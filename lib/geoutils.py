@@ -28,19 +28,22 @@ class Coords:
             self.my = v[1]
             return self
         else:
-            return [self.mx,self.my]
+            return (self.mx,self.my)
 
 
 #
 # class Point
 #
-class Point(Coords)
+class Point(Coords):
+
+    def addv(self,v):
+        return Point(self.x() + v.x(),self.y() + v.y())
     
 
 #
 # class Vector
 #
-class Vector(Coords)
+class Vector(Coords):
 
     def __init__(self,x=1.0,y=0.0):
         self.mx = x
