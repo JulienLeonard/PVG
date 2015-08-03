@@ -10,14 +10,14 @@ class Coords:
 
     def x(self,v=""):
         if not v == "":
-            self.mx = x
+            self.mx = v
             return self
         else:
             return self.mx
 
     def y(self,v=""):
         if not v == "":
-            self.my = y
+            self.my = v
             return self
         else:
             return self.my
