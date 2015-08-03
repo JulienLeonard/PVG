@@ -23,16 +23,23 @@ class R:
         else:
             return self.mv2
 
+    def minv(self):
+        return min(self.v1(),self.v2())
+
+    def maxv(self):
+        return max(self.v1(),self.v2())
+
     def sample(self,t):
+        if t < 0.0 or t > 1.0:
+            return None
         return sample((self.mv1,self.mv2),t)
 
     def v(self,t):
         return sample((self.mv1,self.mv2),t)
 
-    def fit(self,t):
-        return rangefit((self.mv1,self.mv2),t)
-
     def abscissa(self,t):
+        if t < self.minv() or t > self.maxv():
+            return None
         return abscissa((self.mv1,self.mv2),t)
 
     def contain(self,t):

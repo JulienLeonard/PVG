@@ -106,12 +106,12 @@ def rangle():
 
 def abscissa(range,t):
     t1,t2 = range
-    if t > t2:
-        return t2
-    elif t < t1:
-        return t1
+    if t > max(t1,t2):
+        return 1.0
+    elif t < min(t1,t2):
+        return 0.0
     elif t1 == t2:
-        return t1
+        return 0.0
     else:
         return (t - t1)/(t2 - t1)
 
