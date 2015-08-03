@@ -59,6 +59,27 @@ class VectorTest(unittest.TestCase):
         self.assertEqual(oldv.coords(), (2.0,0.0))
         self.assertEqual(newv.coords(), (1.0,0.0))
 
+class CircleTest(unittest.TestCase):
+    
+    def test_defaultcircle(self):
+        self.assertEqual(Circle().center().x(),0.0)
+        self.assertEqual(Circle().center().y(),0.0)
+        self.assertEqual(Circle().radius(),1.0)
+
+    def test_center(self):
+        self.assertEqual(Circle().center().x(), 0.0)
+        self.assertEqual(Circle().center(Point(1.0,2.0)).center().x(), 1.0)
+        self.assertEqual(Circle().center(Point(1.0,2.0)).center().y(), 2.0)
+
+    def test_radius(self):
+        self.assertEqual(Circle().radius(), 1.0)
+        self.assertEqual(Circle().radius(3.0).radius(), 3.0)
+
+    def test_coords(self):
+        self.assertEqual(Circle().coords(), (0.0,0.0,1.0))
+        self.assertEqual(Circle().coords((3.0,4.0,5.0)).coords(), (3.0,4.0,5.0))
+
+    
 
 
 

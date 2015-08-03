@@ -92,10 +92,10 @@ class Circle:
 
     def radius(self,v=""):
         if not v == "":
-            self.mradius = v
+            self.mr = v
             return self
         else:
-            return self.mradius
+            return self.mr
 
 
 
