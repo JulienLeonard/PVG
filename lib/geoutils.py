@@ -1,5 +1,16 @@
 from utils import *
 
+def dist2(p1,p2):
+    x = p2.x - p1.x
+    y = p2.y - p1.y
+    return x*x + y*y
+
+def dist(p1,p2):
+    return math.sqrt(dist2(p1,p2))
+
+def anglerange():
+    return R(0.0,2* math.pi)
+
 
 #
 # Interface to define 2D geometry entity (Point or Vector)
@@ -64,59 +75,22 @@ class Vector(Coords):
         else:
             return Vector(self.x()/self.length(),self.y()/self.length())
 
-    
+    def rotate(self,angle):
+        cosa = math.cos(angle)
+        sina = math.sin(angle)
+        x1 = self.x()
+        y1 = self.y()
+        return Vector((x1 * cosa - y1 * sina),(x1 * sina + y1 * cosa ))
 
+    def scale(self,ratio):
+        return Vector(self.x()*ratio,self.y()*ratio)
+        
 #
-# define a circle object
+# compute the average point of a list of points
 #
-class Circle:
-    def __init__(self,pcenter=Point(0.0,0.0),r=1.0):
-        self.mcenter = pcenter
-        self.mr      = r
-
-    def coords(self,v=""):
-        if not v == "":
-            self.mcenter = Point(v[0],v[1])
-            self.mr      = v[2]
-            return self
-        else:
-            return (self.mcenter.x(),self.mcenter.y(),self.mr)
-
-
-    def center(self,v=""):
-        if not v == "":
-            self.mcenter = v
-            return self
-        else:
-            return self.mcenter
-
-    def radius(self,v=""):
-        if not v == "":
-            self.mr = v
-            return self
-        else:
-            return self.mr
-
-
-
-def circlefromcoords(x,y,r):
-    return Circle().coords(x,y,r)
-
-def circlefromlist(coords):
-    if len(coords) > 0:
-        return circlefromcoords(coords[0],coords[1],coords[2])
-    return ""
-
 def pmiddle(points):
     listx = [p.x for p in points]
     listy = [p.y for p in points]
     return (sum(listx)/float(len(coords)),sum(listy)/float(len(coords)))
 
-def dist2(p1,p2):
-    x = p2.x - p1.x
-    y = p2.y - p1.y
-    return x*x + y*y
-
-def dist(p1,p2):
-    return math.sqrt(dist2(p1,p2))
 

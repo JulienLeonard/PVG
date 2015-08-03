@@ -9,6 +9,20 @@ class R:
         self.mv1 = v1
         self.mv2 = v2
 
+    def v1(self,v=""):
+        if not v == "":
+            self.mv1 = v
+            return self
+        else:
+            return self.mv1
+
+    def v2(self,v=""):
+        if not v == "":
+            self.mv2 = v
+            return self
+        else:
+            return self.mv2
+
     def sample(self,t):
         return sample((self.mv1,self.mv2),t)
 
