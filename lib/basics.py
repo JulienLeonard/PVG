@@ -3,48 +3,79 @@ import math
 import random
 import sys
 
-def grouper(n, iterable, fillvalue=None):
-    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
-    args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
-
+#
+# return the circular nth item from a list
+#
 def circular(list,n):
     n = n%(len(list))
     # print "circular result",n
     return list[n]
 
+#
+# alias for circular
+#
 def lcircular(list,n):
     return circular(list,n)
 
+#
+# general grouping pattern
+# [i for i in sliceIterator(range(5),3)]  == [[0,1,2],[1,2,3],[2,3,4]]
+#
 def sliceIterator(lst, sliceLen):
     for i in range(len(lst) - sliceLen + 1):
         yield lst[i:i + sliceLen]
 
+#
+# run along a list 2 by 2
+# [i for i in foreach2(range(5))] == [[0,1],[2,3]]
+#
 def foreach2(lst):
     for i in range(0,len(lst) - 1,2):
         yield lst[i:i + 2]
 
+#
+# generalization of foreach2
+# [i for i in foreachn(range(7),3)] == [[0,1,2],[3,4,5]]
+#
 def foreachn(lst,n):
     for i in range(0,len(lst) - (n-1),n):
         yield lst[i:i + n]
 
-
+#
+# run along a list by each pair
+# [i for i in pairs(range(4))] == [(0,1),(1,2),(2,3)]
+#
 def pairs(lst):
     for i in range(len(lst) - 1):
         yield (lst[i],lst[i + 1])
 
+#
+# same as pairs but with 3 items
+# [i for i in triplets(range(4))] == [(0,1,2),(1,2,3)]
+#
 def triplets(lst):
     for i in range(len(lst) - 2):
-        yield lst[i:i + 3]
+        yield (lst[i],lst[i + 1],lst[i + 2])
 
+#
+# same as pairs but with a closing circular pair at the end
+# [i for i in pairs(range(4))] == [(0,1),(1,2),(2,3),(3,0)]
+#
 def circlepairs(list):
     for i in range(len(list) - 1):
         yield (list[i],list[i + 1])
     yield (list[-1],list[0])
 
+#
+# get a linear sample from a range
+# do not check the bounds of abs (and extend the linearity out of the range)
+#
 def sample(range,abs):
     return range[0] + (range[1]-range[0])*abs
 
+#
+# trim a value to fit the range
+#
 def rangefit(range,value):
     result = value
     if value < range[0]:
@@ -53,20 +84,32 @@ def rangefit(range,value):
         result = range[1]
     return result
 
+#
+# get n values evenly distributed from rrange
+#
 def samples(rrange,niter):
+    if niter == 0:
+        return []
     if niter == 1:
         return [rrange[0]]
     return [sample(rrange,float(i)/float(niter-1)) for i in range(niter)]
 
+#
+# shortcut for sampling the unitary range
+#
 def usamples(niter):
     return samples((0.0,1.0),niter)
 
+#
+# get n random values inside the unitary range, sorted, and completely covering the range
+#
 def urandsamples(niter):
     result = [random.uniform(0.0,1.0) for i in range(niter)]
     result.sort()
     result[0] = 0.0
     result[-1] = 1.0
     return result
+
 
 def rand(min=0.0,max=1.0):
     return random.uniform(min,max)
@@ -361,12 +404,3 @@ def ldoublesym(list):
     return list + lreverse(list[1:-1])
 
 
-# from http://stackoverflow.com/questions/1335392/iteration-over-list-slices
-# map(None, *(iter(range(10)),) * 3)
-# list_of_slices = zip(*(iter(the_list),) * slice_size)
-
-# big_list = [1,2,3,4,5,6,7,8,9]
-# slice_length = 3
-# def sliceIterator(lst, sliceLen):
-#    for i in range(len(lst) - sliceLen + 1):
-#        yield lst[i:i + sliceLen]
