@@ -67,6 +67,54 @@ class BasicTest(unittest.TestCase):
         self.assertEqual(usamples(2),[0.0,1.0])
         self.assertEqual(usamples(3),[0.0,0.5,1.0])
 
+    def test_urandsamples(self):
+        random.seed(0.0)
+        vrands = urandsamples(4)
+        self.assertEqual(urandsamples(0),[])
+        self.assertEqual(urandsamples(1),[0.0])
+        self.assertEqual(urandsamples(2),[0.0,1.0])
+        self.assertEqual(len(vrands),4)
+        self.assertEqual(vrands[0],0.0)
+        self.assertEqual(vrands[-1],1.0)
+        self.assertEqual(vrands[1] < vrands[2],True)
+
+    def test_rand(self):
+        random.seed(0.0)
+        v = rand(0.0,1.0)
+        self.assertEqual(v >= 0.0,True)
+        self.assertEqual(v <= 1.0,True)
+
+    def test_rands(self):
+        random.seed(0.0)
+        vs = rands((0.0,1.0),5)
+        self.assertEqual(len(vs),5)
+        for v in vs:
+            self.assertEqual(v >= 0.0,True)
+            self.assertEqual(v <= 1.0,True)
+
+    def test_lrand(self):
+        random.seed(0.0)
+        self.assertEqual(lrand([]),"")
+        self.assertEqual(lrand([0]),0)
+        self.assertEqual(lrand([0,1]),1)
+        self.assertEqual(lrand([0,1]),0)
+
+    def test_pi(self):
+        self.assertEqual(pi(),math.pi)
+
+    def test_normangle(self):
+        self.assertEqual(normangle(0.0),0.0)
+        self.assertEqual(normangle(pi()),pi())
+        self.assertEqual(normangle(2.0* pi()), 2.0 * pi())
+        self.assertEqual(normangle(3.0* pi()), pi())
+        self.assertEqual(normangle(-0.1),2.0 * pi() - 0.1)
+        self.assertEqual(normangle(2.0 * pi() +0.1), 0.1)
+
+        
+        
+        
+        
+
         
 
 

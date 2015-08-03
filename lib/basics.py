@@ -104,31 +104,57 @@ def usamples(niter):
 # get n random values inside the unitary range, sorted, and completely covering the range
 #
 def urandsamples(niter):
+    if niter == 0:
+        return []
+    if niter == 1:
+        return [0.0]
     result = [random.uniform(0.0,1.0) for i in range(niter)]
     result.sort()
     result[0] = 0.0
     result[-1] = 1.0
     return result
 
-
+#
+# shortcut to get a random value
+#
 def rand(min=0.0,max=1.0):
     return random.uniform(min,max)
 
+#
+# get a number of rand values from the range
+#
 def rands((min,max),niter):
     return [random.uniform(min,max) for i in range(niter)]
 
-
+#
+# alias for rand
+#
 def rrandom(min,max):
     return rand(min,max)
 
+#
+# return a random item from a list
+#
 def lrand(list):
+    if list == []:
+        return ""
     return list[int(float(len(list)) * rand())]
 
+
+#
+# alias for pi
+#
+def pi():
+    return math.pi
+
+#
+# normalize an angle
+#
 def normangle(angle):
-    while angle > 2.0*3.14159:
-        angle -= 2.0*3.14159
+    while angle > 2.0*pi():
+        angle -= 2.0*pi()
     while angle < 0.0:
-        angle += 2.0*3.14159
+        angle += 2.0*pi()
     return angle
 
 # valuelist must be [(),(),...,()]
@@ -141,8 +167,6 @@ def multisamples(valuelist,t):
             return sample((v1[1],v2[1]),absc)
     return valuelist[-1][-1]
 
-def pi():
-    return math.pi
 
 def rangle():
     return (0.0,2.0*math.pi)
