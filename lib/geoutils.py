@@ -1,5 +1,6 @@
 from utils import *
 
+
 #
 # Interface to define 2D geometry entity (Point or Vector)
 #
@@ -48,7 +49,22 @@ class Vector(Coords):
     def __init__(self,x=1.0,y=0.0):
         self.mx = x
         self.my = y
+        self.ml  = None
 
+    def length(self):
+        if self.ml == None:
+            x = self.x()
+            y = self.y()
+            self.ml = math.sqrt(x*x + y*y)
+        return self.ml
+
+    def normalize(self):
+        if self.length() == 0.0:
+            return Vector(0.0,0.0)
+        else:
+            return Vector(self.x()/self.length(),self.y()/self.length())
+
+    
 
 #
 # define a circle object
