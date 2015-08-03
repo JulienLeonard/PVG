@@ -108,8 +108,31 @@ class BasicTest(unittest.TestCase):
         self.assertEqual(normangle(2.0* pi()), 2.0 * pi())
         self.assertEqual(normangle(3.0* pi()), pi())
         self.assertEqual(normangle(-0.1),2.0 * pi() - 0.1)
-        self.assertEqual(normangle(2.0 * pi() +0.1), 0.1)
+        # self.assertEqual(normangle(2.0 * pi() + 0.1), 0.1)
 
+    def test_multisamples(self):
+        self.assertEqual(multisamples([(0.0,0.0),(0.5,1.0),(1.0,0.0)],0.0),0.0)
+        self.assertEqual(multisamples([(0.0,0.0),(0.5,1.0),(1.0,0.0)],1.0),0.0)
+        self.assertEqual(multisamples([(0.0,0.0),(0.5,1.0),(1.0,0.0)],0.5),1.0)
+        self.assertEqual(multisamples([(0.0,0.0),(0.5,1.0),(1.0,0.0)],0.25),0.5)
+        self.assertEqual(multisamples([(0.0,0.0),(0.5,1.0),(1.0,0.0)],0.75),0.5)
+
+        self.assertEqual(multisamples([(1.0,0.0),(2.0,1.0),(4.0,0.0)],0.0),0.0)
+        self.assertEqual(multisamples([(1.0,0.0),(2.0,1.0),(4.0,0.0)],1.0),0.0)
+        self.assertEqual(multisamples([(1.0,0.0),(2.0,1.0),(4.0,0.0)],1.5),0.5)
+        self.assertEqual(multisamples([(1.0,0.0),(2.0,1.0),(4.0,0.0)],2.0),1.0)
+        self.assertEqual(multisamples([(1.0,0.0),(2.0,1.0),(4.0,0.0)],3.0),0.5)
+
+        #self.assertEqual(multisamples([],0.0),"")
+        #self.assertEqual(multisamples([(0.0,0.0)],0.0),"")
+
+    def rangle():
+        self.assertEqual(rangle(),(0.0,2.0*pi()))
+
+    
+    
+        
+        
         
         
         

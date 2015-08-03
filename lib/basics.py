@@ -157,8 +157,15 @@ def normangle(angle):
         angle += 2.0*pi()
     return angle
 
-# valuelist must be [(),(),...,()]
+#
+# valuelist must be [(t1,v1),(t2,v2),...,(tn,vn)]
+# with t1 <= t1 <= ... <= tn
+# TODO: add edge cases
+#
 def multisamples(valuelist,t):
+    if valuelist == []:
+        return ""
+    
     for (v1,v2) in pairs(valuelist):
         if t < v1[0]:
             return v1[1]
@@ -167,20 +174,25 @@ def multisamples(valuelist,t):
             return sample((v1[1],v2[1]),absc)
     return valuelist[-1][-1]
 
-
+#
+# return angle range
+#
 def rangle():
     return (0.0,2.0*math.pi)
 
-def abscissa(range,t):
-    t1,t2 = range
-    if t > max(t1,t2):
+#
+# given a range, get the linear abscissa corresponding to the v value
+#
+def abscissa(range,v):
+    v1,v2 = range
+    if v > max(v1,v2):
         return 1.0
-    elif t < min(t1,t2):
+    elif v < min(v1,v2):
         return 0.0
-    elif t1 == t2:
+    elif v1 == v2:
         return 0.0
     else:
-        return (t - t1)/(t2 - t1)
+        return (v - v1)/(v2 - v1)
 
 def circularnext(list,v):
     if len(list)<2:
