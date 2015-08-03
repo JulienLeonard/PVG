@@ -126,10 +126,64 @@ class BasicTest(unittest.TestCase):
         #self.assertEqual(multisamples([],0.0),"")
         #self.assertEqual(multisamples([(0.0,0.0)],0.0),"")
 
-    def rangle():
+    def rangle(self):
         self.assertEqual(rangle(),(0.0,2.0*pi()))
 
+    def test_abscissa(self):
+        self.assertEqual(abscissa((1.0,3.0),1.0),0.0)
+        self.assertEqual(abscissa((1.0,3.0),2.0),0.5)
+        self.assertEqual(abscissa((1.0,3.0),3.0),1.0)
+        self.assertEqual(abscissa((1.0,3.0),-1.0),0.0)
+        self.assertEqual(abscissa((1.0,3.0),4.0),1.0)
+
+    def test_circularnext(self):
+        self.assertEqual(circularnext([0.0,1.0,2.0],0.0),1.0)
+        self.assertEqual(circularnext([0.0,1.0,2.0],1.0),2.0)
+        self.assertEqual(circularnext([0.0,1.0,2.0],2.0),0.0)
+        self.assertEqual(circularnext([],2.0),"")
+        self.assertEqual(circularnext([1.0],1.0),1.0)
+        self.assertEqual(circularnext([2.0],1.0),"")
+
+    def test_circularprev(self):
+        self.assertEqual(circularprev([0.0,1.0,2.0],0.0),2.0)
+        self.assertEqual(circularprev([0.0,1.0,2.0],1.0),0.0)
+        self.assertEqual(circularprev([0.0,1.0,2.0],2.0),1.0)
+        self.assertEqual(circularprev([],2.0),"")
+        self.assertEqual(circularprev([1.0],1.0),1.0)
+        self.assertEqual(circularprev([2.0],1.0),"")
+
+    def test_lunique(self):
+        self.assertEqual(lunique([]),[])
+        self.assertEqual(lunique([0.0]),[0.0])
+        self.assertEqual(lunique([0.0,0.0]),[0.0])
+        self.assertEqual(lunique([0.0,1.0,0.0]),[0.0,1.0])
+        self.assertEqual(lunique([0.0,1.0,0.0,1.0]),[0.0,1.0])
+
+    def test_lremove(self):
+        self.assertEqual(lremove([],0.0),[])
+        self.assertEqual(lremove([0.0],0.0),[])
+        self.assertEqual(lremove([0.0,0.0],0.0),[])
+        self.assertEqual(lremove([0.0,1.0,0.0],0.0),[1.0])
+        
+    def test_lsubstract(self):
+        self.assertEqual(lsubstract([],[0.0,1.0]),[])
+        self.assertEqual(lsubstract([0.0],[0.0,1.0]),[])
+        self.assertEqual(lsubstract([0.0,1.0],[0.0,1.0]),[])
+        self.assertEqual(lsubstract([0.0,1.0,0.0,1.0],[0.0,1.0]),[])
+        self.assertEqual(lsubstract([0.0,1.0,2.0,1.0],[0.0,1.0]),[2.0])
+        
+
+        
+        
+        
+        
     
+        
+    
+        
+        
+        
+        
     
         
         

@@ -194,8 +194,11 @@ def abscissa(range,v):
     else:
         return (v - v1)/(v2 - v1)
 
+#
+# get the next item of v from a list in a circular way
+#
 def circularnext(list,v):
-    if len(list)<2:
+    if len(list)<1:
         return ""
     elif list.count(v) < 1:
         return ""
@@ -204,8 +207,11 @@ def circularnext(list,v):
     else:
         return list[list.index(v)+1]
 
+#
+# reverse of circularnext
+#
 def circularprev(list,v):
-    if len(list)<2:
+    if len(list)<1:
         return ""
     elif list.count(v) < 1:
         return ""
@@ -214,6 +220,9 @@ def circularprev(list,v):
     else:
         return list[list.index(v)-1]
 
+#
+# return a list with duplicates removed
+#
 def lunique(input):
     newresult = []
     for item in input:
@@ -221,6 +230,9 @@ def lunique(input):
             newresult.append(item)
     return newresult
 
+#
+# return a list with item removed removed
+#
 def lremove(input,removed):
     newresult = []
     for item in input:
@@ -228,6 +240,9 @@ def lremove(input,removed):
             newresult.append(item)
     return newresult
 
+#
+# return a list with all the items inside removeds removed from input
+#
 def lsubstract(input,removeds):
     newresult = []
     for item in input:
