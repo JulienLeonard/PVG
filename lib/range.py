@@ -30,8 +30,13 @@ class R:
         return max(self.v1(),self.v2())
 
     def sample(self,t):
+        puts("range sample ",t)
         if t < 0.0 or t > 1.0:
             return None
+        if t < 0.0:
+            t = 0.0
+        if t > 1.0:
+            t = 1.0
         return sample((self.mv1,self.mv2),t)
 
     def v(self,t):
@@ -53,6 +58,8 @@ class R:
                 return True
             else:
                 return False
+
+ANGLERANGE = R(0.0,2 * math.pi)
 
 #
 # define a multi range object by spec [(a1,v1),(a2,v2),...,(an,vn)]

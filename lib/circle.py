@@ -1,3 +1,4 @@
+from utils import *
 from geoutils import *
 
 #
@@ -8,27 +9,30 @@ class Circle:
         self.mcenter = pcenter
         self.mr      = r
 
-    def coords(self,v=""):
-        if not v == "":
+    def coords(self,v=None):
+        if not v == None:
             self.mcenter = Point(v[0],v[1])
             self.mr      = v[2]
             return self
         else:
             return (self.mcenter.x(),self.mcenter.y(),self.mr)
 
-    def center(self,v=""):
-        if not v == "":
+    def center(self,v=None):
+        if not v == None:
             self.mcenter = v
             return self
         else:
             return self.mcenter
 
-    def radius(self,v=""):
-        if not v == "":
+    def radius(self,v=None):
+        if not v == None:
             self.mr = v
             return self
         else:
             return self.mr
+
+    def r(self,v=None):
+        return self.radius(v)
 
     def scale(self,ratio):
         return Circle(self.center(),self.radius() * ratio)
@@ -37,7 +41,62 @@ class Circle:
         return Circle(self.center().addv(tv),self.radius())
 
     def sample(self,abscissa):
-        return self.center().addv(v0.rotate(rangeangle().sample(abscissa)).scale(self.radius()))
+        angle = ANGLERANGE.sample(abscissa)
+        return self.center().add(VX0.rotate(angle).scale(self.r()))
 
     def samples(self,abscissas):
         return [self.sample(abscissa) for abscissa in abscissas]
+
+    def viewbox(self):
+        x,y,r = self.coords()
+        return [x-r,y-r,x+r,y+r]
+
+    def x(self):
+        return self.center().x()
+
+    def y(self):
+        return self.center().y()
+
+    def point(self,abscissa):
+        return self.sample(abscissa)
+
+
+#
+#
+#
+def cscale(circle,ratio):
+    return circle.scale(ratio)
+
+#
+# check if 2 circles intersect, given an error 
+#
+def circleintersect(c1,c2,errorsize = 0.0000001):
+    cc1 = c1.center()
+    cc2 = c2.center()
+    r1  = c1.radius()
+    r2  = c2.radius()
+
+    v2 = dist2(cc1,cc2)
+    r2 = (r1+r2)*(r1+r2)
+    # print "differror",-0.00001
+    result = False
+    if ( (v2-r2)/r2 < -errorsize):
+        result = True
+    # print "circleintersect",c1,c2,"result",result,"v2",v2,"r2",r2,"criteria",(v2-r2)/r2
+    return result
+
+def circleviewbox(circle):
+    return circle.viewbox()
+
+def circlecoords(circle):
+    return circle.coords()
+
+def circlepoint(circle,abs):
+    return circle.point(abs)
+
+def circlepoints(circle,npoints,offset):
+    abss = samples((offset,1.0+offset),npoints)
+    return [circlepoint(circle,abs) for abs in abss]
+
+def circlepolygon(circle,npoints):
+    return [circlepoint(circle,abs) for abs in samples((0.0,1.0),(npoints+1))][:-1]
