@@ -192,6 +192,64 @@ class BasicTest(unittest.TestCase):
         self.assertEqual(ladd([]),None)
         self.assertEqual(ladd([1.0]),1.0)
         self.assertEqual(ladd([1.0,-1.0]),0.0)
+
+    def test_lsum(self):
+        self.assertEqual(lsum([]),None)
+        self.assertEqual(lsum([1.0]),[1.0])
+        self.assertEqual(lsum([1.0,-1.0]),[1.0,0.0])
+
+    def test_lacc(self):
+        self.assertEqual(lacc([]),None)
+        self.assertEqual(lacc([1.0]),[1.0])
+        self.assertEqual(lacc([1.0,-1.0]),[1.0,0.0])
+
+    def test_lrepeat(self):
+        self.assertEqual(lrepeat([],0),[])
+        self.assertEqual(lrepeat([1],0),[])
+        self.assertEqual(lrepeat([1],1),[1])
+        self.assertEqual(lrepeat([1],2),[1,1])
+        self.assertEqual(lrepeat([1,2],2),[1,2,1,2])
+
+    def test_lfront(self):
+        self.assertEqual(lfront([]),None)
+        self.assertEqual(lfront([1]),1)
+        self.assertEqual(lfront([2,1]),2)
+
+    def test_lback(self):
+        self.assertEqual(lback([]),None)
+        self.assertEqual(lback([1]),1)
+        self.assertEqual(lback([2,1]),1)
+
+    def test_litems(self):
+        self.assertEqual(litems([],1),[])
+        self.assertEqual(litems([],2),[])
+        self.assertEqual(litems([1],1),[1])
+        self.assertEqual(litems([2],1),[2])
+        self.assertEqual(litems([1,2],1),[1,2])
+        self.assertEqual(litems([1,2,3,4],1),[1,2,3,4])
+        self.assertEqual(litems([1,2,3,4],2),[1,3])
+        self.assertEqual(litems([1,2,3,4],2,1),[2,4])
+
+    def test_lsublist(self):
+        self.assertEqual(lsublist([],1),[])
+        self.assertEqual(lsublist([],2),[])
+        self.assertEqual(lsublist([1],1),[1])
+        self.assertEqual(lsublist([2],1),[2])
+        self.assertEqual(lsublist([1,2],1),[1,2])
+        self.assertEqual(lsublist([1,2,3,4],1),[1,2,3,4])
+        self.assertEqual(lsublist([1,2,3,4],2),[1,3])
+        self.assertEqual(lsublist([1,2,3,4],2,1),[2,4])
+
+    
+
+        
+        
+
+
+
+
+
+    
         
         
         

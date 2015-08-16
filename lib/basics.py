@@ -251,7 +251,7 @@ def lsubstract(input,removeds):
     return newresult
 
 #
-# compute min of lists
+# compute min of list (either single list, or list of args)
 #
 def lmin(linput,*nextlist):
     if len(nextlist) != 0:
@@ -280,9 +280,15 @@ def lmax(input):
             result = item
     return result
 
+#
+# flatten list of lists
+#
 def lconcat(*lists):
     return [item for list in lists for item in list]
 
+#
+# compute sum of list items
+#
 def ladd(list):
     if len(list) < 1:
         return None
@@ -291,40 +297,62 @@ def ladd(list):
         result += item
     return result
 
+#
+# compute all intermediate sums of list
+#
 def lsum(list):
-    result = []
-    sum = 0.0
-    for i in list:
-        sum += i
-        result.append(sum)
-    return result
-
-def lacc(list):
-    result = []
-    csum = 0.0
-    for item in list:
-        csum += item
+    if len(list) < 1:
+        return None
+    csum = list[0]
+    result = [csum]
+    for i in list[1:]:
+        csum += i
         result.append(csum)
     return result
 
+#
+# same as lsum
+#
+def lacc(list):
+    return lsum(list)
+
+#
+# repeat and concat content of list ntimes
+#
 def lrepeat(list,ntimes):
     result = []
     for i in range(ntimes):
         result.extend(list)
     return result
 
+#
+# return list first item
+#
 def lfront(list):
+    if len(list) < 1:
+        return None
     return list[0]
 
+#
+# return list last item
+#
 def lback(list):
+    if len(list) < 1:
+        return None
     return list[-1]
 
+#
+# extract items from list 
+#
 def litems(list,period,start=0):
     result = []
     for i in range(start,len(list),period):
         result.append(list[i])
     return result
 
+#
+# same as lsublist
+#
 def lsublist(list,period,start=0):
     return litems(list,period,start)
 
