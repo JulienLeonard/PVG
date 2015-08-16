@@ -31,26 +31,25 @@ class BS:
 
 class CirclePackingBaoSwitch:
     
-    def __init__(self,sides,nradiuss,inodes,fdraw):
+    def __init__(self,inodes,baopattern,fdraw):
         self.lastindex = 1
-        self.nodes    = inodes
-        self.sides    = sides
-        self.nradiuss = nradiuss
+        self.nodes      = inodes
+        self.baopattern = baopattern
+        self.fdraw      = fdraw
         
         cindex = 0
         for node in self.nodes:
-            node.index = 0
-            node.retouch = False
-            node.notfound = False
+            node.index      = 0
+            node.retouch    = False
+            node.notfound   = False
             node.colorindex = cindex
             cindex += 1
 
-        self.mlastnode  = self.nodes[1]
-        self.othernode = self.nodes[0]
+        self.mlastnode    = self.nodes[1]
+        self.othernode    = self.nodes[0]
         self.lastlastnode = self.nodes[0]
-        self.last3node = ""
+        self.last3node    = ""
 
-        self.fdraw = fdraw
         self.collisionmargin = 0.0001
 
     def sortdist(self,anode):
@@ -70,13 +69,13 @@ class CirclePackingBaoSwitch:
 
     def iter(self,render,boundaries,nsubiter):
         maxnsubiter = nsubiter
-        lastindex = self.lastindex
-        nodes     = self.nodes
-        sides     = self.sides
-        nradiuss  = self.nradiuss
+        lastindex  = self.lastindex
+        nodes      = self.nodes
+        baopattern = self.baopattern
         result    = [] 
         quadtree = QuadTree()
         quadtree.adds(boundaries)
+        lastside = None
         
         for isubiter in range(maxnsubiter):
             if isubiter > 0 and isubiter % 1000 == 0:
@@ -87,22 +86,20 @@ class CirclePackingBaoSwitch:
                 othernode    = self.othernode
                 lastlastnode = self.lastlastnode
                 last3node    = self.last3node
-        
-                newr = lcircular(nradiuss,lastindex)
+
+                (newside,newr,newstyle) = baopattern.next()
                 
-                bigr    = lastnode.r() + newr * 2.1
-                bignode = lastnode.scale(bigr)
-                side    = lcircular(sides,len(nodes))
-                lastside = lcircular(sides,len(nodes)-1)
+                bigr     = lastnode.r() + newr * 2.1
+                bignode  = lastnode.scale(bigr)
 
                 found = False
                 incrradiusfactor = 1.0
 
-                if side != lastside or lastindex == 1:
+                if newside != lastside or lastindex == 1:
                     othernode = lastlastnode
                 
                 if othernode != "":
-                    allsides = [side,-side]
+                    allsides = [newside,-newside]
                     for iside in allsides:
                         # puts("circles2tangent1")
                         newnode = self.computenextnode(quadtree,lastnode,othernode,newr,iside)
@@ -126,7 +123,7 @@ class CirclePackingBaoSwitch:
                                 
                                 quadtree.add(newnode)
 
-                                self.fdraw(render,self,lastindex)
+                                self.fdraw(render,self,lastindex,newstyle)
 
                                 found = True
                                 result.append(newnode)
@@ -140,7 +137,7 @@ class CirclePackingBaoSwitch:
                     
                     for ccolliding in ccollidings:
                         if not lastnode == ccolliding:
-                            allsides = [side,-side]
+                            allsides = [newside,-newside]
                             for iside in allsides:
                                 # puts("circles2tangent2")
                                 newnode = self.computenextnode(quadtree,lastnode,ccolliding,newr,iside)
@@ -164,7 +161,7 @@ class CirclePackingBaoSwitch:
 
                                         quadtree.add(newnode)
 
-                                        self.fdraw(render,self,lastindex)
+                                        self.fdraw(render,self,lastindex,newstyle)
 
                                         found = True
                                         result.append(newnode)
@@ -179,12 +176,13 @@ class CirclePackingBaoSwitch:
                         lastindex = lastindex - 1
                         freenode = nodes[lastindex]
                     
-                    self.mlastnode = nodes[lastindex]
+                    self.mlastnode    = nodes[lastindex]
                     self.lastlastnode = nodes[lastindex-1]
-                    self.othernode = ""
+                    self.othernode    = ""
                 else:
                     lastindex = len(nodes)-1
                 self.lastindex = lastindex
+                lastside = newside
             
             if self.lastindex < 2:
                 # puts("no more iteration")

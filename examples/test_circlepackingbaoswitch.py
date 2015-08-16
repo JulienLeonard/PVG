@@ -6,16 +6,18 @@ from utils     import *
 from drawutils import *
 import color
 from circlepackingbaoswitch import *
+from baopattern import *
 
-def myfdraw(render,pattern,lastindex):
-    render.drawcircle( cscale( pattern.lastnode(), 0.9), index2color(300,lastindex) )
+def myfdraw(render,pattern,lastindex,newcolor):
+    render.drawcircle( cscale( pattern.lastnode(), 0.9), newcolor )
     
-render = RenderCenterSVG((1000,1000),"../output/test_circlepackingbaoswitch.svg",color.black())
+render = RenderCenter((1000,1000),"C:/DEV/PVG/output/test_circlepackingbaoswitch.ppm")
 
-nradiuss = ldoublesym(samples((0.1,0.2),3))
+rpattern = [item for i in range(10,100) for item in [1.0] * i + [2.0]]
+cpattern = [item for i in range(10,100) for item in [color.black()] * i + [color.red()]]
 
-sidepattern = [1.0] * 3 + [-1] * 3
+baopattern = BaoPattern().sidepattern([1.0]).radiuspattern(rpattern).colorpattern(cpattern)
 
-result = CirclePackingBaoSwitch(sidepattern,nradiuss,nodes0(),myfdraw).iter(render,nodes0(),90)
+result = CirclePackingBaoSwitch(nodes0(),baopattern,myfdraw).iter(render,nodes0(),900)
 
 render.end()
