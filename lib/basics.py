@@ -250,20 +250,30 @@ def lsubstract(input,removeds):
             newresult.append(item)
     return newresult
 
+#
+# compute min of lists
+#
 def lmin(linput,*nextlist):
     if len(nextlist) != 0:
         linput = [linput]
         for i in range(len(nextlist)):
             linput.append(nextlist[i])
 
+    if len(linput) < 1:
+        return None
     result = linput[0]
     for item in linput[1:]:
         if item < result:
             result = item
     return result
-    
 
+#
+# compute max of list
+#
 def lmax(input):
+    if len(input) < 1:
+        return None
+
     result = input[0]
     for item in input[1:]:
         if item > result:
@@ -271,12 +281,11 @@ def lmax(input):
     return result
 
 def lconcat(*lists):
-    result = lists[0][:]
-    for list in lists[1:]:
-        result.extend(list)
-    return result
+    return [item for list in lists for item in list]
 
 def ladd(list):
+    if len(list) < 1:
+        return None
     result = 0.0
     for item in list:
         result += item

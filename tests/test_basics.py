@@ -171,6 +171,34 @@ class BasicTest(unittest.TestCase):
         self.assertEqual(lsubstract([0.0,1.0],[0.0,1.0]),[])
         self.assertEqual(lsubstract([0.0,1.0,0.0,1.0],[0.0,1.0]),[])
         self.assertEqual(lsubstract([0.0,1.0,2.0,1.0],[0.0,1.0]),[2.0])
+
+    def test_lmin(self):
+        self.assertEqual(lmin([]),None)
+        self.assertEqual(lmin([1.0,2.0]),1.0)
+        self.assertEqual(lmin(1.0,2.0),1.0)
+
+    def test_lmax(self):
+        self.assertEqual(lmax([]),None)
+        self.assertEqual(lmax([1.0]),1.0)
+        self.assertEqual(lmax([1.0,2.0]),2.0)
+
+    def test_lconcat(self):
+        self.assertEqual(lconcat([]),[])
+        self.assertEqual(lconcat([],[]),[])
+        self.assertEqual(lconcat([],[1.0]),[1.0])
+        self.assertEqual(lconcat([],[1.0],[2.0,3.0]),[1.0,2.0,3.0])
+
+    def test_ladd(self):
+        self.assertEqual(ladd([]),None)
+        self.assertEqual(ladd([1.0]),1.0)
+        self.assertEqual(ladd([1.0,-1.0]),0.0)
+        
+        
+        
+        
+        
+
+        
         
 
         
