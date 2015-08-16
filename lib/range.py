@@ -30,7 +30,6 @@ class R:
         return max(self.v1(),self.v2())
 
     def sample(self,t):
-        puts("range sample ",t)
         if t < 0.0 or t > 1.0:
             return None
         if t < 0.0:

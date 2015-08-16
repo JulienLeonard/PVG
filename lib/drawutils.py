@@ -54,10 +54,10 @@ class Render:
         for poly in polygons:
             self.drawpolygon(poly,color)
 
-    def drawcircle(self,circle,color=color.white(),ratio=1.0):
+    def drawcircle(self,circle,color=color.black(),ratio=1.0):
         self.drawpolygon(circlepolygon(cscale(circle,ratio),30),color)
 
-    def drawcircles(self,circles,color=color.white(),ratio = 1.0):
+    def drawcircles(self,circles,color=color.black(),ratio = 1.0):
         for circle in circles:
             self.drawcircle(circle,color,ratio)
 
@@ -178,7 +178,7 @@ class RenderTCLSVG(Render):
     def drawpolygonpicture(self,polygon,colorc):
         self.sock.sendall("drawpolygon {" + ' '.join([str(i) for i in lflatten(polygon)]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
 
-    def drawcirclepicture(self,circle,colorc=color.white(),ratio=1.0):
+    def drawcirclepicture(self,circle,colorc=color.black(),ratio=1.0):
         newc = (circle.x(),circle.y(),circle.r() * ratio)
         self.sock.sendall("drawcircle {" + ' '.join([str(i) for i in newc]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
 
@@ -201,7 +201,7 @@ class RenderCenter(RenderTCL):
         # self.setviewport(self,xc,yc,size)
         for item in self.mitems:
             polygon,color = item
-            self.drawpolygonpicture(polygon,color)
+            self.drawpolygonpicture([[p.x(),p.y()]for p in polygon],color)
         self.endpicture()
 
     def viewport(self):
@@ -244,11 +244,11 @@ class RenderCenterSVG(RenderTCLSVG):
         self.filename = filename
         self.backcolor = backcolor
 
-    def drawpolygon( self, polygon, colorc ):
+    def drawpolygon( self, polygon, colorc = color.black()):
         if len(polygon) > 0:
             self.mitems.append((polygon,colorc,"polygon"))
 
-    def drawcircle( self, circle, colorc ):
+    def drawcircle( self, circle, colorc = color.black()):
         if not circle == None:
             self.mitems.append((circle,colorc,"circle"))
 
