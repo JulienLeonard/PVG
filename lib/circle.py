@@ -38,7 +38,7 @@ class Circle:
         return Circle(self.center(),self.radius() * ratio)
 
     def translate(self,tv):
-        return Circle(self.center().addv(tv),self.radius())
+        return Circle(self.center().add(tv),self.radius())
 
     def sample(self,abscissa):
         angle = ANGLERANGE.sample(abscissa)
@@ -60,6 +60,7 @@ class Circle:
     def point(self,abscissa):
         return self.sample(abscissa)
 
+C0 = Circle()
 
 #
 #

@@ -84,7 +84,6 @@ class Vector(Coords):
             return self.scale(1.0/l)
 
     def rotate(self,angle):
-        puts("rotate angle ",angle)
         cosa = math.cos(angle)
         sina = math.sin(angle)
         x = self.x()

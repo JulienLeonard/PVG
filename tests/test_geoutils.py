@@ -25,9 +25,9 @@ class PointTest(unittest.TestCase):
         self.assertEqual(Point().coords(), (0.0,0.0))
         self.assertEqual(Point().coords((3.0,4.0)).coords(), (3.0,4.0))
 
-    def test_addv(self):
-        self.assertEqual(Point().addv(Vector()).coords(), (1.0,0.0))
-        self.assertEqual(Point(1.0,2.0).addv(Vector(3.0,4.0)).coords(), (4.0,6.0))
+    def test_add(self):
+        self.assertEqual(Point().add(Vector()).coords(), (1.0,0.0))
+        self.assertEqual(Point(1.0,2.0).add(Vector(3.0,4.0)).coords(), (4.0,6.0))
 
 class VectorTest(unittest.TestCase):
     
