@@ -1,11 +1,5 @@
 from utils import *
 
-def dist2(p1,p2):
-    return Vector().points(p1,p2).length2()
-
-def dist(p1,p2):
-    return Vector().points(p1,p2).length()
-
 def anglerange():
     return R(0.0,2* math.pi)
 
@@ -49,6 +43,15 @@ class Point(Coords):
     def add(self,v):
         return Point(self.x() + v.x(),self.y() + v.y())
     
+    def sub(self,p):
+        return Vector(self.x() - p.x(),self.y() - p.y())
+
+    def rotate(p,center,angle):
+        return center.add( vector(center,p).rotate(angle) )
+
+    def sym(p,center):
+        return center.add(vector(p,center))
+
 
 #
 # class Vector
@@ -97,6 +100,16 @@ VX0 = Vector(1.0,0.0)
 VY0 = Vector(0.0,0.1)
 V0  = Vector(0.0,0.0)
 P0  = Point(0.0,0.0)
+
+def vector(p1,p2):
+    return Vector().points(p1,p2)
+
+def dist2(p1,p2):
+    return vector(p1,p2).length2()
+
+def dist(p1,p2):
+    return vector(p1,p2).length()
+
         
 #
 # compute the average point of a list of points
@@ -145,6 +158,18 @@ def bbunions(bboxlist):
 def segviewbox(seg):
     return bbox([seg[0],seg[1]])
 
+def viewportfromviewbox(cviewbox,factor):
+    (xmin,ymin,xmax,ymax) = cviewbox
+    xc = (xmin + xmax)/2.0;
+    yc = (ymin + ymax)/2.0;
+    d1 = xmax - xmin
+    d2 = ymax - ymin
+    dmax = dist(Point(0.0,0.0),Point(d1,d2))
+    viewport = (xc,yc,(dmax / 2.0) * factor)
+    return viewport
+
+
+
 def bboxresize(bbox,factor):
     xmin,ymin,xmax,ymax = bbox
     newwidth  = (xmax - xmin) * factor
@@ -156,6 +181,50 @@ def bboxresize(bbox,factor):
     newymax = ycenter + newheight/2.0
     return (newxmin,newymin,newxmax,newymax)
 
+def unionviewboxes(viewboxes):
+    cviewbox = viewboxes[0]
+    for ccviewbox in viewboxes:
+        cviewbox = mergeviewboxes(cviewbox,ccviewbox)
+    return cviewbox
+
+def mergeviewboxes(viewbox1,viewbox2):
+    xmin1,ymin1,xmax1,ymax1 = viewbox1
+    xmin2,ymin2,xmax2,ymax2 = viewbox2
+    
+    xmin = xmin1
+    ymin = ymin1
+    xmax = xmax1
+    ymax = ymax1
+
+    if xmin2 < xmin:
+        xmin = xmin2
+    if ymin2 < ymin:
+        ymin = ymin2
+    if xmax2 > xmax:
+        xmax = xmax2
+    if ymax2 > ymax:
+        ymax = ymax2
+
+    return (xmin,ymin,xmax,ymax)
+
+def viewboxpoints(points):
+    xmin = points[0].x();
+    xmax = points[0].y();
+    ymin = points[0].x();
+    ymax = points[0].y();
+    for point in points[1:]:
+        (x,y) = point.coords()
+        if x < xmin:
+            xmin = x
+        elif x > xmax:
+            xmax = x
+        if y < ymin:
+            ymin = y
+        elif y > ymax:
+            ymax = y
+    return [xmin,ymin,xmax,ymax]
+
+
 def square(center,size):
     return [(center[0]-size/2.0,center[1]-size/2.0),
             (center[0]-size/2.0,center[1]+size/2.0),
@@ -164,3 +233,75 @@ def square(center,size):
 
 def rectangle(x1,y1,x2,y2):
     return [(x1,y1),(x2,y1),(x2,y2),(x1,y2)]
+
+def vscale(v,ratio):
+    return (v[0] * ratio, v[1] * ratio)
+
+def vsangle(v1,v2):
+    return (vangle(v1) - vangle(v2))
+
+def vangle(v):
+    l = v.length()
+    result = 0.0
+    if (l > 0.0):
+        norm = v.normalize()
+        cosx,siny = norm.coords()
+        result = math.acos( cosx )
+        if (siny < 0.0):
+            result = -result
+    return result
+
+def polygonsignedarea(points):
+    signedArea = 0
+    index = 0
+    for (p1,p2) in pairs(points):
+        signedArea += (p1.x() * p2.y() - p2.x() * p1.y())
+    return signedArea / 2
+
+def polygonclockwise(polygon):
+    if ispolygonclockwise(polygon):
+        return polygon
+    return lreverse(polygon)
+
+def ispolygonclockwise(polygon):
+    if polygonsignedarea(polygon) < 0.0:
+        return True
+    return False
+
+
+#
+# order shapes by imbrication levels: level 0 is the highest (ie shapes not contained by any other)
+#
+def computeshapelevels(allbeziers):
+    containgraph = {}
+    for bezier1 in allbeziers:
+        if not bezier1 in containgraph:
+            containgraph[bezier1] = []
+        for bezier2 in allbeziers:
+            if not bezier2 == bezier1:
+                if viewboxinside(bezier2.viewbox(),bezier1.viewbox()):
+                    if not bezier2 in containgraph:
+                        containgraph[bezier2] = []
+                    puts("bezier",bezier2,"contains in bezier",bezier1)
+                    containgraph[bezier2].append(bezier1)
+
+    puts("define imbrication hierarchy ...")
+    levels = {}
+    levels["levels"] = []
+    for bezier in allbeziers:
+        ncontainers = len(containgraph[bezier])
+        if not ncontainers in levels:
+            levels[ncontainers] = []
+            levels["levels"].append(ncontainers)
+        levels[ncontainers].append(bezier)
+    levels["levels"].sort()
+    puts("levels list",levels["levels"])
+    return levels
+
+def viewboxinside(vb1,vb2):
+    (xmin1,ymin1,xmax1,ymax1) = vb1
+    (xmin2,ymin2,xmax2,ymax2) = vb2
+
+    if xmin1 >= xmin2 and ymin1 >= ymin2 and xmax1 <= xmax2 and ymax1 <= ymax2:
+        return True
+    return False
