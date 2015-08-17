@@ -356,77 +356,114 @@ def litems(list,period,start=0):
 def lsublist(list,period,start=0):
     return litems(list,period,start)
 
+#
+# compute the mean of two values
+#
 def mean(v1,v2):
     return (v1+v2)/2.0
 
+#
+# compute the mean of items of a list
+#
 def lmean(list):
+    if len(list) < 1:
+        return None
     return sum(list)/len(list)
 
+#
+# return the item in the middle of a list
+#
 def lmiddle(list,offset=0):
     if len(list) < 1:
         return None
     else:
         return list[len(list)/2 + offset]
 
+#
+# return a new list reversed from the input list
+#
 def lreverse(input):
     result = input[:]
     result.reverse()
     return result
 
+#
+# flatten a list of lists
+#
 def lflatten(list):
-    result = []
-    for sublist in list:
-        result.extend(sublist)
-    return result
+    return [item for sublist in list for item in sublist]
 
+#
+# return a list of sublist containing at most nitems
+#
 def lsplit(list,nitems):
     result = []
     for i in range(0,len(list),nitems):
         result.append(list[i:i+nitems])
     return result
 
+#
+# get the range of values from a list
+#
 def lrange(list):
+    if len(list) < 1:
+        return None
     return (lmin(list),lmax(list))
 
+#
+# circularly close a list
+#
 def lclose(list):
+    if len(list) < 2:
+        return list
     return list + [list[0]]
 
+#
+# return sign of a float
+#
 def sign(num):
     if num < 0.0:
         return -1.0
     return 1.0
 
+#
+# emulation of the C ? operator
+#
 def iff(test,result1,result2):
     if test:
         return result1
     else:
         return result2
 
+#
+# compute a geometric progression 
+#
 def lgeo(xrange,rfactor,nitems):
+    if nitems < 1:
+        return []
+    if nitems == 1:
+        return [xrange[0]]
+    if nitems == 2:
+        return [xrange[0],xrange[1]]
     result = [1.0]
-    for i in range(nitems):
+    for i in range(nitems-1):
         result.append(result[-1]*rfactor)
-    result = [1.0-i for i in result]
+    # result = [1.0-i for i in result]
     georange = (result[0],result[-1])
     # print "result",result
+    puts("abscissas",[abscissa(georange,i) for i in result])
     return [sample(xrange,abscissa(georange,i)) for i in result]
 
-def ldoublegeo(xrange,rfactor,nitems):
-    result = [1.0]
-    for i in range(nitems/2):
-        result.append(result[-1]*rfactor)
-    newresult = result[:]
-    newresult.reverse()
-    result = [2.0-i for i in result]
-    newresult.extend(result)
-    georange = (newresult[0],newresult[-1])
-    print "newresult",result
-    return [sample(xrange,abscissa(georange,i)) for i in newresult]
-
+#
+# zip two lists
+#
 def lzip (list1,list2):
     minsize = min(len(list1),len(list2)) 
     return [(list1[i],list2[i]) for i in range(minsize)]
 
+#
+# return the zip of two lists as a flatten list
+#
 def lzipflat (list1,list2):
     minsize = min(len(list1),len(list2)) 
     result = []
@@ -434,33 +471,62 @@ def lzipflat (list1,list2):
         result = result + [list1[i],list2[i]]
     return result
 
+#
+# unzip a zipped list (ie list of 2uplets inside)
+#
 def lunzip(zlist):
     return ([i[0] for i in zlist],[i[1] for i in zlist])
 
+#
+# synchronized stdout print
+#
 def puts(*arg):
     print arg
     sys.stdout.flush()
 
+#
+# utilitary method
+#
 def lidentity(list):
     return list
 
+#
+# returned a randomized list
+#
 def lshuffle(list):
     result = list[:]
     random.shuffle(result)
     return result
 
+#
+# return the first item of a list and the rest
+#
 def popfront(list):
+    if len(list) < 1:
+        return (None,[])
     return (list[0],list[1:])
 
+#
+# utilitary methods to add variable numbers of append (aka Tcl)
+#
 def lappends(list,*arg):
     result = list
     for item in arg:
         result.append(item)
     return result
 
+#
+# return a circularly shifted list 
+#
 def lshift(list,n):
+    if len(list) < 1:
+        return []
+    n = n % len(list)
     return list[n:] + list[0:n]
 
+#
+# check if a file exists
+#
 def fileexists(filepath):
     try:
         with open(filepath): 
@@ -468,6 +534,9 @@ def fileexists(filepath):
     except IOError:
         return False
 
+#
+# force a value to be between 2 boundaries
+#
 def vtrim(min,max,v):
     if v < min:
         return min
@@ -476,19 +545,29 @@ def vtrim(min,max,v):
     else:
         return v
 
+#
+# from an index, return a sym index with a double period
+#
 def bidirection(i,modulo):
     if ((i % (2*modulo)) < modulo):
         return i % modulo;
     else:
         return modulo - (i % modulo);
-	
+
+#
+# alternate value (same as iff)
+#	
 def alt(boolv,v1,v2):
     if boolv:
         return v1
     else:
         return v2
 
+#
+# build a list by concatenating a list with its reverse, and avoiding doubling extremities
+#
 def ldoublesym(list):
+    if len(list) < 3:
+        return list
     return list + lreverse(list[1:-1])
-
 

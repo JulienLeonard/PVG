@@ -240,6 +240,173 @@ class BasicTest(unittest.TestCase):
         self.assertEqual(lsublist([1,2,3,4],2),[1,3])
         self.assertEqual(lsublist([1,2,3,4],2,1),[2,4])
 
+    def test_mean(self):
+        self.assertEqual(mean(0.0,0.0),0.0)
+        self.assertEqual(mean(0.0,2.0),1.0)
+
+    def test_lmean(self):
+        self.assertEqual(lmean([]),None)
+        self.assertEqual(lmean([0.0,1.0,2.0]),1.0)
+
+    def test_lmiddle(self):
+        self.assertEqual(lmiddle([]),None)
+        self.assertEqual(lmiddle([0.0,1.0,2.0]),1.0)
+        self.assertEqual(lmiddle([0.0,1.0]),1.0)
+
+    def test_lreverse(self):
+        self.assertEqual(lreverse([]),[])
+        self.assertEqual(lreverse([1.0]),[1.0])
+        self.assertEqual(lreverse([1.0,2.0]),[2.0,1.0])
+
+    def test_lflattern(self):
+        self.assertEqual(lflatten([]),[])
+        self.assertEqual(lflatten([[1.0]]),[1.0])
+        self.assertEqual(lflatten([[1.0],[2.0]]),[1.0,2.0])
+        self.assertEqual(lflatten([[1.0,2.0],[3.0,4.0]]),[1.0,2.0,3.0,4.0])
+
+    def test_lsplit(self):
+        self.assertEqual(lsplit([],2),[])
+        self.assertEqual(lsplit([1.0],2),[[1.0]])
+        self.assertEqual(lsplit([1.0,2.0],2),[[1.0,2.0]])
+        self.assertEqual(lsplit([1.0,2.0,3.0,4.0],2),[[1.0,2.0],[3.0,4.0]])
+        self.assertEqual(lsplit([1.0,2.0,3.0,4.0],3),[[1.0,2.0,3.0],[4.0]])
+        
+    def test_lrange(self):
+        self.assertEqual(lrange([]),None)
+        self.assertEqual(lrange([1.0]),(1.0,1.0))
+        self.assertEqual(lrange([2.0,1.0]),(1.0,2.0))
+
+    def test_lclose(self):
+        self.assertEqual(lclose([]),[])
+        self.assertEqual(lclose([0.0]),[0.0])
+        self.assertEqual(lclose([0.0,1.0]),[0.0,1.0,0.0])
+
+    def test_sign(self):
+        self.assertEqual(sign( 0.0),1.0)
+        self.assertEqual(sign( 2.0),1.0)
+        self.assertEqual(sign(-3.0),-1.0)
+
+    def test_iff(self):
+        self.assertEqual(iff(True,0.0,1.0),0.0)
+        self.assertEqual(iff(False,0.0,1.0),1.0)
+    
+    def test_lgeo(self):
+        self.assertEqual(lgeo((2.0,0.0),0.5,0),[])
+        self.assertEqual(lgeo((2.0,0.0),0.5,1),[2.0])
+        self.assertEqual(lgeo((2.0,0.0),0.5,2),[2.0,0.0])
+        self.assertEqual(lgeo((2.0,0.0),0.5,3),[2.0, 0.6666666666666667, 0.0])
+        self.assertEqual(lgeo((2.0,0.0),0.5,4),[2.0, 0.8571428571428572, 0.2857142857142858, 0.0])
+        
+    def test_lzip(self):
+        self.assertEqual(lzip([],[]),[])
+        self.assertEqual(lzip([1.0],[]),[])
+        self.assertEqual(lzip([],[1.0]),[])
+        self.assertEqual(lzip([1.0],['a']),[(1.0,'a')])
+        self.assertEqual(lzip([1.0,2.0],['a']),[(1.0,'a')])
+        self.assertEqual(lzip([1.0,2.0],['a','b']),[(1.0,'a'),(2.0,'b')])
+
+    def test_lzipflat(self):
+        self.assertEqual(lzipflat([],[]),[])
+        self.assertEqual(lzipflat([1.0],[]),[])
+        self.assertEqual(lzipflat([],[1.0]),[])
+        self.assertEqual(lzipflat([1.0],['a']),[1.0,'a'])
+        self.assertEqual(lzipflat([1.0,2.0],['a']),[1.0,'a'])
+        self.assertEqual(lzipflat([1.0,2.0],['a','b']),[1.0,'a',2.0,'b'])
+
+    def test_lunzip(self):
+        self.assertEqual(lunzip([]),([], []))
+        self.assertEqual(lunzip([(1.0,2.0)]),([1.0],[2.0]))
+        self.assertEqual(lunzip([(1.0,2.0),(3.0,4.0)]),([1.0,3.0],[2.0,4.0]))
+        
+    def test_puts(self):
+        puts("toto","titi")
+        
+    def test_lidentity(self):
+        self.assertEqual(lidentity([]),[])
+        self.assertEqual(lidentity(True),True)
+
+    def test_lshuffle(self):
+        self.assertEqual(lshuffle([]),[])
+        self.assertEqual(lshuffle([1.0]),[1.0])
+        random.seed(0.0)
+        self.assertEqual(lshuffle([1.0,2.0,3.0]),[1.0,2.0,3.0])
+
+    def test_popfront(self):
+        self.assertEqual(popfront([]),(None,[]))
+        self.assertEqual(popfront([1.0]),(1.0,[]))
+        self.assertEqual(popfront([1.0,2.0]),(1.0,[2.0]))
+
+    def test_lappends(self):
+        self.assertEqual(lappends([],0.0),[0.0])
+        self.assertEqual(lappends(['a'],0.0,1.0,'b'),['a',0.0,1.0,'b'])
+        
+    def test_lshift(self):
+        self.assertEqual(lshift([],0),[])
+        self.assertEqual(lshift([],2),[])
+        self.assertEqual(lshift([1.0,2.0],0),[1.0,2.0])
+        self.assertEqual(lshift([1.0,2.0],1),[2.0,1.0])
+        self.assertEqual(lshift([1.0,2.0],3),[2.0,1.0])
+
+    def test_vtrim(self):
+        self.assertEqual(vtrim(0.0,1.0,0.0),0.0)
+        self.assertEqual(vtrim(0.0,1.0,1.0),1.0)
+        self.assertEqual(vtrim(0.0,1.0,0.5),0.5)
+        self.assertEqual(vtrim(0.0,1.0,-0.5),0.0)
+        self.assertEqual(vtrim(0.0,1.0, 1.5),1.0)
+
+    def test_bidirection(self):
+        self.assertEqual(bidirection(3,3),3)
+        self.assertEqual(bidirection(4,3),2)
+        self.assertEqual(bidirection(5,3),1)
+        self.assertEqual(bidirection(6,3),0)
+        self.assertEqual(bidirection(7,3),1)
+        
+        
+
+    def test_alt(self):
+        self.assertEqual(alt(True,0.0,1.0),0.0)
+        self.assertEqual(alt(False,0.0,1.0),1.0)
+
+    def test_ldoublesym(self):
+        self.assertEqual(ldoublesym([]),[])
+        self.assertEqual(ldoublesym([1.0]),[1.0])
+        self.assertEqual(ldoublesym([1.0,2.0]),[1.0,2.0])
+        self.assertEqual(ldoublesym([1.0,2.0,3.0]),[1.0,2.0,3.0,2.0])
+        
+
+        
+
+    
+        
+        
+        
+        
+        
+
+        
+        
+    
+
+        
+        
+
+    
+        
+        
+
+    
+        
+        
+        
+
+
+
+        
+        
+
+
+        
+        
     
 
         
