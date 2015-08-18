@@ -1180,7 +1180,7 @@ def seedsfrompointnormals(pns,sides,size):
 
 def psplitevenly(p1,p2,maxdist):
     nsplit = int(dist(p1,p2) / maxdist) + 1
-    return psamples((p1,p2),nsplit)
+    return PR(p1,p2).samples(nsplit)
     
     
 #
