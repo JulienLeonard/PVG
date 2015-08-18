@@ -8,7 +8,7 @@ class Canvas():
     def __init__(self,outputfilename):
         self.mrender           = None
         self.moutputfilename   = outputfilename
-        self.msizes            = (1000,1000)
+        self.msizes            = ImageDim(1000,1000)
         self.mbackground       = color.white()
         self.moutputdir        = "/".join(os.path.dirname(os.path.realpath(__file__).replace("\\","/")).split("/")[:-1]) + "/output"
 
@@ -21,7 +21,7 @@ class Canvas():
         return self
 
     def size(self,size):
-        self.msizes = (size,size)
+        self.msizes = ImageDim(size,size)
         return self
 
     def background(self,background):

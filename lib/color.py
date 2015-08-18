@@ -85,6 +85,11 @@ def hsl(h,s=1.0,l=1.0,a=1.0):
 def hue2color(hue):
     return hsv(hue, 1.0, 1.0,1.0)
 
+def a(color,v=None):
+    if v == None:
+        return color[-1]
+    else:
+        return color[:-1] + [v]
 
 #
 # compute a palette object from a base: base is the accent color
