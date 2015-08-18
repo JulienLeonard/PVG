@@ -9,18 +9,6 @@ def anglerange():
 
 
 #
-# define a Point range
-#
-class PR:
-    def __init__(self,v1,v2):
-        self.mv1 = v1
-        self.mv2 = v2
-
-    def sample(self,t):
-        return psample((self.mv1,self.mv2),t)
-
-
-#
 # Interface to define 2D geometry entity (Point or Vector)
 #
 class Coords:
@@ -133,6 +121,13 @@ class Vector(Coords):
     def scale(self,ratio):
         return Vector(self.x()*ratio,self.y()*ratio)
 
+    #
+    # compute the ortho vector of a vector
+    #
+    def ortho(self):
+        return Vector(-self.y(),self.x())
+
+
 #
 # default defs
 #
@@ -146,6 +141,12 @@ P0  = Point(0.0,0.0)
 #
 def vector(p1,p2):
     return Vector().points(p1,p2)
+
+#
+# compute the trigo vector from an angle
+#
+def angle2vector(a):
+    return Vector(math.cos(a),math.sin(a))
 
 #
 # compute the power2 of the dist between 2 points
@@ -168,35 +169,108 @@ def pmiddle(points):
     listy = [p.y() for p in points]
     return Point(sum(listx)/float(len(points)),sum(listy)/float(len(points)))
 
-
-def bbox(points):
-    xmin = points[0].x()
-    xmax = points[0].x()
-    ymin = points[0].y()
-    ymax = points[0].y()
+#
+# class point range (ie Segment)
+#
+class PR:
     
-    for p in points:
-        x,y = (p.x(),p.y())
-        if (x < xmin):
-            xmin = x
-        elif (x > xmax):
-            xmax = x
-                
-        if (y < ymin):
-            ymin = y
-        elif (y > ymax):
-            ymax = y
-    return [xmin,ymin,xmax,ymax]
+    def __init__(self,p1,p2):
+        self.mp1 = p1
+        self.mp2 = p2
+        self.mrx = R(self.mp1.x(),self.mp2.x())
+        self.mry = R(self.mp1.y(),self.mp2.y())
+        
+
+    def sample(self,t):
+        return Point(self.mrx.sample(t),self.mry.sample(t))
+
+    def samples(self,ntimes):
+        return [self.sample(abs) for abs in usamples(ntimes)]
+    
+
+
+def pequal(p1,p2,error=0.00001):
+    if (vector(p1,p2).length() < error):
+        return True
+    return False
+
+def pdiff(p1,p2,error):
+    return False if pequal(p1,p2,error) else True 
+
+class Viewport:
+    def __init__(self,center,radius):
+        self.mcenter = center
+        self.mradius = radius
+
+    def center(self):
+        return self.mcenter
+
+    def radius(self):
+        return self.mradius
+
+    def circle(self):
+        return Circle(self.center(),self.radius())
+
+    def size(self):
+        return self.radius() * 2.0
+
+    def xmin(self):
+        return self.mcenter.x() - self.radius()
+
+    def ymin(self):
+        return self.mcenter.y() - self.radius()
+
+
+class BBox:
+
+    def __init__(self,pmin=None,pmax=None):
+        self.mpmin = pmin
+        self.mpmax = pmax
+        
+    def coords(self):
+        return self.mpmin.coords() + self.mpmax.coords()
+
+    def center(self):
+        return pmiddle([self.mpmin,self.mpmax])
+
+    def xsize(self):
+        return (self.mpmax.x() - self.mpmin.x())
+
+    def ysize(self):
+        return (self.mpmax.y() - self.mpmin.y())
+
+    def size(self):
+        return max(self.xsize(),self.ysize())
+    
+    def radius(self):
+        rx = self.xsize()/2.0
+        ry = self.ysize()/2.0
+        return math.sqrt(rx * rx + ry * ry)
+
+    def viewport(self,ratio = 1.0):
+        return Viewport(self.center(), self.radius() * ratio)
+
+    def resize(self,factor):
+        xmin,ymin,xmax,ymax = self.coords()
+        newwidth  = self.xsize() * factor
+        newheight = self.ysize() * factor
+        xcenter,ycenter = self.center().coords()
+        newxmin = xcenter - newwidth/2.0
+        newxmax = xcenter + newwidth/2.0
+        newymin = ycenter - newheight/2.0
+        newymax = ycenter + newheight/2.0
+        return BBox(Point(newxmin,newymin),Point(newxmax,newymax))
+
 
 def bbunion(bbox1,bbox2):
     # puts ("bbunion",bbox1,bbox2)
-    xmin1,ymin1,xmax1,ymax1 = bbox1
-    xmin2,ymin2,xmax2,ymax2 = bbox2
+    xmin1,ymin1,xmax1,ymax1 = bbox1.coords()
+    xmin2,ymin2,xmax2,ymax2 = bbox2.coords()
     xmin = lmin([xmin1,xmin2])
     ymin = lmin([ymin1,ymin2])
     xmax = lmax([xmax1,xmax2])
     ymax = lmax([ymax1,ymax2])
-    return [xmin,ymin,xmax,ymax]
+    return BBox(Point(xmin,ymin),Point(xmax,ymax))
 
 def bbunions(bboxlist):
     result = bboxlist[0]
@@ -204,84 +278,22 @@ def bbunions(bboxlist):
         result = bbunion(result,bbox)
     return result
 
+def point2bbox(p):
+    return BBox(p,p)
+
+def points2bbox(points):
+    if len(points) < 1:
+        return None
+    return bbunions([point2bbox(p) for p in points])
+
+def polygons2bbox(polygons):
+    if len(polygons) < 1:
+        return None
+    return bbunions([polygon.viewbox() for polygon in polygons])
+
 def segviewbox(seg):
-    return bbox([seg[0],seg[1]])
+    return BBox().frompoints([seg[0],seg[1]])
 
-def viewportfromviewbox(cviewbox,factor):
-    (xmin,ymin,xmax,ymax) = cviewbox
-    xc = (xmin + xmax)/2.0;
-    yc = (ymin + ymax)/2.0;
-    d1 = xmax - xmin
-    d2 = ymax - ymin
-    dmax = dist(Point(0.0,0.0),Point(d1,d2))
-    viewport = (xc,yc,(dmax / 2.0) * factor)
-    return viewport
-
-
-
-def bboxresize(bbox,factor):
-    xmin,ymin,xmax,ymax = bbox
-    newwidth  = (xmax - xmin) * factor
-    newheight = (ymax - ymin) * factor
-    xcenter,ycenter = pmiddle([Point(xmin,ymin),Point(xmax,ymax)]).coords()
-    newxmin = xcenter - newwidth/2.0
-    newxmax = xcenter + newwidth/2.0
-    newymin = ycenter - newheight/2.0
-    newymax = ycenter + newheight/2.0
-    return (newxmin,newymin,newxmax,newymax)
-
-def unionviewboxes(viewboxes):
-    cviewbox = viewboxes[0]
-    for ccviewbox in viewboxes:
-        cviewbox = mergeviewboxes(cviewbox,ccviewbox)
-    return cviewbox
-
-def mergeviewboxes(viewbox1,viewbox2):
-    xmin1,ymin1,xmax1,ymax1 = viewbox1
-    xmin2,ymin2,xmax2,ymax2 = viewbox2
-    
-    xmin = xmin1
-    ymin = ymin1
-    xmax = xmax1
-    ymax = ymax1
-
-    if xmin2 < xmin:
-        xmin = xmin2
-    if ymin2 < ymin:
-        ymin = ymin2
-    if xmax2 > xmax:
-        xmax = xmax2
-    if ymax2 > ymax:
-        ymax = ymax2
-
-    return (xmin,ymin,xmax,ymax)
-
-def viewboxpoints(points):
-    xmin = points[0].x();
-    xmax = points[0].y();
-    ymin = points[0].x();
-    ymax = points[0].y();
-    for point in points[1:]:
-        (x,y) = point.coords()
-        if x < xmin:
-            xmin = x
-        elif x > xmax:
-            xmax = x
-        if y < ymin:
-            ymin = y
-        elif y > ymax:
-            ymax = y
-    return [xmin,ymin,xmax,ymax]
-
-
-def square(center,size):
-    return [(center[0]-size/2.0,center[1]-size/2.0),
-            (center[0]-size/2.0,center[1]+size/2.0),
-            (center[0]+size/2.0,center[1]+size/2.0),
-            (center[0]+size/2.0,center[1]-size/2.0)]
-
-def rectangle(x1,y1,x2,y2):
-    return [(x1,y1),(x2,y1),(x2,y2),(x1,y2)]
 
 def vscale(v,ratio):
     return (v[0] * ratio, v[1] * ratio)
@@ -300,22 +312,6 @@ def vangle(v):
             result = -result
     return result
 
-def polygonsignedarea(points):
-    signedArea = 0
-    index = 0
-    for (p1,p2) in pairs(points):
-        signedArea += (p1.x() * p2.y() - p2.x() * p1.y())
-    return signedArea / 2
-
-def polygonclockwise(polygon):
-    if ispolygonclockwise(polygon):
-        return polygon
-    return lreverse(polygon)
-
-def ispolygonclockwise(polygon):
-    if polygonsignedarea(polygon) < 0.0:
-        return True
-    return False
 
 
 #
