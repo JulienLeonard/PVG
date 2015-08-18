@@ -7,29 +7,35 @@ import subprocess
 import time
 import os
 
-def gbbox(polygon,itype):
-    if itype == "polygon":
-        return bbox(polygon)
-    else:
-        return circleviewbox(polygon)
+def gbbox(shape):
+    return shape.viewbox()
 
+class ImageDim:
+    def __init__(self,width,height):
+        self.mwidth  = width
+        self.mheight = height
+        
+    def width(self):
+        return self.mwidth
+
+    def height(self):
+        return self.mheight
+    
 
 class Render:
-    def __init__(self,viewport,imagesize,filename,backcolor=color.white()):
-        self.width,self.height = imagesize
-        self.xc,self.yc,self.size = viewport
-        self.xmin = self.xc - self.size/2.0
-        self.ymin = self.yc - self.size/2.0
-        self.filename = filename
-        self.backcolor = backcolor
+    def __init__(self,viewport,imagedim,filename,backcolor=color.white()):
+        self.mimagedim  = imagedim
+        self.mviewport  = viewport
+        self.mfilename  = filename
+        self.mbackcolor = backcolor
 
     def drawpolygon( self, polygon, colorc ):
-        pointcoords = [[p.x(),p.y()] for p in polygon]
+        pointcoords = [coord for p in polygon.points() for coord in p.coords()]
         self.drawpolygonpicture(pointcoords,colorc)
 
-    def drawpolygonpicture( self, polygon, colorc ):
-        if len(polygon) < 2:
-            print "error: polygon",polygon,"too small"
+    def drawpolygonpicture( self, pointcoords, colorc ):
+        if len(pointcoords) < 2:
+            print "error: pointcoords",pointcoords,"too small"
             return
         colorc = color.trimcolor(colorc)
         puts("Render drawpolygonpicture not defined")
@@ -40,22 +46,22 @@ class Render:
     def endpicture(self):
         puts("endpicture")
 
-    def drawpolyline(self, polyline, width, colorc):
-        self.drawpolygon(line(polyline.points(),width),colorc)
+    def strokepolygon(self, polygon, width, colorc):
+        self.drawpolygon(line(polygon.points(),width),colorc)
 
     def end(self):
         self.endpicture()
 
-    def drawpolylines(self,polylines,width,color):
-        for polyline in polylines:
-            self.drawpolyline(polyline,width,color)
+    def strokepolygons(self,polylines,width,color):
+        for polygon in polygons:
+            self.strokepolygon(polygon,width,color)
         
     def drawpolygons(self,polygons,color):
         for poly in polygons:
             self.drawpolygon(poly,color)
 
     def drawcircle(self,circle,color=color.black(),ratio=1.0):
-        self.drawpolygon(circlepolygon(cscale(circle,ratio),30),color)
+        self.drawpolygon(circle.scale(ratio).polygon(30),color)
 
     def drawcircles(self,circles,color=color.black(),ratio = 1.0):
         for circle in circles:
@@ -83,7 +89,8 @@ class Render:
 #         self.AGGrender.end()
 
 class RenderTCL(Render):
-    def initpicture(self,width,height,filename,backcolor):
+    def initpicture(self,imagedim,filename,backcolor):
+        puts("filename",filename)
         self.p = subprocess.Popen("tclsh C:/DEV/CVG/scripts/drawclient.tcl")
         puts("after call")
         while 1:
@@ -98,17 +105,17 @@ class RenderTCL(Render):
                 self.sock.close()
                 break
         
-        if fileexists(self.filename):
-            os.remove(self.filename)
-        self.sock.sendall("drawinit " + str(width) + " " + str(height) + " " + filename + " {" + ' '.join([str(i) for i in backcolor]) +"} \n")
+        if fileexists(filename):
+            os.remove(filename)
+        self.sock.sendall("drawinit " + str(imagedim.width()) + " " + str(imagedim.height()) + " " + filename + " {" + ' '.join([str(i) for i in backcolor]) +"} \n")
 
-    def setviewport(self,xc,yc,radius):
-        self.sock.sendall("focus " + str(xc) + " " + str(yc) + " " + str(radius) + " \n")
+    def setviewport(self,viewport):
+        self.sock.sendall("focus " + str(viewport.center().x()) + " " + str(viewport.center().y()) + " " + str(viewport.radius()) + " \n")
 
     def selfinit(self):
         self.openacceptsocket()
-        self.initpicture(self.width,self.height,self.filename,self.backcolor)
-        self.setviewport(self.xc,self.yc,self.size)
+        self.initpicture(self.mimagedim,self.mfilename,self.mbackcolor)
+        self.setviewport(self.mviewport)
 
     def openacceptsocket(self):
         host = ''
@@ -120,17 +127,17 @@ class RenderTCL(Render):
 
     def endpicture(self):
         self.sock.sendall("end\n")
-        while not fileexists(self.filename):
+        while not fileexists(self.mfilename):
             time.sleep(1)
         self.sock.close()
         self.p.terminate()
 
-    def drawpolygonpicture(self,polygon,colorc):
-        self.sock.sendall("drawpolygon {" + ' '.join([str(i) for i in lflatten(polygon)]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
+    def drawpolygonpicture(self,pointcoords,colorc):
+        self.sock.sendall("drawpolygon {" + ' '.join([str(coord) for coord in pointcoords]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
 
             
 class RenderTCLSVG(Render):
-    def initpicture(self,width,height,filename,backcolor):
+    def initpicture(self,imagedim,filename,backcolor):
         self.p = subprocess.Popen("tclsh C:/DEV/CVG/scripts/drawclientsvg.tcl")
         puts("after call")
         while 1:
@@ -145,20 +152,20 @@ class RenderTCLSVG(Render):
                 self.sock.close()
                 break
         
-        if fileexists(self.filename):
-            os.remove(self.filename)
-        self.sock.sendall("drawinit " + str(width) + " " + str(height) + " " + filename + " {" + ' '.join([str(i) for i in backcolor]) +"} \n")
+        if fileexists(filename):
+            os.remove(filename)
+        self.sock.sendall("drawinit " + str(imagedim.width()) + " " + str(imagedim.height()) + " " + filename + " {" + ' '.join([str(i) for i in backcolor]) +"} \n")
 
     def getsock(self):
         return self.sock
 
-    def setviewport(self,xc,yc,radius):
-        self.sock.sendall("focus " + str(xc) + " " + str(yc) + " " + str(radius) + " \n")
+    def setviewport(self,viewport):
+        self.sock.sendall("focus " + str(viewport.center().x()) + " " + str(viewport.center().y()) + " " + str(viewport.radius()) + " \n")
 
     def selfinit(self):
         self.openacceptsocket()
-        self.initpicture(self.width,self.height,self.filename,self.backcolor)
-        self.setviewport(self.xc,self.yc,self.size)
+        self.initpicture(self.mimagedim,self.mfilename,self.mbackcolor)
+        self.setviewport(self.mviewport)
 
     def openacceptsocket(self):
         host = ''
@@ -170,70 +177,59 @@ class RenderTCLSVG(Render):
 
     def endpicture(self):
         self.sock.sendall("end\n")
-        # while not fileexists(self.filename):
+        # while not fileexists(self.mfilename):
         time.sleep(10)
         self.sock.close()
         self.p.terminate()
 
-    def drawpolygonpicture(self,polygon,colorc):
-        self.sock.sendall("drawpolygon {" + ' '.join([str(i) for i in lflatten(polygon)]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
+    def drawpolygonpicture(self,pointcoords,colorc):
+        self.sock.sendall("drawpolygon {" + ' '.join([str(coord) for coord in pointcoords]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
 
     def drawcirclepicture(self,circle,colorc=color.black(),ratio=1.0):
-        newc = (circle.x(),circle.y(),circle.r() * ratio)
-        self.sock.sendall("drawcircle {" + ' '.join([str(i) for i in newc]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
+        coords = [circle.x(),circle.y(),circle.r() * ratio]
+        self.sock.sendall("drawcircle {" + ' '.join([str(coord) for coord in coords]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
 
 
 class RenderCenter(RenderTCL):
-    def __init__(self,imagesize,filename,backcolor=color.white()):
+    def __init__(self,imagedim,filename,backcolor=color.white()):
         self.mitems     = []
-        self.width,self.height = imagesize
-        self.filename = filename
-        self.backcolor = backcolor
+        self.mimagedim  = imagedim
+        self.mfilename  = filename
+        self.mbackcolor = backcolor
 
     def drawpolygon( self, polygon, colorc ):
-        if len(polygon) > 0:
+        if not polygon == None:
             self.mitems.append((polygon,colorc))
 
     def end(self):
-        xc,yc,size = self.viewport()
         self.openacceptsocket()
-        self.initpicture(self.width,self.height,self.filename,self.backcolor)
-        # self.setviewport(self,xc,yc,size)
+        self.initpicture(self.mimagedim,self.mfilename,self.mbackcolor)
         for item in self.mitems:
             polygon,color = item
-            self.drawpolygonpicture([[p.x(),p.y()]for p in polygon],color)
+            self.drawpolygonpicture(polygon.coords(),color)
         self.endpicture()
 
     def viewport(self):
-        result = bbox(self.mitems[0][0])
-        for item in self.mitems[1:]:
-            result = bbunion(result,bbox(item[0]))
-        result = bboxresize(result,1.25)
-        xmin,ymin,xmax,ymax = result
-        xcenter = lmean([xmin,xmax])
-        ycenter = lmean([ymin,ymax])
-        size    = lmax([xmax-xmin,ymax-ymin])
-        return (xcenter,ycenter,size)
+        return polygons2bbox([item[0] for item in self.mitems]).resize(1.25).viewport()
 
 class RenderViewport(RenderCenter):
-    def __init__(self,viewport_,imagesize,filename,backcolor=color.white()):
-        self.mitems     = []
-        self.mviewport = viewport_
-        self.width,self.height = imagesize
-        self.filename = filename
+    def __init__(self,viewport,imagedim,filename,backcolor=color.white()):
+        self.mitems    = []
+        self.mviewport = viewport
+        self.mimagedim = imagedim
+        self.filename  = filename
         self.backcolor = backcolor
 
     def viewport(self):
         return self.mviewport
 
     def end(self):
-        xc,yc,size = self.viewport()
         self.openacceptsocket()
-        self.initpicture(self.width,self.height,self.filename,self.backcolor)
-        self.setviewport(xc,yc,size)
+        self.initpicture(self.mimagedim,self.mfilename,self.mbackcolor)
+        self.setviewport(self.viewport())
         for item in self.mitems:
             polygon,color = item
-            self.drawpolygonpicture(polygon,color)
+            self.drawpolygonpicture(polygon.coords(),color)
         self.endpicture()
 
 
@@ -245,68 +241,61 @@ class RenderCenterSVG(RenderTCLSVG):
         self.backcolor = backcolor
 
     def drawpolygon( self, polygon, colorc = color.black()):
-        if len(polygon) > 0:
+        if not polygon == None:
             self.mitems.append((polygon,colorc,"polygon"))
 
     def drawcircle( self, circle, colorc = color.black()):
         if not circle == None:
             self.mitems.append((circle,colorc,"circle"))
 
-
     def end(self):
         xc,yc,size = self.viewport()
         self.openacceptsocket()
-        self.initpicture(self.width,self.height,self.filename,self.backcolor)
-        self.setviewport(xc,yc,size*2.0)
-        self.drawpolygonpicture(square((xc,yc),size),self.backcolor)
+        self.initpicture(self.mimagedim,self.mfilename,self.mbackcolor)
+        self.setviewport(self.viewport())
+        self.drawpolygonpicture(square(Point(xc,yc),size).coords(),self.backcolor)
         for item in self.mitems:
             polygon,color,itype = item
             if itype == "polygon":
-                self.drawpolygonpicture(polygon,color)
+                self.drawpolygonpicture(polygon.coords(),color)
             else:
-                self.drawcirclepicture(polygon,color)
+                self.drawcirclepicture(polygon.coords(),color)
         self.endpicture()
 
     def viewport(self):
-        result = gbbox(self.mitems[0][0],self.mitems[0][2])
-        for item in self.mitems[1:]:
-            result = bbunion(result,gbbox(item[0],item[2]))
-        result = bboxresize(result,1.25)
-        xmin,ymin,xmax,ymax = result
-        xcenter = lmean([xmin,xmax])
-        ycenter = lmean([ymin,ymax])
-        size    = lmax([xmax-xmin,ymax-ymin])
-        return (xcenter,ycenter,size)
+        return polygons2bbox([item[0] for item in self.mitems]).resize(1.25).viewport()
 
 
 class RenderCenterMulti(RenderCenter):
-    def __init__(self,imagesize,nsubs,filename,backcolor=color.white()):
+    def __init__(self,imagedim,nsubs,filename,backcolor=color.white()):
         self.mitems     = []
-        self.width,self.height = imagesize
-        self.filename = filename
-        self.backcolor = backcolor
-        self.nsubs = nsubs
+        self.mimagedim  = imagedim
+        self.mfilename  = filename
+        self.mbackcolor = backcolor
+        self.mnsubs     = nsubs
 
     def end(self):
-        axc,ayc,asize = self.viewport()
-        axmin = axc - asize/2.0
-        aymin = ayc - asize/2.0
-        size = asize / self.nsubs
-        realfilename = self.filename
+        viewport = self.viewport()
+        axmin = viewport.xmin()
+        aymin = viewport.ymin()
+        size = viewport.size() / self.nsubs
+        realfilename = self.mfilename
         self.openacceptsocket()
         filelists = []
+        
+        # TODO : refactor by adding split method on viewport and imagedim
         for i in range(self.nsubs):
             filelist = []
             for j in range(self.nsubs):
                 xc = axmin + size * (float(j) + 0.5)
                 yc = aymin + size * (float(i) + 0.5)
-                self.filename = realfilename + "." + str(i) + str(j) + ".ppm"
-                filelist.append(self.filename)
-                self.initpicture(self.width/self.nsubs,self.height/self.nsubs,self.filename,self.backcolor)
-                self.setviewport(xc,yc,size/2.0)
+                self.mfilename = realfilename + "." + str(i) + str(j) + ".ppm"
+                filelist.append(self.mfilename)
+                self.initpicture(ImageDim(self.mimagedim.width()/self.nsubs,self.mimagedim.height()/self.nsubs),self.mfilename,self.mbackcolor)
+                self.setviewport(Viewport(Point(xc,yc),size/2.0))
                 for item in self.mitems:
                     polygon,color = item
-                    self.drawpolygonpicture(polygon,color)
+                    self.drawpolygonpicture(polygon.coords(),color)
                 self.endpicture()
             filelists.append(filelist)
         # now create real image with rconvert
