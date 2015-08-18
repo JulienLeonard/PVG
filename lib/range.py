@@ -1,5 +1,4 @@
 from basics import *
-from geoutils import *
 
 #
 # define a range object
@@ -58,8 +57,6 @@ class R:
             else:
                 return False
 
-ANGLERANGE = R(0.0,2 * math.pi)
-
 #
 # define a multi range object by spec [(a1,v1),(a2,v2),...,(an,vn)]
 #
@@ -70,15 +67,5 @@ class MR:
     def sample(self,t):
         return multisamples(self.mvlist,t)
 
-#
-# define a Point range
-#
-class PR:
-    def __init__(self,v1,v2):
-        self.mv1 = v1
-        self.mv2 = v2
-
-    def sample(self,t):
-        return psample((self.mv1,self.mv2),t)
     
     

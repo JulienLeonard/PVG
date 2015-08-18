@@ -1,7 +1,23 @@
 from utils import *
+from range import *
 
+#
+# define angle range
+#
 def anglerange():
     return R(0.0,2* math.pi)
+
+
+#
+# define a Point range
+#
+class PR:
+    def __init__(self,v1,v2):
+        self.mv1 = v1
+        self.mv2 = v2
+
+    def sample(self,t):
+        return psample((self.mv1,self.mv2),t)
 
 
 #
@@ -46,8 +62,8 @@ class Point(Coords):
     def sub(self,p):
         return Vector(self.x() - p.x(),self.y() - p.y())
 
-    def rotate(p,center,angle):
-        return center.add( vector(center,p).rotate(angle) )
+    def rotate(self,center,angle):
+        return center.add( vector(center,self).rotate(angle) )
 
     def sym(p,center):
         return center.add(vector(p,center))
@@ -58,27 +74,42 @@ class Point(Coords):
 #
 class Vector(Coords):
 
+    #
+    # constructor
+    #
     def __init__(self,x=1.0,y=0.0):
         self.mx = x
         self.my = y
         self.ml  = None
-
+        
+    #
+    # compute coords of vector from extremities
+    #
     def points(self,p1,p2):
         self.mx = (p2.x() - p1.x())
         self.my = (p2.y() - p1.y())
         self.ml  = None
         return self
 
+    #
+    # compute the power2 of the length of the vector
+    #
     def length2(self):
         _x = self.x()
         _y = self.y()
         return _x *_x + _y *_y
 
+    #
+    # compute the norm of the vector
+    #
     def length(self):
         if self.ml == None:
             self.ml = math.sqrt(self.length2())
         return self.ml
 
+    #
+    # return a normalized vector
+    #
     def normalize(self):
         l = self.length()
         if l == 0.0:
@@ -86,6 +117,9 @@ class Vector(Coords):
         else:
             return self.scale(1.0/l)
 
+    #
+    # rotate a vector
+    #
     def rotate(self,angle):
         cosa = math.cos(angle)
         sina = math.sin(angle)
@@ -93,20 +127,35 @@ class Vector(Coords):
         y = self.y()
         return Vector((x * cosa - y * sina),(x * sina + y * cosa ))
 
+    #
+    # scale a vector
+    #
     def scale(self,ratio):
         return Vector(self.x()*ratio,self.y()*ratio)
 
+#
+# default defs
+#
 VX0 = Vector(1.0,0.0)
 VY0 = Vector(0.0,0.1)
 V0  = Vector(0.0,0.0)
 P0  = Point(0.0,0.0)
 
+#
+# shortcut: build a vector from extremities
+#
 def vector(p1,p2):
     return Vector().points(p1,p2)
 
+#
+# compute the power2 of the dist between 2 points
+#
 def dist2(p1,p2):
     return vector(p1,p2).length2()
 
+#
+# compute the dist betweem 2 points
+#
 def dist(p1,p2):
     return vector(p1,p2).length()
 
@@ -117,7 +166,7 @@ def dist(p1,p2):
 def pmiddle(points):
     listx = [p.x() for p in points]
     listy = [p.y() for p in points]
-    return (sum(listx)/float(len(points)),sum(listy)/float(len(points)))
+    return Point(sum(listx)/float(len(points)),sum(listy)/float(len(points)))
 
 
 def bbox(points):
