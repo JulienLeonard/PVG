@@ -223,7 +223,7 @@ def bboxresize(bbox,factor):
     xmin,ymin,xmax,ymax = bbox
     newwidth  = (xmax - xmin) * factor
     newheight = (ymax - ymin) * factor
-    xcenter,ycenter = pmiddle([Point(xmin,ymin),Point(xmax,ymax)])
+    xcenter,ycenter = pmiddle([Point(xmin,ymin),Point(xmax,ymax)]).coords()
     newxmin = xcenter - newwidth/2.0
     newxmax = xcenter + newwidth/2.0
     newymin = ycenter - newheight/2.0
