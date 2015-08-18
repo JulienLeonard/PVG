@@ -1,5 +1,6 @@
-from utils import *
+from utils    import *
 from geoutils import *
+from polygon  import *
 
 #
 # define a circle object
@@ -41,7 +42,7 @@ class Circle:
         return Circle(self.center().add(tv),self.radius())
 
     def sample(self,abscissa):
-        angle = ANGLERANGE.sample(abscissa)
+        angle = anglerange().sample(abscissa)
         return self.center().add(VX0.rotate(angle).scale(self.r()))
 
     def samples(self,abscissas):
@@ -59,6 +60,10 @@ class Circle:
 
     def point(self,abscissa):
         return self.sample(abscissa)
+
+    def polygon(self,npoints=30):
+        return Polygon([self.point(i) for i in usamples(npoints+1)][:-1])
+        
 
 C0 = Circle()
 
@@ -100,4 +105,4 @@ def circlepoints(circle,npoints,offset):
     return [circlepoint(circle,abs) for abs in abss]
 
 def circlepolygon(circle,npoints):
-    return [circlepoint(circle,abs) for abs in samples((0.0,1.0),(npoints+1))][:-1]
+    return circle.polygon(npoints)

@@ -1,5 +1,5 @@
-from bezier import *
-from polyline import *
+from bezier  import *
+from polygon import *
 
 class Silhouette:
     def __init__(self,svgdef):
@@ -13,28 +13,28 @@ class Silhouette:
         if self.mbeziers == []:
             (fpoints,beziers)  = svg2bezier(self.mdef)
             self.mbeziers  = [bezier.clockwise().reverse() for bezier in beziers]
-            self.mviewbox  = unionviewboxes([bezier.viewbox() for bezier in self.mbeziers])
+            self.mviewbox  = bbunions([bezier.viewbox() for bezier in self.mbeziers])
 
     def size(self):
         self.compute()
-        return viewportfromviewbox(self.mviewbox,1.0)[2]
+        return self.mviewbox.size()
 
     def viewport(self,factor=1.1):
         self.compute()
-        return viewportfromviewbox(self.mviewbox,factor)
+        return self.mviewbox.viewport(factor)
 
-    def levels(self,circleboxfactor = 0.0,addedpolylines = []):
+    def levels(self,circleboxfactor = 0.0,addedpolygons = []):
         if self.mlevels == {}:
             self.compute()
-            minviewport = viewportfromviewbox(self.mviewbox,1.0)
+            minviewport = self.mviewbox.viewport()
             allbeziers = self.mbeziers
             if not circleboxfactor == 0.0:
-                circlebox = Polyline(circlepolygon((minviewport[0],minviewport[1],minviewport[2]*circleboxfactor),250)).close()
+                circlebox  = minviewport.circle().scale(circleboxfactor).polygon(250).close()
                 allbeziers = allbeziers + [circlebox]
-            if not len(addedpolylines) == 0:
-                allbeziers = allbeziers + addedpolylines
+            if not len(addedpolygons) == 0:
+                allbeziers = allbeziers + addedpolygons
             self.mlevels = computeshapelevels(allbeziers)
-            self.mpolys  = { level: [bezier.points() for bezier in self.mlevels[level]] for level in self.mlevels["levels"]}
+            self.mpolys  = { level: [bezier.polygon() for bezier in self.mlevels[level]] for level in self.mlevels["levels"]}
         return self
 
     def getlevels(self):
@@ -51,7 +51,7 @@ class Silhouette:
         return [point for level in self.mlevels["levels"] for poly in self.mpolys[level] for point in poly]
 
     def allpointcircles(self,rc):
-        return [(point[0],point[1],rc) for level in self.mlevels["levels"] for poly in self.mpolys[level] for point in Polyline(poly).lengthsamples(rc)]
+        return [(point[0],point[1],rc) for level in self.mlevels["levels"] for poly in self.mpolys[level] for point in poly.lengthsamples(rc)]
 
     def polygonlevel(self,polygon):
         if self.mlevels == {}:
@@ -79,3 +79,9 @@ class Silhouette:
             return ""
 
         return self.mpolys[level]
+
+    #
+    # return the first polygon of first level
+    #
+    def polygon(self):
+        return self.polygons(0)[0]

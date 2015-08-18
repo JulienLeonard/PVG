@@ -1,6 +1,6 @@
-from utils import *
+from utils    import *
 from geoutils import *
-from polyline import *
+from polygon  import *
 
 class Bezier:
 	def __init__(self,p1,p2,p3,p4):
@@ -108,15 +108,15 @@ class Bezier:
 
 	def frame(self,t):
 		self.checksegments()
-		return self.mpolyline.frame(t)
+		return self.mpolygon.frame(t)
 
 	def tangent(self,t):
 		self.checksegments()
-		return self.mpolyline.tangent(t)
+		return self.mpolygon.tangent(t)
 
 	def point(self,t):
 		self.checksegments()
-		result = self.mpolyline.point(t)
+		result = self.mpolygon.point(t)
 		# puts("point t",t,"result",result)
 		return result
 
@@ -154,13 +154,13 @@ class Bezier:
 		self.msegments = segpoints
 		self.msegerror = error
 		self.mlength = self.computelength(self.msegments)
-		self.mpolyline = Polyline(self.msegments)
+		self.mpolygon = Polygon(self.msegments)
 		
 	def computelength(self,segments):
 		return ladd([dist(p1,p2) for (p1,p2) in pairs(segments)])
 
-	def polyline(self,error=0.01):
-		return Polyline(self.segments(error))
+	def polygon(self,error=0.01):
+		return Polygon(self.segments(error))
 
 	def length(self,error=0.01):
 		self.checksegments(error)
@@ -176,7 +176,7 @@ class Bezier:
 
 	def viewbox(self):
 		self.checksegments()
-		return viewboxpoints(self.msegments)
+		return points2bbox(self.msegments)
 		
 		
 def bezierfrompointvector(p1,v1,p4,v4):
@@ -194,8 +194,8 @@ def bezierfrompointsangle(p1,p2,angle,factor=1.0):
 	return bezierfrompointvector(p1,v1,p2,v2)
 
 # pvlist is of the form (p1,v1,p2,v2,...,pn,vn)
-# to give beziers ((p1,p1+v1,p2 - v2,p2), (p2,p2+v2,p3-v3,p3),...,(pn-1,pn-1 + vn-1, pn-vn,pn)).polyline()
-def bezierpolylinefrompointsvectors(pvlist):
+# to give beziers ((p1,p1+v1,p2 - v2,p2), (p2,p2+v2,p3-v3,p3),...,(pn-1,pn-1 + vn-1, pn-vn,pn)).polygon()
+def bezierpolygonfrompointsvectors(pvlist):
 	beziers = []
 	i = 0
 	while i < len(pvlist)-3:
@@ -207,13 +207,13 @@ def bezierpolylinefrompointsvectors(pvlist):
 		beziers.append(Bezier(p1,p2,p3,p4))
 		i += 2
 	# print "beziers length",len(beziers)
-	result = beziers[0].polyline()
+	result = beziers[0].polygon()
 	for bezier in beziers[1:]:
-		result = result.concat(bezier.polyline())
+		result = result.concat(bezier.polygon())
 
 	return result
 
-def regularbezierpolylinefrompointsvectors(pvlist):
+def regularbezierpolygonfrompointsvectors(pvlist):
 	beziers = []
 	i = 0
 	while i < len(pvlist)-3:
@@ -225,9 +225,9 @@ def regularbezierpolylinefrompointsvectors(pvlist):
 		beziers.append(bezierfrompointvector(p1,v1,p2,v2))
 		i += 2
 	# print "beziers length",len(beziers)
-	#result = beziers[0].polyline()
+	#result = beziers[0].polygon()
 	#for bezier in beziers[1:]:
-	#	result = result.concat(bezier.polyline())
+	#	result = result.concat(bezier.polygon())
 	result = PolyBezier().adds(beziers)	
 	return result
 
@@ -251,7 +251,7 @@ def regularbezierfrompoints(plist):
 		pvlist.append(p)
 		pvlist.append(pmiddle(vectors[p]))
 		
-	return regularbezierpolylinefrompointsvectors(pvlist)
+	return regularbezierpolygonfrompointsvectors(pvlist)
 
 		
 
@@ -263,14 +263,14 @@ def closingbezier(poly1,poly2):
     tan2 = v1.normalize().scale(vector(p1,p2).length() *  1.0/3.0)
     tan2 = v2.normalize().scale(vector(p1,p2).length() * -1.0/3.0)
     bezier = bezierfrompointvector(p1,tan1,p2,tan2)
-    return bezier.polyline()
+    return bezier.polygon()
 
 
-def bezierconcat(polylines,close=False):
+def bezierconcat(polygons,close=False):
     result = []
     if close:
-        polylines.append(polylines[0])
-    for poly1,poly2 in pairs(polylines):
+        polygons.append(polygons[0])
+    for poly1,poly2 in pairs(polygons):
         result.extend(poly1.points())
         result.extend(closingbezier(poly1,poly2).points())
     result.extend(poly2.points())
@@ -416,7 +416,7 @@ class PolyBezier:
 		return self.mlength
 
 	def viewbox(self):
-		return unionviewboxes([bezier.viewbox() for bezier in self.mbeziers])
+		return bbunions([bezier.viewbox() for bezier in self.mbeziers])
 
 	def point(self,t):
 		for (rmin,rmax,bezier) in self.mranges:
@@ -428,7 +428,10 @@ class PolyBezier:
 
 
 	def points(self,error=0.01):
-		return [point for bezier in self.mbeziers for point in bezier.polyline(error).points()]
+		return [point for bezier in self.mbeziers for point in bezier.polygon(error).points()]
+
+	def polygon(self,error=0.01):
+		return Polygon(self.points(error))
 	
 	def reverse(self):
 		return PolyBezier().adds([bezier.reverse() for bezier in lreverse(self.mbeziers)])
@@ -452,7 +455,7 @@ class PolyBezier:
 				if nsize < 2:
 					result.append((p1,p2))
 				else:
-					newpoints = psamples((p1,p2),nsize)
+					newpoints = PR(p1,p2).samples(nsize)
 					result.extend(pairs(newpoints))
 		return result
 		
@@ -464,10 +467,10 @@ def roundpolygon(polygon,factor):
     for (p1,p2) in pairs(polygon + [polygon[0]]):
 	    # puts("p1",p1,"p2",p2)    
         if factor == 0.5:
-            newpoints.append(psample((p1,p2),0.5))
+            newpoints.append(PR(p1,p2).sample(0.5))
         else:
             for cabs in [factor,1.0-factor]:
-                newpoints.append(psample((p1,p2),cabs))
+                newpoints.append(PR(p1,p2).sample(cabs))
     
     # then build regular bezier from the new points
     return regularbezierfrompoints(newpoints)
