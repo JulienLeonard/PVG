@@ -1,7 +1,7 @@
 from utils     import *
 from drawutils import *
 from geoutils  import *
-import color
+from color     import *
 
 
 class Canvas():
@@ -9,7 +9,7 @@ class Canvas():
         self.mrender           = None
         self.moutputfilename   = outputfilename
         self.msizes            = ImageDim(1000,1000)
-        self.mbackground       = color.white()
+        self.mbackground       = Color.white()
         self.moutputdir        = "/".join(os.path.dirname(os.path.realpath(__file__).replace("\\","/")).split("/")[:-1]) + "/output"
 
     def outputdir(self,outdir):

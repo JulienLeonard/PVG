@@ -1,6 +1,6 @@
-import color
+from color    import *
 from geoutils import *
-from circle import *
+from circle   import *
 import socket
 import sys
 import subprocess
@@ -23,7 +23,7 @@ class ImageDim:
     
 
 class Render:
-    def __init__(self,viewport,imagedim,filename,backcolor=color.white()):
+    def __init__(self,viewport,imagedim,filename,backcolor=Color.white()):
         self.mimagedim  = imagedim
         self.mviewport  = viewport
         self.mfilename  = filename
@@ -37,7 +37,7 @@ class Render:
         if len(pointcoords) < 2:
             print "error: pointcoords",pointcoords,"too small"
             return
-        colorc = color.trimcolor(colorc)
+        colorc = Color.trimcolor(colorc)
         puts("Render drawpolygonpicture not defined")
 
     def initpicture(self):
@@ -60,10 +60,10 @@ class Render:
         for poly in polygons:
             self.drawpolygon(poly,color)
 
-    def drawcircle(self,circle,color=color.black(),ratio=1.0):
+    def drawcircle(self,circle,color=Color.black(),ratio=1.0):
         self.drawpolygon(circle.scale(ratio).polygon(30),color)
 
-    def drawcircles(self,circles,color=color.black(),ratio = 1.0):
+    def drawcircles(self,circles,color=Color.black(),ratio = 1.0):
         for circle in circles:
             self.drawcircle(circle,color,ratio)
 
@@ -72,7 +72,7 @@ class Render:
             self.drawcircle(circles[i],circular(colors,i))
 
 # class RenderAGG:
-#     def __init__(self,viewport,imagesize,filename,backcolor=color.white()):
+#     def __init__(self,viewport,imagesize,filename,backcolor=Color.white()):
 #         from AGGPROXY import *
 #         self.AGGrender = AGGRender()
 #         self.initpicture()
@@ -107,7 +107,7 @@ class RenderTCL(Render):
         
         if fileexists(filename):
             os.remove(filename)
-        self.sock.sendall("drawinit " + str(imagedim.width()) + " " + str(imagedim.height()) + " " + filename + " {" + ' '.join([str(i) for i in backcolor]) +"} \n")
+        self.sock.sendall("drawinit " + str(imagedim.width()) + " " + str(imagedim.height()) + " " + filename + " {" + ' '.join([str(i) for i in backcolor.values()]) +"} \n")
 
     def setviewport(self,viewport):
         self.sock.sendall("focus " + str(viewport.center().x()) + " " + str(viewport.center().y()) + " " + str(viewport.radius()) + " \n")
@@ -133,7 +133,7 @@ class RenderTCL(Render):
         self.p.terminate()
 
     def drawpolygonpicture(self,pointcoords,colorc):
-        self.sock.sendall("drawpolygon {" + ' '.join([str(coord) for coord in pointcoords]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
+        self.sock.sendall("drawpolygon {" + ' '.join([str(coord) for coord in pointcoords]) + "} {" + ' '.join([str(i) for i in colorc.values()]) + "} \n")
 
             
 class RenderTCLSVG(Render):
@@ -154,7 +154,7 @@ class RenderTCLSVG(Render):
         
         if fileexists(filename):
             os.remove(filename)
-        self.sock.sendall("drawinit " + str(imagedim.width()) + " " + str(imagedim.height()) + " " + filename + " {" + ' '.join([str(i) for i in backcolor]) +"} \n")
+        self.sock.sendall("drawinit " + str(imagedim.width()) + " " + str(imagedim.height()) + " " + filename + " {" + ' '.join([str(i) for i in backcolor.values()]) +"} \n")
 
     def getsock(self):
         return self.sock
@@ -183,15 +183,15 @@ class RenderTCLSVG(Render):
         self.p.terminate()
 
     def drawpolygonpicture(self,pointcoords,colorc):
-        self.sock.sendall("drawpolygon {" + ' '.join([str(coord) for coord in pointcoords]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
+        self.sock.sendall("drawpolygon {" + ' '.join([str(coord) for coord in pointcoords]) + "} {" + ' '.join([str(i) for i in colorc.values()]) + "} \n")
 
-    def drawcirclepicture(self,circle,colorc=color.black(),ratio=1.0):
+    def drawcirclepicture(self,circle,colorc=Color.black(),ratio=1.0):
         coords = [circle.x(),circle.y(),circle.r() * ratio]
-        self.sock.sendall("drawcircle {" + ' '.join([str(coord) for coord in coords]) + "} {" + ' '.join([str(i) for i in colorc]) + "} \n")
+        self.sock.sendall("drawcircle {" + ' '.join([str(coord) for coord in coords]) + "} {" + ' '.join([str(i) for i in colorc.values()]) + "} \n")
 
 
 class RenderCenter(RenderTCL):
-    def __init__(self,imagedim,filename,backcolor=color.white()):
+    def __init__(self,imagedim,filename,backcolor=Color.white()):
         self.mitems     = []
         self.mimagedim  = imagedim
         self.mfilename  = filename
@@ -213,7 +213,7 @@ class RenderCenter(RenderTCL):
         return polygons2bbox([item[0] for item in self.mitems]).resize(1.25).viewport()
 
 class RenderViewport(RenderCenter):
-    def __init__(self,viewport,imagedim,filename,backcolor=color.white()):
+    def __init__(self,viewport,imagedim,filename,backcolor=Color.white()):
         self.mitems    = []
         self.mviewport = viewport
         self.mimagedim = imagedim
@@ -234,17 +234,17 @@ class RenderViewport(RenderCenter):
 
 
 class RenderCenterSVG(RenderTCLSVG):
-    def __init__(self,imagesize,filename,backcolor=color.white()):
+    def __init__(self,imagesize,filename,backcolor=Color.white()):
         self.mitems     = []
         self.width,self.height = imagesize
         self.filename = filename
         self.backcolor = backcolor
 
-    def drawpolygon( self, polygon, colorc = color.black()):
+    def drawpolygon( self, polygon, colorc = Color.black()):
         if not polygon == None:
             self.mitems.append((polygon,colorc,"polygon"))
 
-    def drawcircle( self, circle, colorc = color.black()):
+    def drawcircle( self, circle, colorc = Color.black()):
         if not circle == None:
             self.mitems.append((circle,colorc,"circle"))
 
@@ -267,7 +267,7 @@ class RenderCenterSVG(RenderTCLSVG):
 
 
 class RenderCenterMulti(RenderCenter):
-    def __init__(self,imagedim,nsubs,filename,backcolor=color.white()):
+    def __init__(self,imagedim,nsubs,filename,backcolor=Color.white()):
         self.mitems     = []
         self.mimagedim  = imagedim
         self.mfilename  = filename
