@@ -1,95 +1,124 @@
 from utils     import *
 from colorsys import *
 
-def name(name):
-    if name == "red":
-        return red()
-    if name == "green":
-        return green()
-    if name == "white":
-        return white()
-    if name == "blue":
-        return blue()
-    if name == "yellow":
-        return yellow()
-    if name == "orange":
-        return orange()
-    if name == "black":
-        return black()
+class Color:
 
-def parse(spec):
-    specs = spec.split(" ") 
-    if len(specs) == 1:
-        return name(spec)
-    else:
-        return specs
+    def __init__(self,r=0.0,g=0.0,b=0.0,a=1.0):
+        self.mr = r
+        self.mg = g
+        self.mb = b
+        self.ma = a
 
-def white(a=1.0):
-    return [1.0,1.0,1.0,a]
+    def values(self):
+        return [self.mr, self.mg, self.mb, self.ma]
 
-def red(a=1.0):
-    return [1.0,0.0,0.0,a]
+    @staticmethod
+    def name(name):
+        if name == "red":
+            return Color.red()
+        if name == "green":
+            return Color.green()
+        if name == "white":
+            return Color.white()
+        if name == "blue":
+            return Color.blue()
+        if name == "yellow":
+            return Color.yellow()
+        if name == "orange":
+            return Color.orange()
+        if name == "black":
+            return Color.black()
 
-def blue(a=1.0):
-    return [0.0,0.0,1.0,a]
+    @staticmethod
+    def parse(spec):
+        specs = spec.split(" ") 
+        if len(specs) == 1:
+            return name(spec)
+        else:
+            return Color(specs)
 
-def yellow(a=1.0):
-    return [1.0,1.0,0.0,a]
+    @staticmethod
+    def white(a=1.0):
+        return Color(1.0,1.0,1.0,a)
 
-def green(a=1.0):
-    return [0.0,1.0,0.0,a]
+    @staticmethod
+    def red(a=1.0):
+        return Color(1.0,0.0,0.0,a)
 
-def orange(a=1.0):
-    return [1.0,0.5,0.0,a]
+    @staticmethod
+    def blue(a=1.0):
+        return Color(0.0,0.0,1.0,a)
 
-def black(a=1.0):
-    return [0.0,0.0,0.0,a]
+    @staticmethod
+    def yellow(a=1.0):
+        return Color(1.0,1.0,0.0,a)
 
-def grey(v=0.5,a=1.0):
-    return [v,v,v,a]
+    @staticmethod
+    def green(a=1.0):
+        return Color(0.0,1.0,0.0,a)
 
-def colorrandom(a=1.0):
-    return [random.uniform(0.0,1.0),random.uniform(0.0,1.0),random.uniform(0.0,1.0),a]
+    @staticmethod
+    def orange(a=1.0):
+        return Color(1.0,0.5,0.0,a)
 
-def rand(a=1.0):
-    return colorrandom(a)
+    @staticmethod
+    def black(a=1.0):
+        return Color(0.0,0.0,0.0,a)
 
-def trimcolor(color):
-    result = color[:]
-    for i in range(4):
-        if color[i] < 0.0:
-            result[i] = 0.0
-        elif color[i]>1.0:
-            result[i] = 1.0
-    return result
-           
+    @staticmethod
+    def grey(v=0.5,a=1.0):
+        return COlor(v,v,v,a)
 
-def hsv(h,s=1.0,v=1.0,a=1.0):
-    if h > 1.0:
-        h -= 1.0
-    elif h < 0.0:
-        h += 1.0
+    @staticmethod
+    def random(a=1.0):
+        return Color(random.uniform(0.0,1.0),random.uniform(0.0,1.0),random.uniform(0.0,1.0),a)
 
-    r,g,b = hsv_to_rgb(h,s,v)
-    return [r,g,b,a]
+    @staticmethod
+    def rand(a=1.0):
+        return Color.random(a)
 
-def hsl(h,s=1.0,l=1.0,a=1.0):
-    if h > 1.0:
-        h -= 1.0
-    elif h < 0.0:
-        h += 1.0
+    @staticmethod
+    def trimcolor(color):
+        result = color.values()
+        for i in range(4):
+            if color[i] < 0.0:
+                result[i] = 0.0
+            elif color[i]>1.0:
+                result[i] = 1.0
+        return Color(result[0],result[1],result[2],result[3])
 
-    r,g,b = hls_to_rgb(h,l,s)
-    return [r,g,b,a]
 
-def hue2color(hue):
-    return hsv(hue, 1.0, 1.0,1.0)
+    @staticmethod
+    def hsv(h,s=1.0,v=1.0,a=1.0):
+        if h > 1.0:
+            h -= 1.0
+        elif h < 0.0:
+            h += 1.0
 
-def a(color,v=None):
-    if v == None:
-        return color[-1]
-    else:
-        return color[:-1] + [v]
+        r,g,b = hsv_to_rgb(h,s,v)
+        return  Color(r,g,b,a)
+
+    @staticmethod
+    def hsl(h,s=1.0,l=1.0,a=1.0):
+        if h > 1.0:
+            h -= 1.0
+        elif h < 0.0:
+            h += 1.0
+
+        r,g,b = hls_to_rgb(h,l,s)
+        return Color(r,g,b,a)
+
+    @staticmethod
+    def hue2color(hue):
+        return Color.hsv(hue, 1.0, 1.0,1.0)
+
+    def a(self,v=None):
+        if v == None:
+            return self.ma
+        else:
+            self.ma = v
+            return self
+
 
 #
 # compute a palette object from a base: base is the accent color
