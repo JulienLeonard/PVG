@@ -365,7 +365,7 @@ def svg2bezier(svgpath,coords0=(0.0,0.0)):
 	if len(cbeziers):
 		result.append(cbeziers)
 
-	puts("parsing svg finished. Build polybeziers ...")	
+	# puts("parsing svg finished. Build polybeziers ...")	
 	# here result containt either list of list of atomic beziers or atomic lines: just concat and create bezier objects
 	fresult = []
 	fpoints = []

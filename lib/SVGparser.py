@@ -1,6 +1,6 @@
 from xml.dom import minidom
 from silhouette import *
-import color
+from color      import *
 
 class SVGStyle:
 
@@ -49,6 +49,7 @@ class SVGPath:
         return self.mstyle.fillcolor()
 
     def silhouette(self):
+        # puts("pathstring",self.mpathstring)
         return Silhouette(self.mpathstring)
 
 class SVGParser:

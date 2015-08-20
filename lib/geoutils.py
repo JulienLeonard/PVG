@@ -327,10 +327,10 @@ def computeshapelevels(allbeziers):
                 if viewboxinside(bezier2.viewbox(),bezier1.viewbox()):
                     if not bezier2 in containgraph:
                         containgraph[bezier2] = []
-                    puts("bezier",bezier2,"contains in bezier",bezier1)
+                    # puts("bezier",bezier2,"contains in bezier",bezier1)
                     containgraph[bezier2].append(bezier1)
 
-    puts("define imbrication hierarchy ...")
+    # puts("define imbrication hierarchy ...")
     levels = {}
     levels["levels"] = []
     for bezier in allbeziers:
@@ -340,7 +340,7 @@ def computeshapelevels(allbeziers):
             levels["levels"].append(ncontainers)
         levels[ncontainers].append(bezier)
     levels["levels"].sort()
-    puts("levels list",levels["levels"])
+    # puts("levels list",levels["levels"])
     return levels
 
 def viewboxinside(vb1,vb2):

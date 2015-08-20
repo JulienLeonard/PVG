@@ -12,6 +12,36 @@ class Color:
     def values(self):
         return [self.mr, self.mg, self.mb, self.ma]
 
+
+    def r(self,v=None):
+        if v == None:
+            return self.mr
+        else:
+            self.mr = v
+            return self
+
+    def g(self,v=None):
+        if v == None:
+            return self.mg
+        else:
+            self.mg = v
+            return self
+
+    def b(self,v=None):
+        if v == None:
+            return self.mb
+        else:
+            self.mb = v
+            return self
+
+    def a(self,v=None):
+        if v == None:
+            return self.ma
+        else:
+            self.ma = v
+            return self
+
+
     @staticmethod
     def name(name):
         if name == "red":
@@ -112,12 +142,6 @@ class Color:
     def hue2color(hue):
         return Color.hsv(hue, 1.0, 1.0,1.0)
 
-    def a(self,v=None):
-        if v == None:
-            return self.ma
-        else:
-            self.ma = v
-            return self
 
 
 #
