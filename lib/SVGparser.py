@@ -50,7 +50,7 @@ class SVGPath:
 
     def silhouette(self):
         # puts("pathstring",self.mpathstring)
-        return Silhouette(self.mpathstring)
+        return Silhouette().loadsvgstring(self.mpathstring)
 
 class SVGParser:
     

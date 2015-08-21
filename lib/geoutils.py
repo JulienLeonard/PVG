@@ -344,8 +344,8 @@ def computeshapelevels(allbeziers):
     return levels
 
 def viewboxinside(vb1,vb2):
-    (xmin1,ymin1,xmax1,ymax1) = vb1
-    (xmin2,ymin2,xmax2,ymax2) = vb2
+    (xmin1,ymin1,xmax1,ymax1) = vb1.coords()
+    (xmin2,ymin2,xmax2,ymax2) = vb2.coords()
 
     if xmin1 >= xmin2 and ymin1 >= ymin2 and xmax1 <= xmax2 and ymax1 <= ymax2:
         return True
