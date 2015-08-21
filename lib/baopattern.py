@@ -1,12 +1,12 @@
 from utils         import *
 from geoutils      import *
-import color
+from color         import *
 
 class BaoPattern:
     def __init__(self):
         self.msidepattern   = [1.0]
         self.mradiuspattern = [1.0]
-        self.mcolorpattern  = [color.black()]
+        self.mcolorpattern  = [Color.black()]
         self.mindex   = 0
 
     #

@@ -2,8 +2,8 @@ import sys
 sys.path.insert(0, './../lib')
 
 from canvas  import *
-import color
+from color   import *
 
-render = Canvas("test_canvas.ppm").background(color.red()).render()
+render = Canvas("test_canvas.png").background(Color.red()).render()
 render.drawcircle(Circle())
 render.end()

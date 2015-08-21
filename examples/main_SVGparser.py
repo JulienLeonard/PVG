@@ -4,12 +4,12 @@ sys.path.insert(0, './../lib')
 from utils      import *
 from canvas     import *
 from SVGparser  import *
-import color
+from color      import *
 
-render = Canvas("main_SVGparser.ppm").render()
+render = Canvas("main_SVGparser.png").render()
 paths = svgPaths("flower.svg")
 silhouettes = [path.silhouette() for path in paths]
-for (silhouette,color) in lzip(silhouettes,[color.black(),color.red(),color.yellow()]):
+for (silhouette,color) in lzip(silhouettes,[Color.black(),Color.red(),Color.yellow()]):
     render.drawpolygons(silhouette.polygons(0),color)
 
 render.end()

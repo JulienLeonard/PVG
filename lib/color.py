@@ -17,29 +17,26 @@ class Color:
         if v == None:
             return self.mr
         else:
-            self.mr = v
-            return self
+            return Color(v,self.g(),self.b(),self.a())
 
     def g(self,v=None):
         if v == None:
             return self.mg
         else:
-            self.mg = v
-            return self
+            return Color(self.r(),v,self.b(),self.a())
 
     def b(self,v=None):
         if v == None:
             return self.mb
         else:
-            self.mb = v
-            return self
+            return Color(self.r(),self.g(),v,self.a())
+
 
     def a(self,v=None):
         if v == None:
             return self.ma
         else:
-            self.ma = v
-            return self
+            return Color(self.r(),self.g(),self.b(),v)
 
 
     @staticmethod

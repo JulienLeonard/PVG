@@ -2,10 +2,11 @@
 import sys
 sys.path.insert(0, './../lib')
 
-from utils     import *
-from drawutils import *
+from   utils       import *
+from   renderCairo import *
 import color
 
-render = RenderCenter((1000,1000),"C:/DEV/PVG/output/drawcircle.ppm")
+outputfilepath = defaultoutputdir() + "/" + "drawcircle.png"
+render = RenderCenter(ImageDim(1000,1000),outputfilepath)
 render.drawcircle(C0)
 render.end()
