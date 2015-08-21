@@ -350,7 +350,7 @@ class Polygon:
         return Polygon([Point(2.0*x-p.x(),p.y())for p in self.points()])
 
     def viewbox(self):
-        return viewboxpoints(self.points())
+        return points2bbox(self.points())
 
     def coords(self):
         return [coord for p in self.points() for coord in p.coords()]

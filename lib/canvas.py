@@ -1,8 +1,7 @@
-from utils     import *
-from drawutils import *
-from geoutils  import *
-from color     import *
-
+from utils       import *
+from geoutils    import *
+from color       import *
+from renderCairo import *
 
 class Canvas():
     def __init__(self,outputfilename):
@@ -10,7 +9,7 @@ class Canvas():
         self.moutputfilename   = outputfilename
         self.msizes            = ImageDim(1000,1000)
         self.mbackground       = Color.white()
-        self.moutputdir        = "/".join(os.path.dirname(os.path.realpath(__file__).replace("\\","/")).split("/")[:-1]) + "/output"
+        self.moutputdir        = defaultoutputdir()
 
     def outputdir(self,outdir):
         self.moutputdir = outdir

@@ -28,14 +28,9 @@ class Render:
         self.selfinit()
 
     def drawpolygon( self, polygon, colorc ):
-        pointcoords = [coord for p in polygon.points() for coord in p.coords()]
-        self.drawpolygonpicture(pointcoords,colorc)
+        self.drawpolygonpicture(polygon,colorc)
 
-    def drawpolygonpicture( self, pointcoords, colorc ):
-        if len(pointcoords) < 2:
-            print "error: pointcoords",pointcoords,"too small"
-            return
-        colorc = Color.trimcolor(colorc)
+    def drawpolygonpicture( self, polygon, colorc ):
         puts("Render drawpolygonpicture not defined")
 
     def initpicture(self):
@@ -68,4 +63,6 @@ class Render:
     def drawcirclescolors(self,circles,colors):
         for i in range(len(circles)):
             self.drawcircle(circles[i],circular(colors,i))
+
+
 
