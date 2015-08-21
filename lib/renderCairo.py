@@ -38,7 +38,6 @@ class RenderCairo(Render):
             ctx.line_to(x, y)
 
         # then fill with color
-        puts("color",colorc.values())
         ctx.set_source_rgba(colorc.r(), colorc.g(),colorc.b(),colorc.a())
         ctx.fill()
 
