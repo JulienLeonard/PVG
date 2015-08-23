@@ -1,5 +1,8 @@
 from geoutils import *
 
+#
+# class used to manage a seuqnce of points
+#
 class Polygon:
     def __init__(self,points):
         self.mpoints  = points[:]
@@ -13,7 +16,7 @@ class Polygon:
             return self.samples(npoints)
 
     def bbox(self):
-        return bbox(self.mpoints)
+        return points2bbox(self.mpoints)
 
     def samples(self,npoints):
         return [self.point(abs) for abs in usamples(npoints)]
@@ -21,8 +24,9 @@ class Polygon:
     def lengthsamples(self,size):
         result = []
         cabs = 0.0
+        rlength = R(0.0,self.length())
         while cabs < self.length():
-            result.append(self.point(cabs))
+            result.append(self.point(rlength.abscissa(cabs)))
             cabs += size
         result.append(self.point(1.0))
         return result
