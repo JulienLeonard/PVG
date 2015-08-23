@@ -32,18 +32,18 @@ class Polygon:
         return result
     
     def lengths(self):
-        self.checklengths()
+        self._checklengths()
         return self.mlengths
 
     def length(self):
-        self.checklengths()
+        self._checklengths()
         return self.mlength
         
-    def checklengths(self):
+    def _checklengths(self):
         if len(self.mlengths) == 0:
-            self.computelengths()
+            self._computelengths()
         
-    def computelengths(self):
+    def _computelengths(self):
         result = [[0.0,self.mpoints[0]]]
         mylength = 0.0
         for p1,p2 in pairs(self.mpoints):
@@ -60,7 +60,7 @@ class Polygon:
                 self.mlengths.append([item[0]/mylength,item[1]])
 
     def segment(self,t):
-        self.checklengths()
+        self._checklengths()
         # print "lengths",self.lengths
         if (t >= 1.0):
             return [self.mlengths[-2],self.mlengths[-1]]
@@ -72,7 +72,7 @@ class Polygon:
                 return (i1,i2)
 
     def curvabscissa(self,pointindex):
-        self.checklengths()
+        self._checklengths()
         return self.mlengths[pointindex][0]
 
     def point(self,t):

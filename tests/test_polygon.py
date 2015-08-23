@@ -31,3 +31,8 @@ class PolygonTest(unittest.TestCase):
     def test_lengthsamples(self):
         self.assertEqual([coord for p in square(P0,1.0).lengthsamples(0.5) for coord in p.coords()],[-0.5,-0.5,-0.5,0.0,-0.5,0.5,0.0,0.5,0.5,0.5,0.5,0.0,0.5,-0.5,0.0,-0.5,-0.5,-0.5])
         
+    def test_lengths(self):
+        self.assertEqual([[abs,p.coords()] for (abs,p) in square(P0,1.0).lengths()],[[0.0,(-0.5,-0.5)],[0.25,(-0.5,0.5)],[0.5,(0.5,0.5)],[0.75,(0.5,-0.5)],[1.0,(-0.5,-0.5)]])
+
+    def test_length(self):
+        self.assertEqual(square(P0,1.0).length(),4.0)
