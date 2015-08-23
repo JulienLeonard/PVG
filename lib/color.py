@@ -1,5 +1,52 @@
 from utils    import *
-from colorsys import *
+
+# from stackoverflow
+def hsv_to_rgb(h,s,v):
+    if s == 0.0: return [v, v, v]
+    i = int(h*6.) # XXX assume int() truncates!
+    f = (h*6.)-i; p,q,t = v*(1.-s), v*(1.-s*f), v*(1.-s*(1.-f)); i%=6
+    if i == 0: return [v, t, p]
+    if i == 1: return [q, v, p]
+    if i == 2: return [p, v, t]
+    if i == 3: return [p, q, v]
+    if i == 4: return [t, p, v]
+    if i == 5: return [v, p, q]
+
+# from stackoverflow
+def hslv2rgb(p, q, t):
+    if t < 0.0:
+        t += 1.0
+    if t > 1.0:
+        t -= 1.0
+    if t < 1.0/6.0: 
+        return p + (q - p) * 6.0 * t
+    if t < 0.5: 
+        return q
+    if t < 2.0/3.0:
+        return p + (q - p) * (2.0/3.0 - t) * 6.0
+    return p
+
+
+def hsl_to_rgb(h, s, l):
+    r = 0.0
+    g = 0.0 
+    b = 0.0
+
+    if s == 0.0:
+        r = 1.0
+        g = 1.0
+        b = 1.0
+    else:
+        q = iff(l <= 0.5, l * (1.0 + s), l + s - l * s)
+        p = 2.0 * l - q
+        r = hslv2rgb(p, q, h + 1.0/3.0)
+        g = hslv2rgb(p, q, h)
+        b = hslv2rgb(p, q, h - 1.0/3.0)
+
+
+    return [r, g ,b]
+
+
 
 class Color:
 
@@ -132,7 +179,7 @@ class Color:
         elif h < 0.0:
             h += 1.0
 
-        r,g,b = hls_to_rgb(h,l,s)
+        r,g,b = hsl_to_rgb(h,s,l)
         return Color(r,g,b,a)
 
     @staticmethod
