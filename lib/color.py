@@ -1,4 +1,4 @@
-from utils     import *
+from utils    import *
 from colorsys import *
 
 class Color:
@@ -108,9 +108,9 @@ class Color:
     def trimcolor(color):
         result = color.values()
         for i in range(4):
-            if color[i] < 0.0:
+            if result[i] < 0.0:
                 result[i] = 0.0
-            elif color[i]>1.0:
+            elif result[i]>1.0:
                 result[i] = 1.0
         return Color(result[0],result[1],result[2],result[3])
 
