@@ -12,9 +12,14 @@ class Silhouette:
         return self.mbeziers
 
     def add(self,polybezier):
-        puts("add bezier")
         self._add(polybezier)
         self.computelevels()
+
+    def adds(self,polybeziers):
+        for polybezier in polybeziers:
+            self._add(polybezier)
+        self.computelevels()
+
 
     def _add(self,polybezier):
         self.mbeziers.append(polybezier.clockwise().reverse())
@@ -25,9 +30,7 @@ class Silhouette:
         
     def loadsvgstring(self,svgstring):
         (fpoints,beziers)  = svg2bezier(svgstring)
-        for bezier in beziers:
-            self._add(bezier)
-        self.computelevels()
+        self.adds(beziers)
         return self
 
     def size(self):
@@ -37,7 +40,7 @@ class Silhouette:
         return self.mviewbox.viewport(factor)
 
     def computelevels(self):
-        puts("computelevels")
+        puts("computelevels nbeziers",len(self.mbeziers))
         allbeziers = self.mbeziers
         self.mlevels = computeshapelevels(allbeziers)
         self.mpolys  = { level: [bezier.polygon() for bezier in self.mlevels[level]] for level in self.mlevels["levels"]}
@@ -86,4 +89,7 @@ class Silhouette:
         return result
 
 def svgpaths2silhouette(svgPaths):
-    result = Silhouette.merge([path.silhouette() for path in svgPaths])
+    result = Silhouette()
+    beziers = [item for path in svgPaths for item in path.silhouette().beziers()]
+    result.adds(beziers)
+    return result
