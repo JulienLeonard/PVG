@@ -106,9 +106,33 @@ class UtilsTest(unittest.TestCase):
     def test_pmiddle(self):
         self.assertEqual(pmiddle([Point(0.0,0.0),Point(3.0,0.0),Point(0.0,3.0)]).coords(), (1.0,1.0))
         
+    def test_rawintersection(self):
+        # point intersections empty
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(0.0,0.0), Point(2.0,1.0), Point(2.0,1.0)), None)
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(2.0,1.0), Point(2.0,1.0)), None)
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(3.0,0.0), Point(3.0,0.0)), None)
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(0.0,0.0), Point(1.0,0.0), Point(3.0,0.0)), None)
 
+        # parallel
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(2.0,1.0), Point(1.0,1.0)), None)
 
-    
+        # included points
+        self.assertEqual(raw_intersection(Point(1.0,1.0), Point(1.0,1.0), Point(1.0,1.0), Point(1.0,1.0)).coords(), Point(1.0,1.0).coords())
+        self.assertEqual(raw_intersection(Point(1.0,1.0), Point(1.0,1.0), Point(1.0,1.0), Point(2.0,1.0)).coords(), Point(1.0,1.0).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.5,0.0), Point(0.5,0.0)).coords(), Point(0.5,0.0).coords())
+        self.assertEqual(raw_intersection(Point(0.8,0.0), Point(0.8,0.0), Point(0.0,0.0), Point(1.0,0.0)).coords(), Point(0.8,0.0).coords())
+
+        # included segments
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.5,0.0),  Point(0.75,0.0)).coords(), PR(Point(0.5,0.0),Point(0.75,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.75,0.0), Point(0.5,0.0)).coords(),  PR(Point(0.5,0.0),Point(0.75,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(1.0,0.0),  Point(3.0,0.0)).coords(),  PR(Point(1.0,0.0),Point(2.0,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(3.0,0.0),  Point(1.0,0.0)).coords(),  PR(Point(1.0,0.0),Point(2.0,0.0)).coords())
+
+        # point intersection
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.5,1.0), Point(0.5,-1.0)).coords(), Point(0.5,0.0).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.0,1.0), Point(0.0,-1.0)).coords(), Point(0.0,0.0).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(1.0,0.0), Point(2.0,0.0)).coords(),  Point(1.0,0.0).coords())
+
 
 
 

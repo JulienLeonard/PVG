@@ -186,7 +186,9 @@ class PR:
 
     def samples(self,ntimes):
         return [self.sample(abs) for abs in usamples(ntimes)]
-    
+
+    def coords(self):
+        return self.mp1.coords() + self.mp2.coords()
 
 
 def pequal(p1,p2,error=0.00001):
@@ -261,12 +263,23 @@ class BBox:
         newymax = ycenter + newheight/2.0
         return BBox(Point(newxmin,newymin),Point(newxmax,newymax))
 
-    def contains(self,point):
+    def contain(self,point):
         xmin,ymin,xmax,ymax = self.coords()
         x,y                 = point.coords()
         if xmin <= x and x <= xmax and ymin <= y and y <= ymax:
             return True
         return False
+    
+    def corners(self):
+        xmin,ymin,xmax,ymax = self.coords()
+        return [Point(xmin,ymin),Point(xmax,ymin),Point(xmin,ymax),Point(xmax,ymax)]
+
+    # def intersect(self,obbox):
+    #     for p in obbox.corners():
+    #         if self.contain(p):
+    #             return True
+    #     return False
+            
 
 
 def bbunion(bbox1,bbox2):
@@ -358,3 +371,29 @@ def viewboxinside(vb1,vb2):
     if xmin1 >= xmin2 and ymin1 >= ymin2 and xmax1 <= xmax2 and ymax1 <= ymax2:
         return True
     return False
+
+def raw_intersection (p1,p2,p3,p4):
+    x1,y1 = p1.coords()
+    x2,y2 = p2.coords()
+    x3,y3 = p3.coords()
+    x4,y4 = p4.coords()
+    denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
+    uanum = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)
+    ubnum = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)
+    if (denom == 0.0 and uanum == 0.0 and ubnum == 0.0):
+        vs = [(x1,y1),(x2,y2),(x3,y3),(x4,y4)]
+        vs.sort()
+        if vs[1] == vs[2]:
+            return Point(vs[1][0],vs[1][1])
+        else:
+            return PR(Point(vs[1][0],vs[1][1]),Point(vs[2][0],vs[2][1]))
+    elif (denom == 0.0):
+	return None
+    else:
+	ua = uanum / denom
+	ub = ubnum / denom
+	if (ua >= 0 and ua <= 1 and ub >= 0 and ub <= 1):
+	    x = x1 + ua * (x2 - x1)
+	    y = y1 + ua * (y2 - y1)
+	    return Point(x, y)
+	return None
