@@ -261,6 +261,13 @@ class BBox:
         newymax = ycenter + newheight/2.0
         return BBox(Point(newxmin,newymin),Point(newxmax,newymax))
 
+    def contains(self,point):
+        xmin,ymin,xmax,ymax = self.coords()
+        x,y                 = point.coords()
+        if xmin <= x and x <= xmax and ymin <= y and y <= ymax:
+            return True
+        return False
+
 
 def bbunion(bbox1,bbox2):
     # puts ("bbunion",bbox1,bbox2)

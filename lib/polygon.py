@@ -355,6 +355,36 @@ class Polygon:
     def coords(self):
         return [coord for p in self.points() for coord in p.coords()]
 
+    def signedArea(self):
+        signedArea = 0
+        for (p1,p2) in pairs(self.points()):
+            signedArea += (p1.x() * p2.y() - p2.x() * p1.y())
+        return signedArea / 2
+        
+    def isClockwise(self):
+        return (self.signedArea() < 0.0)
+
+    def clockwise(self):
+        if self.isClockwise():
+            return self
+        else:
+            return self.reverse()
+
+    def contain(self,point):
+        if not self.viewbox().contains(point):
+            return False
+        else:
+            pps = self.points()
+            i = 0
+            j = len(pps)-1
+            result = False
+            for i in range(len(pps)):
+                if ( ((pps[i].y() > point.y()) != (pps[j].y() > point.y())) and
+                     (point.x() < ((pps[j].x() - pps[i].x()) * (point.y() - pps[i].y()) / (pps[j].y() - pps[i].y()) + pps[i].x()) ) ):
+                    result = iff(result == False, True, False)
+                j = i
+            return result
+
 
 def polygonfromradiusangle(origin,radiuss,angles):
     result = [origin]
@@ -372,19 +402,11 @@ def rectangle(x1,y1,x2,y2):
     return Polygon([Point(x1,y1),Point(x2,y1),Point(x2,y2),Point(x1,y2)]).close()
 
 def polygonsignedarea(points):
-    signedArea = 0
-    index = 0
-    for (p1,p2) in pairs(points):
-        signedArea += (p1.x() * p2.y() - p2.x() * p1.y())
-    return signedArea / 2
+    return Polygon(points).signedArea()
 
 def polygonclockwise(polygon):
-    if ispolygonclockwise(polygon):
-        return polygon
-    return lreverse(polygon)
+    return polygon.clockwise()
 
 def ispolygonclockwise(polygon):
-    if polygonsignedarea(polygon) < 0.0:
-        return True
-    return False
+    return polygon.isClockwise()
 
