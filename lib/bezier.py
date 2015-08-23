@@ -437,7 +437,7 @@ class PolyBezier:
 		return PolyBezier().adds([bezier.reverse() for bezier in lreverse(self.mbeziers)])
 	
 	def clockwise(self):
-		if ispolygonclockwise(self.points()):
+		if self.polygon().isClockwise():
 			return self
 		else:
 			return self.reverse()

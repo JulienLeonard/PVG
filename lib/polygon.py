@@ -388,6 +388,9 @@ class Polygon:
                     result = iff(result == False, True, False)
                 j = i
             return result
+        
+    def middle(self):
+        return pmiddle(self.points())
 
 
 def polygonfromradiusangle(origin,radiuss,angles):

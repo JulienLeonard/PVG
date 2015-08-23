@@ -40,7 +40,7 @@ class Silhouette:
         return self.mviewbox.viewport(factor)
 
     def computelevels(self):
-        puts("computelevels nbeziers",len(self.mbeziers))
+        # puts("computelevels nbeziers",len(self.mbeziers))
         allbeziers = self.mbeziers
         self.mlevels = computeshapelevels(allbeziers)
         self.mpolys  = { level: [bezier.polygon() for bezier in self.mlevels[level]] for level in self.mlevels["levels"]}
@@ -69,7 +69,7 @@ class Silhouette:
 
     def polygons(self,level=0):
         if not level in self.mlevels:
-            puts("error: no level",level)
+            # puts("error: no level",level)
             return []
 
         return self.mpolys[level]
