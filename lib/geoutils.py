@@ -181,6 +181,15 @@ class PR:
         self.mry = R(self.mp1.y(),self.mp2.y())
         
 
+    def p1(self):
+        return self.mp1
+
+    def p2(self):
+        return self.mp2
+
+    def isPoint(self):
+        return self.p1().coords() == self.p2().coords()
+
     def sample(self,t):
         return Point(self.mrx.sample(t),self.mry.sample(t))
 
@@ -381,12 +390,34 @@ def raw_intersection (p1,p2,p3,p4):
     uanum = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)
     ubnum = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)
     if (denom == 0.0 and uanum == 0.0 and ubnum == 0.0):
-        vs = [(x1,y1),(x2,y2),(x3,y3),(x4,y4)]
-        vs.sort()
-        if vs[1] == vs[2]:
-            return Point(vs[1][0],vs[1][1])
+        pp1 = min((x1,y1),(x2,y2))
+        pp2 = max((x1,y1),(x2,y2))
+        pp3 = min((x3,y3),(x4,y4))
+        pp4 = max((x3,y3),(x4,y4))
+        x1,y1 = pp1
+        x2,y2 = pp2
+        x3,y3 = pp3
+        x4,y4 = pp4
+
+        if R(x1,x2).contain(x3):
+            if R(x1,x2).contain(x4):
+                result = PR(Point(x3,y3),Point(x4,y4))
+            else:
+                result = PR(Point(x3,y3),Point(x2,y2))
         else:
-            return PR(Point(vs[1][0],vs[1][1]),Point(vs[2][0],vs[2][1]))
+            if R(x1,x2).contain(x4):
+                result = PR(Point(x1,y1),Point(x4,y4))
+            else: 
+                if R(x3,x4).contain(x1) and R(x3,x4).contain(x2):
+                    result =  PR(Point(x1,y1),Point(x2,y2))
+                else:
+                    result = None
+
+        if not result == None:
+            if result.isPoint():
+                result = result.p1()
+        return result
+
     elif (denom == 0.0):
 	return None
     else:

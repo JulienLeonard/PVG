@@ -4,7 +4,7 @@ sys.path.insert(0, './../lib')
 
 from canvas    import *
 from polygon   import *
-import color
+from color     import *
 
 render = Canvas("main_polygon.png").render()
 

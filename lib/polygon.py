@@ -375,7 +375,7 @@ class Polygon:
             return self.reverse()
 
     def contain(self,point):
-        if not self.viewbox().contains(point):
+        if not self.viewbox().contain(point):
             return False
         else:
             pps = self.points()
