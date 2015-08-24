@@ -428,3 +428,12 @@ def raw_intersection (p1,p2,p3,p4):
 	    y = y1 + ua * (y2 - y1)
 	    return Point(x, y)
 	return None
+
+def preduce(points,ratio):
+    middle = pmiddle(points)
+    result = []
+    for p in points:
+        v = vector(middle,p)
+        newp = middle.add(v.scale(ratio))
+        result.append(newp)
+    return result

@@ -124,8 +124,8 @@ class Polygon:
             for seg2 in segs2:
                 p21,p22 = seg2
                 inter = raw_intersection(p11,p12,p21,p22)
-                if len(inter):
-                    print "inter",inter
+                if not inter == None:
+                    print "inter",inter.coords()
                     inters.append(inter)
             
             if len(inters):
