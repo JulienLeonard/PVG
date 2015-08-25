@@ -27,7 +27,7 @@ class Render:
         self.mbackcolor = backcolor
         self.selfinit()
 
-    def drawpolygon( self, polygon, colorc ):
+    def drawpolygon( self, polygon, colorc = Color.black() ):
         self.drawpolygonpicture(polygon,colorc)
 
     def drawpolygonpicture( self, polygon, colorc ):
