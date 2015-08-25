@@ -250,6 +250,12 @@ class BBox:
     def ysize(self):
         return (self.mpmax.y() - self.mpmin.y())
 
+    def width(self):
+        return self.xsize()
+
+    def height(self):
+        return self.ysize()
+
     def size(self):
         return max(self.xsize(),self.ysize())
     
@@ -436,4 +442,10 @@ def preduce(points,ratio):
         v = vector(middle,p)
         newp = middle.add(v.scale(ratio))
         result.append(newp)
+    return result
+
+def vsanglepos(v1,v2):
+    result = vsangle(v1,v2)
+    if result < 0.0:
+        result += 2* 3.14159
     return result

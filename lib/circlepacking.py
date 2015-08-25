@@ -21,6 +21,11 @@ def oseeds():
 def allsides():
     return [-1.0,1.0]
 
+def circle2nodepair(c):
+    
+    return [CircleNode().coords((c.x() - c.r(),c.y(),c.r())),CircleNode().coords((c.x() + c.r(),c.y(),c.r()))]
+
+
 # kept for perf
 def perf_circlepackingall(seeds,quadtree,radiusf,nitermax):
     result = []
