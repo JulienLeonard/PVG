@@ -142,7 +142,7 @@ class EdgeGraph:
 
         # build newdeges adjs
         for newedge in newedges:
-            p1 = newedge.p1()
+            p2 = newedge.p2()
             if p2 in edgestart:
                 for nextedge in edgestart[p2]:
                     Edge.addadj(newedge,nextedge)
@@ -176,13 +176,13 @@ class EdgeGraph:
                     else:
                         edge0 = cedge
                         break
-                puts("edge",edge.coords(),"edge0",edge0.coords())
+                # puts("edge",edge.coords(),"edge0",edge0.coords())
 
                 # then compute the sequence of nexts
                 newarcedges = [edge0]
                 cedge       =  edge0
                 while True:
-                    puts("cedge",cedge.coords(),"len(cedge.nexts())",len(cedge.nexts()))
+                    # puts("cedge",cedge.coords(),"len(cedge.nexts())",len(cedge.nexts()))
                     if len(cedge.nexts()) == 1 and not cedge.nexts()[0] == edge0:
                         cedge = cedge.nexts()[0]
                         newarcedges.append(cedge)
@@ -190,7 +190,7 @@ class EdgeGraph:
                         break
 
                 # then create the new arc
-                puts("new arc nedges",len(newarcedges))
+                # puts("new arc nedges",len(newarcedges))
                 self.marcs.append(Arc(newarcedges))
 
 
