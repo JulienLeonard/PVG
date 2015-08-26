@@ -1,4 +1,4 @@
-from geoutils import *
+from geoutils  import *
 
 #
 # class used to manage a seuqnce of points
@@ -127,9 +127,9 @@ class Polygon:
                 if not inter == None:
                     print "inter",inter.coords()
                     inters.append(inter)
-            
+
+            puts("seg1",[p.coords() for p in seg1],"inters",inters)
             if len(inters):
-                # puts("inters",inters)
                 sortinter = [(vector(p11,inter).length(),inter) for inter in inters]
                 sortinter.sort()
                 llo = 0.0
@@ -151,6 +151,8 @@ class Polygon:
             # print "merge first and last segments"
             result[-1].extend(result[0])
             result = result[1:]
+
+        puts("subpolygonsfromintersection result",len(result))
         return [Polygon(ps) for ps in result]
 
     def isclosed(self):

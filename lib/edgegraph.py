@@ -1,4 +1,5 @@
-from geoutils import *
+from geoutils   import *
+from geomatcher import *
 
 #
 # class to build edges graph (linked by points)
@@ -7,12 +8,10 @@ from geoutils import *
 
 class Edge:
 
-    def __init__(self,p1,p2):
-        self.mp1    = p1
-        self.mp2    = p2
-        self.mprevs = []
-        self.mnexts = []
-        self.marc    = None
+    def __init__(self,node1,node2):
+        self.mnode1   = node1
+        self.mnode2   = node2
+        self.marc     = None
 
     def arc(self,v=None):
         if v == None:
@@ -21,55 +20,58 @@ class Edge:
             self.marc = v
             return self
 
-    def p1(self):
-        return self.mp1
+    def node1(self):
+        return self.mnode1
 
-    def p2(self):
-        return self.mp2
+    def node2(self):
+        return self.mnode2
+
+    def nodes(self):
+        return [self.node1(),self.node2()]
+
+    def othernode(self,node):
+        if node == self.node1():
+            return self.node2()
+        elif node == self.node2():
+            return self.node1()
+        return None
     
-    def add_prev(self,prevedge):
-        self.mprevs.append(prevedge)
-        return self
+    def bbox(self):
+        return points2bbox([self.node1().p(),self.node2().p()])
 
-    def add_next(self,nextedge):
-        self.mnexts.append(nextedge)
-        return self
+    def coords(self):
+        return self.node1().p().coords() + self.node2().p().coords()
 
-    def remove_prev(self,prevedge):
-        if prevedge in self.mprevs:
-            self.mprevs.remove(prevedge)
-        return self
+    def intersection(self,oedge):
+        return raw_intersection(self.node1().p(),self.node2().p(),oedge.node1().p(),oedge.node2().p())
 
-    def remove_next(self,nextedge):
-        if nextedge in self.mnexts:
-            self.mnexts.remove(nextedge)
-        return self        
+class PointNode:
+    def __init__(self,point):
+        self.mp     = point
+        self.mnexts = []
+
+    def p(self):
+        return self.mp
 
     def nexts(self):
         return self.mnexts
 
-    def prevs(self):
-        return self.mprevs
+    def add_next(self,p):
+        self.mnexts.append(p)
 
-    def bbox(self):
-        return points2bbox([self.p1(),self.p2()])
-
-    def coords(self):
-        return self.p1().coords() + self.p2().coords()
-
-    def intersection(self,oedge):
-        return raw_intersection(self.p1(),self.p2(),oedge.p1(),oedge.p2())
+    def remove_next(self,p):
+        if p in self.mnexts:
+            self.mnexts.remove(p)
 
     @staticmethod
-    def addadj(edge1,edge2):
-        edge1.add_next(edge2)
-        edge2.add_prev(edge1)
+    def addadj(node1,node2):
+        node1.add_next(node2)
+        node2.add_next(node1)
+
 
 class Arc:
     def __init__(self,edges):
         self.medges = edges
-        self.mprevs = []
-        self.mnexts = []
         for edge in self.medges:
             edge.arc(self)
 
@@ -79,76 +81,82 @@ class Arc:
 class EdgeGraph:
 
     def __init__(self):
+        self.mnodes = []
         self.medges = []
         self.marcs  = []
+
+    def nodes(self):
+        return self.mnodes
+
+    def node(self,index):
+        return self.mnodes[index]
+
+    def add_node(self,node):
+        self.mnodes.append(node)
+        return self
+
+    def remove_node(self,node):
+        self.mnodes.remove(node)
+        for onode in node.nexts():
+            onode.remove_next(node)
+        return self
 
     def edges(self):
         return self.medges
 
-    def edge(self,index):
-        return self.medges[index]
-
-    def add(self,edge):
+    def add_edge(self,edge):
         self.medges.append(edge)
-        return self
 
-    def remove(self,edge):
-        self.medges.remove(edge)
-        for prevedge in edge.prevs():
-            prevedge.remove_next(edge)
-        for nextedge in edge.nexts():
-            nextedge.remove_prev(edge)
-        return self
+    #
+    # TODO: optimize by making a map
+    #
+    def nodes2edge(self,node1,node2):
+        for edge in self.medges:
+            if (edge.node1() == node1 and edge.node2() == node2) or (edge.node2() == node1 and edge.node1() == node2):
+                return edge
+        return None
     
     def loadwithpointsequence(self,points):
-        if len(points) < 2:
+        if len(points) < 1:
             return self
-        firstedge = Edge(points[0],points[1])
-        self.add(firstedge)
-        prevedge = firstedge
-        for (p1,p2) in pairs(points[1:]):
-            newedge = Edge(p1,p2)
-            Edge.addadj(prevedge,newedge)
-            self.add(newedge)
-            prevedge = newedge
-        if prevedge.p2() == firstedge.p1():
-            Edge.addadj(prevedge,firstedge)
-        return self
+        pointpairs = GeoMatcher().checksegments([(p1,p2) for (p1,p2) in pairs(points)])
 
+        firstnode = None
+        for (p1,p2) in pointpairs:
+            if firstnode == None:
+                firstnode = PointNode(p1)
+                self.add_node(firstnode)
+                prevnode = firstnode
+            if p2 == firstnode.p():
+                PointNode.addadj(prevnode,firstnode)
+                self.add_edge(Edge(prevnode,firstnode))
+            else:
+                newnode = PointNode(p2)
+                PointNode.addadj(prevnode,newnode)
+                self.add_edge(Edge(prevnode,newnode))
+                self.add_node(newnode)
+                prevnode = newnode
+        return self
+    
     def loadwithpointpairs(self,pointpairs):
-        # first unify points
-        points = {}
+        # manage float problems and unify same points
+        pointpairs = GeoMatcher().checksegments(pointpairs)
+
+        # build adjacency and nodes
+        pnode = {}
+        adj   = {}
         for (p1,p2) in pointpairs:
             for p in [p1,p2]:
-                if not p.coords() in points:
-                    points[p.coords()] = p
-
-        # created edges
-        newedges = []
-        for (p1,p2) in pointpairs:
-            newp1 = points[p1.coords()]
-            newp2 = points[p2.coords()]
-            newedge = Edge(newp1,newp2)
-            newedges.append(newedge)
-    
-        # build adjacency
-        edgestart = {}
-        for newedge in newedges:
-            p1 = newedge.p1()
-            p2 = newedge.p2()
-            if not p1 in edgestart:
-                edgestart[p1] = []
-            edgestart[p1].append(newedge)
-
-        # build newdeges adjs
-        for newedge in newedges:
-            p2 = newedge.p2()
-            if p2 in edgestart:
-                for nextedge in edgestart[p2]:
-                    Edge.addadj(newedge,nextedge)
+                if not p in pnode:
+                    pnode[p] = PointNode(p)
+                    self.add_node(pnode[p])
+                if not pnode[p] in adj:
+                    adj[pnode[p]] = []
+            
+            PointNode.addadj(pnode[p1],pnode[p2])            
+            self.add_edge(Edge(pnode[p1],pnode[p2]))
 
         # TODO: check adjacency with preexisting edges too !
-        self.medges.extend(newedges)
         return self
 
     #
@@ -160,38 +168,47 @@ class EdgeGraph:
         self.computearcs()
         return self.marcs
 
+    #
+    # explore each node graph up to a point with more than 2 nexts (or no more next)
+    # WARNING: TODO: do not compute fot the moment the merge of arcs (ie if some edges have already been computed with arcs)
+    #
+    def computeedgearc(self,edge):
+        semiarcs = []
+        for node in edge.nodes():
+            semiarc  = []
+            prevnode = edge.othernode(node)
+            nodes    = [node]
+            while True:
+                cnode = nodes[-1]
+                if len(cnode.nexts()) == 0:
+                    puts("Error: single node",cnode.p().coords())
+                    break
+                else:
+                    nexts = lremove(cnode.nexts(),prevnode)
+                    if len(nexts) == 0:
+                        break
+                    elif len(nexts) == 1:
+                        nextnode = nexts[0]
+                        semiarc.append(self.nodes2edge(cnode,nextnode))
+                        if nextnode in nodes:
+                            # circular arc
+                            break
+                        else:
+                            prevnode = cnode
+                            nodes.append(nextnode)
+                    else:
+                        # bifurcation: break
+                        break
+            semiarcs.append(semiarc)
+        return lreverse(semiarcs[0]) + [edge] + semiarcs[1]
+
 
     def computearcs(self):
         for edge in self.medges:
             if edge.arc() == None:
-                # first find the beginning of the arc (warning: can be a cycle)
-                edge0 = edge
-                cedge = edge
-                while True:
-                    if len(cedge.prevs()) == 1:
-                        cedge = cedge.prevs()[0]
-                        if cedge == edge:
-                            edge0 = edge
-                            break
-                    else:
-                        edge0 = cedge
-                        break
-                # puts("edge",edge.coords(),"edge0",edge0.coords())
-
-                # then compute the sequence of nexts
-                newarcedges = [edge0]
-                cedge       =  edge0
-                while True:
-                    # puts("cedge",cedge.coords(),"len(cedge.nexts())",len(cedge.nexts()))
-                    if len(cedge.nexts()) == 1 and not cedge.nexts()[0] == edge0:
-                        cedge = cedge.nexts()[0]
-                        newarcedges.append(cedge)
-                    else:
-                        break
-
-                # then create the new arc
-                # puts("new arc nedges",len(newarcedges))
-                self.marcs.append(Arc(newarcedges))
+                arcedges = self.computeedgearc(edge)
+                self.marcs.append(Arc(arcedges))
+        return self
 
 
     # def managedEdgeIntersectionPoint(self,edge1,edge2,inter):

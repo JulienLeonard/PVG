@@ -49,7 +49,7 @@ class RenderCenter(RenderCairo):
         self.filename  = filename
         self.backcolor = backcolor
 
-    def drawpolygon( self, polygon, colorc ):
+    def drawpolygon( self, polygon, colorc = Color.black()):
         if not polygon == None:
             self.mitems.append((polygon,colorc))
 
