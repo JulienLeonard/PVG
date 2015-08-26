@@ -9,9 +9,18 @@ from geomatcher import *
 class Edge:
 
     def __init__(self,node1,node2):
-        self.mnode1   = node1
-        self.mnode2   = node2
-        self.marc     = None
+        self.mnode1    = node1
+        self.mnode2    = node2
+        self.marc      = None
+        self.mopposite = None
+
+
+    def opposite(self,v=None):
+        if v == None:
+            return self.mopposite
+        else:
+            self.mopposite = v
+            return self
 
     def arc(self,v=None):
         if v == None:
@@ -30,7 +39,7 @@ class Edge:
         return self.node1().p()
 
     def point2(self):
-        return self.node2().p2()
+        return self.node2().p()
 
     def nodes(self):
         return [self.node1(),self.node2()]
@@ -49,7 +58,7 @@ class Edge:
         return points2bbox([self.point1(),self.point1()])
 
     def coords(self):
-        return self.poin1().coords() + self.point2().coords()
+        return self.point1().coords() + self.point2().coords()
 
     def intersection(self,oedge):
         return raw_intersection(self.point1(),self.point2(),oedge.point1(),oedge.point2())
@@ -169,12 +178,15 @@ class EdgeGraph:
     def createedges(self,p1,p2):
         edge12 = Edge(p1,p2)
         edge21 = Edge(p2,p1)
+
+        edge12.opposite(edge21)
+        edge21.opposite(edge12)
         
         p1.add_nextedge(edge12)
         p1.add_prevedge(edge21)
         
         p2.add_nextedge(edge21)
-        p1.add_prevedge(edge12)
+        p2.add_prevedge(edge12)
         
         self.add_edge(edge12)
         self.add_edge(edge21)
@@ -197,6 +209,7 @@ class EdgeGraph:
             else:
                 newnode = PointNode(p2)
                 self.createedges(prevnode,newnode)
+                self.add_node(newnode)
                 prevnode = newnode
         return self
     
@@ -223,7 +236,7 @@ class EdgeGraph:
     #
     # algo:                 
     def arcs(self):
-        self.computearcgraph()
+        self._computearcs()
         return self.marcs
 
     #
@@ -232,26 +245,32 @@ class EdgeGraph:
     # WARNING: TODO: do not compute fot the moment the merge of arcs (ie if some edges have already been computed with arcs)
     #
     def _computeedgearc(self,edge):
-        #puts("computeedgearc",edge.coords())
+        # puts("computeedgearc",edge.coords())
         
         # first find origin or arc, ie point with more or less than one prevedge
-        node0 = edge.node1()
-        onode = node0
+        node0    = edge.node1()
+        onode    = node0
+        prevedge = edge
         while True:
-            prevedges = onode.prevedges()
+            prevedges = lremove(onode.prevedges(),prevedge.opposite())
+            # puts("onode",onode.p().coords(),"prevedges",[edge.coords() for edge in prevedges])
             if len(prevedges) == 1:
                 prevedge = prevedges[0]
-                onode     = prevedge.node1()
+                onode    = prevedge.node1()
                 if onode == node0: # to deal with circular arcs
+                    edge0 = prevedge
                     break
             else:
+                edge0 = prevedge
                 break
 
         # here onode is origin of arc, so just run amon the nextedges
-        arcedges = []
-        cnode = onode
+        # puts("node0",onode.p().coords())
+        arcedges = [edge0]
+        cnode    = edge0.node2()
         while True:
-            nextedges = cnode.nextedges()
+            nextedges = lremove(cnode.nextedges(),arcedges[-1].opposite())
+            # puts("cnode",cnode.p().coords(),"nextedges",[edge.coords() for edge in nextedges])
             if len(nextedges) == 1:
                 nextedge = nextedges[0]
                 arcedges.append(nextedge)
@@ -295,8 +314,6 @@ class EdgeGraph:
     #
     #
     def computearcgraph(self):
-        self._computearcs()
-
         #
         # first compute the graph node => arc
         #

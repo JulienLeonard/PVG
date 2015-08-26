@@ -451,7 +451,7 @@ def lgeo(xrange,rfactor,nitems):
     # result = [1.0-i for i in result]
     georange = (result[0],result[-1])
     # print "result",result
-    puts("abscissas",[abscissa(georange,i) for i in result])
+    # puts("abscissas",[abscissa(georange,i) for i in result])
     return [sample(xrange,abscissa(georange,i)) for i in result]
 
 #
