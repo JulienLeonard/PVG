@@ -127,6 +127,11 @@ class Vector(Coords):
     def ortho(self):
         return Vector(-self.y(),self.x())
 
+    #
+    # cross product
+    #
+    def cross(self,ov):
+        return (self.x() * ov.y() - self.y() * ov.x())
 
 #
 # default defs

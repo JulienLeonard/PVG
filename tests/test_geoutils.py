@@ -86,6 +86,10 @@ class VectorTest(unittest.TestCase):
     def test_scale(self):
         self.assertEqual(Vector(0.0,0.2).scale(10.0).coords(), (0.0,2.0))
 
+    def test_cross(self):
+        self.assertEqual(Vector(0.0,1.0).cross(Vector(0.0,1.0)), 0.0)
+        self.assertEqual(Vector(0.0,1.0).cross(Vector(1.0,0.0)), -1.0)
+
 class UtilsTest(unittest.TestCase):
     
     def test_anglerange(self):
