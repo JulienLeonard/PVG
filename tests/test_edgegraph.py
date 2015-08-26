@@ -29,36 +29,22 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.arcs()),1)
         self.assertEqual(len(eg.arcs()[0].edges()),2)
 
-    # def test_arcs2(self):
-    #     p1s = [p for p in pairs(Circle(Point(0.0,0.0),1.0).polygon(4).points())]
-    #     p2s = [(Point(1.0,0.0),Point(2.0,0.0))]
-    #     p3s = [p for p in pairs(Circle(Point(3.0,0.0),1.0).polygon(4).points())]
-    #     eg = EdgeGraph().loadwithpointpairs(p1s + p2s + p3s)
-    #     self.assertEqual(len(eg.edges()[0].nexts()),1)
-    #     self.assertEqual(len(eg.edges()[0].prevs()),1)
-    #     self.assertEqual(len(eg.arcs()),1)
+    def test_arcs2(self):
+        p1s = [p for p in pairs(Circle(Point(0.0,0.0),1.0).polygon(4).points())]
+        p2s = [(Point(1.0,0.0),Point(2.0,0.0))]
+        p3s = [p for p in pairs(Circle(Point(3.0,0.0),1.0).polygon(4).points())]
+        eg = EdgeGraph().loadwithpointpairs(p1s + p2s + p3s)
+        # puts("edges",[edge.coords() for edge in eg.edges()])
+        self.assertEqual(len(eg.edges()),7)
+        self.assertEqual(len(eg.nodes()),8)
+        self.assertEqual(len(eg.arcs()),3)
 
-
-    # def test_cutedges(self):    
-    #     eg = EdgeGraph().loadwithpointsequence([Point(0.0,0.0),Point(1.0,0.0)])
-    #     eg = eg.loadwithpointsequence([Point(0.5,1.0),Point(0.5,-1.0)])
-    #     self.assertEqual(len(eg.edges()),2)
-    #     eg.cutedges()
-    #     self.assertEqual(len(eg.edges()),4)
-
-    # def test_cutedges2(self):    
-    #     eg = EdgeGraph().loadwithpointsequence([Point(0.0,0.0),Point(1.0,0.0)])
-    #     eg = eg.loadwithpointsequence([Point(0.45,1.0),Point(0.55,-1.0)])
-    #     eg = eg.loadwithpointsequence([Point(0.25,1.0),Point(0.75,-1.0)])
-    #     self.assertEqual(len(eg.edges()),3)
-    #     eg.cutedges()
-    #     self.assertEqual(len(eg.edges()),7)
-
-    # def test_cutedges3(self):    
-    #     eg = EdgeGraph().loadwithpointsequence([Point(0.0,0.0),Point(1.0,0.0)])
-    #     eg = eg.loadwithpointsequence([Point(-0.1,1.0),Point(1.0,-2.0)])
-    #     eg = eg.loadwithpointsequence([Point(-0.2,-2.0),Point(1.0,1.0)])
-    #     self.assertEqual(len(eg.edges()),3)
-    #     eg.cutedges()
-    #     self.assertEqual(len(eg.edges()),9)
-        
+    def test_arcs3(self):
+        p1s = [p for p in pairs(Circle(Point(0.0,0.0),1.0).polygon(4).close().points())]
+        p2s = [(Point(1.0,0.0),Point(2.0,0.0))]
+        p3s = [p for p in pairs(Circle(Point(3.0,0.0),1.0).polygon(4).close().points())]
+        eg = EdgeGraph().loadwithpointpairs(p1s + p2s + p3s)
+        # puts("edges",[edge.coords() for edge in eg.edges()])
+        self.assertEqual(len(eg.edges()),9)
+        self.assertEqual(len(eg.nodes()),8)
+        self.assertEqual(len(eg.arcs()),3)

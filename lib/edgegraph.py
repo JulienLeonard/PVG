@@ -26,8 +26,17 @@ class Edge:
     def node2(self):
         return self.mnode2
 
+    def point1(self):
+        return self.node1().p()
+
+    def point2(self):
+        return self.node2().p2()
+
     def nodes(self):
         return [self.node1(),self.node2()]
+
+    def vector(self):
+        return Vector(self.point1(),self.poin2())
 
     def othernode(self,node):
         if node == self.node1():
@@ -37,46 +46,93 @@ class Edge:
         return None
     
     def bbox(self):
-        return points2bbox([self.node1().p(),self.node2().p()])
+        return points2bbox([self.point1(),self.point1()])
 
     def coords(self):
-        return self.node1().p().coords() + self.node2().p().coords()
+        return self.poin1().coords() + self.point2().coords()
 
     def intersection(self,oedge):
-        return raw_intersection(self.node1().p(),self.node2().p(),oedge.node1().p(),oedge.node2().p())
+        return raw_intersection(self.point1(),self.point2(),oedge.point1(),oedge.point2())
 
 class PointNode:
     def __init__(self,point):
         self.mp     = point
-        self.mnexts = []
-
+        self.mnextedges = []
+        self.mprevedges = []
+        
     def p(self):
         return self.mp
 
-    def nexts(self):
-        return self.mnexts
+    def coords(self):
+        return self.p().coords()
 
-    def add_next(self,p):
-        self.mnexts.append(p)
+    def nextedges(self):
+        return self.mnextedges
 
-    def remove_next(self,p):
-        if p in self.mnexts:
-            self.mnexts.remove(p)
+    def add_nextedge(self,edge):
+        self.mnextedges.append(edge)
 
-    @staticmethod
-    def addadj(node1,node2):
-        node1.add_next(node2)
-        node2.add_next(node1)
+    def remove_nextedge(self,edge):
+        if edge in self.mnextedges:
+            self.mnextedges.remove(edge)
 
+    def prevedges(self):
+        return self.mprevedges
+
+    def add_prevedge(self,edge):
+        self.mprevedges.append(edge)
+
+    def remove_prevedge(self,edge):
+        if edge in self.mprevedges:
+            self.mprevedges.remove(edge)
+
+#
+# Arc is oriented from first point to last point
+#
 
 class Arc:
     def __init__(self,edges):
         self.medges = edges
+        self.mnext  = None
         for edge in self.medges:
             edge.arc(self)
 
     def edges(self):
         return self.medges
+
+    def next(self,next=None):
+        if next == None:
+            return self.mnext
+        else:
+            self.mnext = next
+            return self
+
+    def firstvector(self):
+        return self.medges[0].vector()
+
+    def lastvector(self):
+        return self.medges[-1].vector()
+
+    def edge1(self):
+        return self.medges[0]
+
+    def edge2(self):
+        return self.medges[-1]
+    
+    def node1(self):
+        return self.edge1().node1()
+
+    def node2(self):
+        return self.edge2().node2()
+
+    def extremities(self):
+        return (self.node1(),self.node2())
+
+    def point1(self):
+        return self.node1().p()
+
+    def points(self):
+        return [self.point1()] + [edge.node2().p() for edge in self.medges[1:]]
 
 class EdgeGraph:
 
@@ -95,12 +151,6 @@ class EdgeGraph:
         self.mnodes.append(node)
         return self
 
-    def remove_node(self,node):
-        self.mnodes.remove(node)
-        for onode in node.nexts():
-            onode.remove_next(node)
-        return self
-
     def edges(self):
         return self.medges
 
@@ -112,9 +162,24 @@ class EdgeGraph:
     #
     def nodes2edge(self,node1,node2):
         for edge in self.medges:
-            if (edge.node1() == node1 and edge.node2() == node2) or (edge.node2() == node1 and edge.node1() == node2):
+            if (edge.node1() == node1 and edge.node2() == node2):
                 return edge
         return None
+
+    def createedges(self,p1,p2):
+        edge12 = Edge(p1,p2)
+        edge21 = Edge(p2,p1)
+        
+        p1.add_nextedge(edge12)
+        p1.add_prevedge(edge21)
+        
+        p2.add_nextedge(edge21)
+        p1.add_prevedge(edge12)
+        
+        self.add_edge(edge12)
+        self.add_edge(edge21)
+        return self
+
     
     def loadwithpointsequence(self,points):
         if len(points) < 1:
@@ -128,13 +193,10 @@ class EdgeGraph:
                 self.add_node(firstnode)
                 prevnode = firstnode
             if p2 == firstnode.p():
-                PointNode.addadj(prevnode,firstnode)
-                self.add_edge(Edge(prevnode,firstnode))
+                self.createedges(prevnode,firstnode)
             else:
                 newnode = PointNode(p2)
-                PointNode.addadj(prevnode,newnode)
-                self.add_edge(Edge(prevnode,newnode))
-                self.add_node(newnode)
+                self.createedges(prevnode,newnode)
                 prevnode = newnode
         return self
     
@@ -143,72 +205,162 @@ class EdgeGraph:
         pointpairs = GeoMatcher().checksegments(pointpairs)
 
         # build adjacency and nodes
-        pnode = {}
-        adj   = {}
+        nodes = {}
         for (p1,p2) in pointpairs:
             for p in [p1,p2]:
-                if not p in pnode:
-                    pnode[p] = PointNode(p)
-                    self.add_node(pnode[p])
-                if not pnode[p] in adj:
-                    adj[pnode[p]] = []
-            
-            PointNode.addadj(pnode[p1],pnode[p2])            
-            self.add_edge(Edge(pnode[p1],pnode[p2]))
+                if not p in nodes:
+                    nodes[p] = PointNode(p)
+                    self.add_node(nodes[p])
+
+            self.createedges(nodes[p1],nodes[p2])
 
         # TODO: check adjacency with preexisting edges too !
         return self
 
     #
     # compute arcs from edges
-    # an arc is a string of edges without bifurcation                
+    # an arc is a string of edges without bifurcation, oriented                
     #
     # algo:                 
     def arcs(self):
-        self.computearcs()
+        self.computearcgraph()
         return self.marcs
 
     #
     # explore each node graph up to a point with more than 2 nexts (or no more next)
+    # each edge has one and only one arc
     # WARNING: TODO: do not compute fot the moment the merge of arcs (ie if some edges have already been computed with arcs)
     #
-    def computeedgearc(self,edge):
-        semiarcs = []
-        for node in edge.nodes():
-            semiarc  = []
-            prevnode = edge.othernode(node)
-            nodes    = [node]
-            while True:
-                cnode = nodes[-1]
-                if len(cnode.nexts()) == 0:
-                    puts("Error: single node",cnode.p().coords())
+    def _computeedgearc(self,edge):
+        #puts("computeedgearc",edge.coords())
+        
+        # first find origin or arc, ie point with more or less than one prevedge
+        node0 = edge.node1()
+        onode = node0
+        while True:
+            prevedges = onode.prevedges()
+            if len(prevedges) == 1:
+                prevedge = prevedges[0]
+                onode     = prevedge.node1()
+                if onode == node0: # to deal with circular arcs
                     break
-                else:
-                    nexts = lremove(cnode.nexts(),prevnode)
-                    if len(nexts) == 0:
-                        break
-                    elif len(nexts) == 1:
-                        nextnode = nexts[0]
-                        semiarc.append(self.nodes2edge(cnode,nextnode))
-                        if nextnode in nodes:
-                            # circular arc
-                            break
-                        else:
-                            prevnode = cnode
-                            nodes.append(nextnode)
-                    else:
-                        # bifurcation: break
-                        break
-            semiarcs.append(semiarc)
-        return lreverse(semiarcs[0]) + [edge] + semiarcs[1]
+            else:
+                break
 
+        # here onode is origin of arc, so just run amon the nextedges
+        arcedges = []
+        cnode = onode
+        while True:
+            nextedges = cnode.nextedges()
+            if len(nextedges) == 1:
+                nextedge = nextedges[0]
+                arcedges.append(nextedge)
+                cnode     = nextedge.node2()
+                if cnode == onode: # to deal with circular arcs
+                    break
+            else:
+                break
 
-    def computearcs(self):
+        return arcedges 
+
+    #
+    # compute all the arcs contained in the edge graph
+    #
+    def _computearcs(self):
         for edge in self.medges:
             if edge.arc() == None:
-                arcedges = self.computeedgearc(edge)
+                arcedges = self._computeedgearc(edge)
                 self.marcs.append(Arc(arcedges))
         return self
+
+    #
+    # explore the arc graph from arc and get all paths going back to arc
+    #
+    def computearccycle(self,arcgraph,arc0):
+        result = [arc0]
+        carc   = arc0
+        while True:
+            if arcgraph[carc] == None:
+                return None
+            else:
+                carc = arcgraph[carc]
+                if carc == arc0:
+                    return result
+                else:
+                    result.append(carc)
+        return result
+
+    #
+    # compute a graph with arc oriented, and with the next arc the righest
+    #
+    #
+    def computearcgraph(self):
+        self._computearcs()
+
+        #
+        # first compute the graph node => arc
+        #
+        nodearcs = {}
+        for arc in self.marcs:
+            for node in arc.extremities():
+                if not node in nodearcs:
+                    nodearcs[node] = []
+            node1 = arc.node1()
+            nodearcs[node1].append(arc)
+
+        #
+        # then for each arc, compute the most right next arc
+        #
+        arcgraph = {}    
+        for arc in self.marcs:
+            nextarcs = nodearcs[arc.p2()]
+            sortlist = [(arc.lastvector().normalize().cross(nextarc.firstvector().normalize()),nextarc)]
+            sortlist.sort()
+            if len(sortlist) == 0:
+                argraph[arc] = None
+            else:
+                argraph[arc] = sortlist[0][1]
+
+        return arcgraph
+
+    #
+    # compute all the arc cycles (minimal) of a arcs
+    #
+    def computearccycles(self):
+        arcgraph = self.computearcgraph()
+
+        for arc in arcnodegraph.keys():
+            if not arc in touched:
+                arccycle = self.computearccycle(arcgraph,arc)
+                if not arccycle == None:
+                    result.append(arccycle)
+                    touched.extend(arccycle)
+        return result
+
+
+    def arccycle2polygon(self,arccycle):
+        result = []
+        for arc in arccycle:
+            points = arc.points()
+            if len(result) == 0:
+                result = points
+            else:
+                result.extend(points[1:])
+        return result
+                
+    #
+    # a closed polygon is a cycle in the arc graph
+    # 
+    #
+    def closedpolygons(self):
+        touched = []
+        result  = []
+
+        arccycles = self.computearccycles()
+        result = [self.arccycle2polygon(arccycle) for arccycle in arccycles]
+        return result
+            
+
 
 
     # def managedEdgeIntersectionPoint(self,edge1,edge2,inter):
