@@ -35,6 +35,11 @@ class Render:
             return self
 
     def draw(self, shape, colorc = Color.black() ):
+        if type(shape) == list:
+            shapes = shape
+            for shape in shapes:
+                self.draw(shape,colorc)
+
         if isinstance(shape,Circle):
             self.drawcircle(shape,colorc)
         elif isinstance(shape,Polygon):
