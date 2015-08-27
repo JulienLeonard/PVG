@@ -80,6 +80,19 @@ class EdgeGraphTest(unittest.TestCase):
         #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
         self.assertEqual(len(polygons),1)
 
+    def test_polygons1b(self):
+        p1s = [p for p in pairs(Circle(Point(0.0,0.0),1.0).polygon(4).close().points())]
+        p2s = [(Point(-2.0,0.0),Point(-1.0,0.0)),(Point(-1.0,0.0),Point(0.0,0.0))]
+        eg = EdgeGraph().loadwithpointpairs(p1s + p2s)
+        #puts("edges",[edge.coords() for edge in eg.edges()])
+        self.assertEqual(len(eg.edges()),12)
+        self.assertEqual(len(eg.nodes()),6)
+        self.assertEqual(len(eg.arcs()),6)
+        polygons = eg.closedpolygons()
+        #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
+        self.assertEqual(len(polygons),1)
+
+
     def test_polygons2(self):
         p1s = [p for p in pairs(Circle(Point(0.0,0.0),1.0).polygon(4).close().points())]
         p2s = [(Point(1.0,0.0),Point(2.0,0.0))]
@@ -115,7 +128,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),14)
         self.assertEqual(len(eg.arcs()),10)
         #puts("closedpolygons test_polygons4",[[p.coords() for p in polygon] for polygon in eg.closedpolygons()])
-        self.assertEqual(len(eg.closedpolygons()),2)
+        self.assertEqual(len(eg.closedpolygons()),3)
 
     def test_polygons5(self):
         p1s = [p for p in pairs(Circle(Point(0.0,0.0),1.0).polygon(4).close().points())]
@@ -126,4 +139,4 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),20)
         self.assertEqual(len(eg.arcs()),20)
         #puts("closedpolygons test_polygons5",[[p.coords() for p in polygon] for polygon in eg.closedpolygons()])
-        self.assertEqual(len(eg.closedpolygons()),4)
+        self.assertEqual(len(eg.closedpolygons()),5)

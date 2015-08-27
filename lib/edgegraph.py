@@ -349,11 +349,13 @@ class EdgeGraph:
     #
     #
     def computearcgraph(self):
+        
+
         #
         # first compute the graph node => arc
         #
         nodearcs = {}
-        for arc in self.marcs:
+        for arc in self.arcs():
             for node in arc.extremities():
                 if not node in nodearcs:
                     nodearcs[node] = []
@@ -361,10 +363,30 @@ class EdgeGraph:
             nodearcs[node1].append(arc)
 
         #
+        # the prune arc that have no next or no prev
+        #
+        prunearcs = self.arcs()
+        for arc in self.arcs():
+            if len(nodearcs[arc.node2()]) == 1: # only the opposite
+                puts("arc end no following")
+                prunearcs = lremove(prunearcs,arc)
+                prunearcs = lremove(prunearcs,arc.opposite())
+        puts("arcs",len(self.arcs()),"prunearcs",len(prunearcs))
+
+        nodearcs = {}
+        for arc in prunearcs:
+            for node in arc.extremities():
+                if not node in nodearcs:
+                    nodearcs[node] = []
+            node1 = arc.node1()
+            nodearcs[node1].append(arc)
+                
+
+        #
         # then for each arc, compute the most right next arc
         #
         arcgraph = {}    
-        for arc in self.marcs:
+        for arc in prunearcs:
             #puts("compute most right next arc for arc",arc.coords())
             nextarcs = nodearcs[arc.node2()]
             # if len(nextarcs) > 1:
