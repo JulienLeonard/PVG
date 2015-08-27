@@ -12,7 +12,7 @@ from edgegraph import *
 
 render = Canvas("main_wingline.png").render()
 
-paths  = svgPaths("winglines.svg")
+paths  = svgPaths("halfupbutterfly.svg")
 
 segs = [(p1,p2) for path in paths for (p1,p2) in pairs(path.silhouette().polygon().lengthsamples(5.0))]
 
