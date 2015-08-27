@@ -29,7 +29,7 @@ class Canvas():
 
     def render(self):
         if self.mrender == None:
-            self.mrender = RenderCenter(self.msizes,self.mbackground)
+            self.mrender = RenderCenter(self.msizes,self.mbackground).outputfilepath(self.moutputfilename)
         return self.mrender
 
     def save(self,outputfilepath):
