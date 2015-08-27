@@ -451,6 +451,8 @@ def preduce(points,ratio):
 
 def vsanglepos(v1,v2):
     result = vsangle(v1,v2)
-    if result < 0.0:
-        result += 2* 3.14159
+    if result < -math.pi:
+        result += 2.0 * math.pi
+    if result > math.pi:    
+        result -= 2.0 * math.pi
     return result

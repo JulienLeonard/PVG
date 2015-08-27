@@ -45,7 +45,7 @@ class Edge:
         return [self.node1(),self.node2()]
 
     def vector(self):
-        return Vector(self.point1(),self.poin2())
+        return vector(self.point1(),self.point2())
 
     def othernode(self,node):
         if node == self.node1():
@@ -55,7 +55,7 @@ class Edge:
         return None
     
     def bbox(self):
-        return points2bbox([self.point1(),self.point1()])
+        return points2bbox([self.point1(),self.point2()])
 
     def coords(self):
         return self.point1().coords() + self.point2().coords()
@@ -101,8 +101,9 @@ class PointNode:
 
 class Arc:
     def __init__(self,edges):
-        self.medges = edges
-        self.mnext  = None
+        self.medges    = edges
+        self.mnext     = None
+        self.mopposite = None
         for edge in self.medges:
             edge.arc(self)
 
@@ -141,14 +142,30 @@ class Arc:
         return self.node1().p()
 
     def points(self):
-        return [self.point1()] + [edge.node2().p() for edge in self.medges[1:]]
+        return [self.point1()] + [edge.point2() for edge in self.medges]
+    
+    def isopposite(self,oarc):
+        if oarc.edge1() == self.edge2().opposite() and oarc.edge2() == self.edge1().opposite():
+            return True
+        return False
+
+    def opposite(self,v=None):
+        if v == None:
+            return self.mopposite
+        else:
+            self.mopposite = v
+            return self
+
+    def coords(self):
+        return [p.coords() for p in self.points()]
+        
 
 class EdgeGraph:
 
     def __init__(self):
         self.mnodes = []
         self.medges = []
-        self.marcs  = []
+        self.marcs  = None
 
     def nodes(self):
         return self.mnodes
@@ -236,7 +253,8 @@ class EdgeGraph:
     #
     # algo:                 
     def arcs(self):
-        self._computearcs()
+        if self.marcs == None:
+            self._computearcs()
         return self.marcs
 
     #
@@ -286,10 +304,18 @@ class EdgeGraph:
     # compute all the arcs contained in the edge graph
     #
     def _computearcs(self):
+        self.marcs = []
         for edge in self.medges:
             if edge.arc() == None:
                 arcedges = self._computeedgearc(edge)
-                self.marcs.append(Arc(arcedges))
+                newarc1 = Arc(arcedges)
+                newarc2 = Arc(lreverse([edge.opposite() for edge in arcedges]))
+                
+                newarc1.opposite(newarc2)
+                newarc2.opposite(newarc1)
+
+                self.marcs.append(newarc1)
+                self.marcs.append(newarc2)
         return self
 
     #
@@ -299,14 +325,23 @@ class EdgeGraph:
         result = [arc0]
         carc   = arc0
         while True:
+            #puts("carc",carc.coords())
             if arcgraph[carc] == None:
                 return None
             else:
-                carc = arcgraph[carc]
-                if carc == arc0:
+                newarc = arcgraph[carc]
+                if newarc == arc0:
                     return result
+                if newarc.opposite() in result:
+                    return None
+                    #newnewarc = arcgraph[newarc]
+                    #result = lstop(result,newarc.opposite())
+                    #newarc = newnewarc
+                elif newarc in result:
+                    return None
                 else:
-                    result.append(carc)
+                    result.append(newarc)
+                    carc= newarc
         return result
 
     #
@@ -330,14 +365,22 @@ class EdgeGraph:
         #
         arcgraph = {}    
         for arc in self.marcs:
-            nextarcs = nodearcs[arc.p2()]
-            sortlist = [(arc.lastvector().normalize().cross(nextarc.firstvector().normalize()),nextarc)]
+            #puts("compute most right next arc for arc",arc.coords())
+            nextarcs = nodearcs[arc.node2()]
+            # if len(nextarcs) > 1:
+            nextarcs = lremove(nextarcs,arc.opposite())
+            #puts("compute most right next arc for arc",arc.coords(),"nextarcs",[nextarc.coords() for nextarc in nextarcs])
+            # sortlist = [(arc.lastvector().normalize().cross(nextarc.firstvector().normalize()),nextarc) for nextarc in nextarcs]
+            sortlist = [(vsanglepos(arc.lastvector(),nextarc.firstvector()),nextarc) for nextarc in nextarcs]
             sortlist.sort()
+            sortlist.reverse()
+            #puts("arc",arc.coords(),"sortlist",[(anglepos,carc.coords()) for (anglepos,carc) in sortlist])
             if len(sortlist) == 0:
-                argraph[arc] = None
+                #puts("compute most right next arc for arc",arc.coords(),"None")
+                arcgraph[arc] = None
             else:
-                argraph[arc] = sortlist[0][1]
-
+                arcgraph[arc] = sortlist[0][1]
+                #puts("compute most right next arc for arc",arc.coords(),"next",arcgraph[arc].coords())
         return arcgraph
 
     #
@@ -345,8 +388,10 @@ class EdgeGraph:
     #
     def computearccycles(self):
         arcgraph = self.computearcgraph()
-
-        for arc in arcnodegraph.keys():
+        
+        touched = []
+        result  = []
+        for arc in arcgraph.keys():
             if not arc in touched:
                 arccycle = self.computearccycle(arcgraph,arc)
                 if not arccycle == None:
@@ -370,104 +415,15 @@ class EdgeGraph:
     # 
     #
     def closedpolygons(self):
-        touched = []
         result  = []
-
         arccycles = self.computearccycles()
         result = [self.arccycle2polygon(arccycle) for arccycle in arccycles]
+
+        # remove same polygons with reverse direction
+        newresult = []
+        for polygon in result:
+            if not lreverse(polygon) in newresult:
+                newresult.append(polygon)
+        result = newresult
         return result
             
-
-
-
-    # def managedEdgeIntersectionPoint(self,edge1,edge2,inter):
-    #     newedge11 = Edge(edge1.p1(),inter)
-    #     newedge12 = Edge(inter,edge1.p2())
-        
-    #     newedge21 = Edge(edge2.p1(),inter)
-    #     newedge22 = Edge(inter,edge2.p2())
-        
-    #     prevedges1 = edge1.prevs()
-    #     nextedges1 = edge1.nexts()
-        
-    #     prevedges2 = edge2.prevs()
-    #     nextedges2 = edge2.nexts()
-        
-    #     for prevedge1 in prevedges1:
-    #         prevedge1.remove_next(edge1)
-    #         prevedge1.add_next(newedge11)
-    #     for nextedge1 in nextedges1:
-    #         nextedge1.remove_prev(edge1)
-    #         nextedge1.add_prev(newedge12)
-                            
-    #     prevedges2 = edge2.prevs()
-    #     nextedges2 = edge2.nexts()
-    #     for prevedge2 in prevedges2:
-    #         prevedge2.remove_next(edge2)
-    #         prevedge2.add_next(newedge21)
-    #     for nextedge2 in nextedges2:
-    #         nextedge2.remove_prev(edge2)
-    #         nextedge2.add_prev(newedge22)
-                        
-    #     Edge.addadj(newedge11,newedge12)
-    #     Edge.addadj(newedge11,newedge22)
-        
-    #     Edge.addadj(newedge21,newedge22)
-    #     Edge.addadj(newedge21,newedge12)
-
-    #     self.remove(edge1)
-    #     self.remove(edge2)
-        
-    #     self.add(newedge11)
-    #     self.add(newedge12)
-    #     self.add(newedge21)
-    #     self.add(newedge22)
-
-    #     return ((newedge11,newedge12),(newedge21,newedge22))
-        
-
-    #
-    # compute non interesecting edge graph, by splitting intersecting edges 
-    #
-    # Algo: 
-    # - order edges by x abscissa
-    # - iterate the items in the ordered list:
-    #   - if item is stop, remove the edge from the stack
-    #   - if item is start, add edge to the stack
-    #      and check if intersection:
-    #      - if intersection, create the new edges, and refresh the adjacent edges
-    #
-    # def cutedges(self):
-        # sortlist = []
-        # for edge in self.medges:
-        #     # TODO: to improve: 1,2 to have stop after start for vertical segments
-        #     sortlist.append((edge.p1().x(),edge,1))
-        #     sortlist.append((edge.p2().x(),edge,2))
-        # sortlist.sort()
-
-        # stack = []
-        # alias = {}
-        # for item in sortlist:
-        #     (dum,edge,isstart) = item
-        #     puts("stack",[cedge.coords() for cedge in stack])
-        #     if isstart == 1:
-        #         alias[edge] = edge
-        #         newstack = []
-        #         for stackedge in stack:
-        #             inter = edge.intersection(stackedge)
-        #             puts("edge",edge.coords(),"stackedge",stackedge.coords(),"inter",inter)
-        #             if not inter == None:
-        #                 if isinstance(inter,Point):
-        #                     (newedges,newstackedges) = self.managedEdgeIntersectionPoint(edge,stackedge,inter)
-        #                     newedge      = iff(newedges[0].p1().x() > newedges[1].p1().x(), newedges[0],newedges[1])
-        #                     newstackedge = iff(newstackedges[0].p1().x() > newstackedges[1].p1().x(), newstackedges[0],newstackedges[1])
-                             
-        #                     alias[edge]      = newedge
-        #                     alias[stackedge] = newstackedge
-                            
-
-        #             else:
-        #                 stack.append(edge)
-
-        #     else:
-        #         stack = lremove(stack,edge)

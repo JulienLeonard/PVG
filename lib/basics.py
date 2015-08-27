@@ -571,3 +571,15 @@ def ldoublesym(list):
         return list
     return list + lreverse(list[1:-1])
 
+#
+# return sublist of items up to item
+#
+def lstop(list,stopitem):
+    result = []
+    for item in list:
+        if item == stopitem:
+            return result
+        else:
+            result.append(item)
+    return result
+    
