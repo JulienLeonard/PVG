@@ -27,6 +27,20 @@ class Render:
         self.mbackcolor = backcolor
         self.selfinit()
 
+    def outputfilepath(self,v = None):
+        if v == None:
+            return self.mfilename
+        else:
+            self.mfilename = v
+            return self
+
+    def draw(self, shape, colorc = Color.black() ):
+        if isinstance(shape,Circle):
+            self.drawcircle(shape,colorc)
+        elif isinstance(shape,Polygon):
+            self.drawpolygon(shape,colorc)
+        return self
+
     def drawpolygon( self, polygon, colorc = Color.black() ):
         self.drawpolygonpicture(polygon,colorc)
 

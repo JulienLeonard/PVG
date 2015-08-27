@@ -4,9 +4,9 @@ from color       import *
 from renderCairo import *
 
 class Canvas():
-    def __init__(self,outputfilename):
+    def __init__(self):
         self.mrender           = None
-        self.moutputfilename   = outputfilename
+        self.moutputfilename   = "temp.png"
         self.msizes            = ImageDim(1000,1000)
         self.mbackground       = Color.white()
         self.moutputdir        = defaultoutputdir()
@@ -28,5 +28,14 @@ class Canvas():
         return self
 
     def render(self):
-        self.mrender = RenderCenter(self.msizes,self.moutputdir + "/" + self.moutputfilename,self.mbackground)
+        if self.mrender == None:
+            self.mrender = RenderCenter(self.msizes,self.mbackground)
         return self.mrender
+
+    def save(self,outputfilepath):
+        self.render().outputfilepath(outputfilepath)
+        self.render().end()
+
+    def draw(self,shape,style = Color.black()):
+        self.render().draw(shape,style)
+        return self

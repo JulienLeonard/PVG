@@ -2,11 +2,10 @@ from   Render import *
 import cairo
 
 class RenderCairo(Render):
-    def initpicture(self,imagedim,filename,backcolor):
+    def initpicture(self,imagedim,backcolor):
         self.mimagedim = imagedim
         self.msurface  = cairo.ImageSurface (cairo.FORMAT_ARGB32, imagedim.width(), imagedim.height())
         self.mctx      = cairo.Context(self.msurface)
-        self.mfilename = filename
 
         # set background
         self.mctx.rectangle(0.0, 0.0, imagedim.width(), imagedim.height())
@@ -21,11 +20,11 @@ class RenderCairo(Render):
         # ctx.scale(self.mimagedim.width(), self.mimagedim.height())
 
     def selfinit(self):
-        self.initpicture(self.mimagedim,self.mfilename,self.mbackcolor)
+        self.initpicture(self.mimagedim,self.mbackcolor)
         self.setviewport(self.mviewport)
 
     def endpicture(self):
-        self.msurface.write_to_png (self.mfilename)
+        self.msurface.write_to_png (self.outputfilepath())
 
     def drawpolygonpicture(self,polygon,colorc):
         ctx = self.mctx
@@ -43,18 +42,17 @@ class RenderCairo(Render):
 
 
 class RenderCenter(RenderCairo):
-    def __init__(self,imagedim,filename,backcolor=Color.white()):
+    def __init__(self,imagedim,backcolor=Color.white()):
         self.mitems    = []
         self.mimagedim = imagedim
-        self.filename  = filename
-        self.backcolor = backcolor
+        self.mbackcolor = backcolor
 
     def drawpolygon( self, polygon, colorc = Color.black()):
         if not polygon == None:
             self.mitems.append((polygon,colorc))
 
     def end(self):
-        self.initpicture(self.mimagedim,self.filename,self.backcolor)
+        self.initpicture(self.mimagedim,self.mbackcolor)
         self.setviewport(self.viewport())
         for item in self.mitems:
             polygon,color = item

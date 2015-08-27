@@ -1,12 +1,4 @@
-# some_file.py
-import sys
-sys.path.insert(0, './../lib')
+from PVG import *
 
-from   utils       import *
-from   renderCairo import *
-import color
+Canvas().draw(Circle()).save("circle.png")
 
-outputfilepath = defaultoutputdir() + "/" + "drawcircle.png"
-render = RenderCenter(ImageDim(1000,1000),outputfilepath)
-render.drawcircle(C0)
-render.end()
