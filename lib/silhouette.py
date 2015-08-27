@@ -67,6 +67,9 @@ class Silhouette:
                 return level
         return None
 
+    def levels(self):
+        return self.mlevels
+
     def polygons(self,level=0):
         if not level in self.mlevels:
             # puts("error: no level",level)
@@ -79,6 +82,9 @@ class Silhouette:
     #
     def polygon(self):
         return self.polygons(0)[0]
+
+    def allpolygons(self):
+        return [poly for level in self.mpolys.keys() for poly in self.mpolys[level]]
 
     @staticmethod
     def merge(silhouettes):

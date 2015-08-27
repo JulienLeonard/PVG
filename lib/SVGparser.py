@@ -52,26 +52,51 @@ class SVGPath:
         # puts("pathstring",self.mpathstring)
         return Silhouette().loadsvgstring(self.mpathstring)
 
+class SVGLayer:
+
+    def __init__(self):
+        self.mpaths = []
+
+    def paths(self):
+        return self.mpaths
+
+    def add_path(self,path):
+        self.mpaths.append(path)
+
+    def add_paths(self,paths):
+        self.mpaths.extend(paths)
+
+    def silhouette(self):
+        return  Silhouette.merge([path.silhouette() for path in self.mpaths])
+
 class SVGParser:
     
     def __init__(self,filepath=None):
         self.mfilepath = filepath
-        self.mpaths    = None
+        self.mlayers   = None
+
+    def layers(self):
+        return self.mlayers
 
     def parse(self,filepath=None):
         if filepath != None:
             self.mfilepath = filepath
+        self.mlayers   = []    
         doc = minidom.parse(filepath)
-        path_strings  = [path.getAttribute('d')     for path in doc.getElementsByTagName('path')]
-        style_strings = [path.getAttribute('style') for path in doc.getElementsByTagName('path')]
+        svglayers = doc.getElementsByTagName('g')
+        for svglayer in svglayers:
+            newlayer = SVGLayer()
+            self.mlayers.append(newlayer)
+            path_strings  = [path.getAttribute('d')     for path in svglayer.getElementsByTagName('path')]
+            style_strings = [path.getAttribute('style') for path in svglayer.getElementsByTagName('path')]
+            newlayer.add_paths([SVGPath(path,style) for (path,style) in zip(path_strings,style_strings)])
         doc.unlink()
-        self.mpaths = [SVGPath(path,style) for (path,style) in zip(path_strings,style_strings)]
         return self
 
     def paths(self):
-        if self.mpaths == None and self.mfilepath != None:
+        if self.mlayers == None and self.mfilepath != None:
             self.parse()
-        return self.mpaths
+        return [path for layer in self.mlayers for path in layer.paths()]
 
 def svgPaths(filepath):
     return SVGParser().parse(filepath).paths()
