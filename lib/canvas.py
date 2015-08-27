@@ -4,9 +4,9 @@ from color       import *
 from renderCairo import *
 
 class Canvas():
-    def __init__(self):
+    def __init__(self,filename = "temp.png"):
         self.mrender           = None
-        self.moutputfilename   = "temp.png"
+        self.moutputfilename   = filename
         self.msizes            = ImageDim(1000,1000)
         self.mbackground       = Color.white()
         self.moutputdir        = defaultoutputdir()
