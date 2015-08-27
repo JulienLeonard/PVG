@@ -78,7 +78,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.arcs()),2)
         polygons = eg.closedpolygons()
         #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
-        self.assertEqual(len(polygons),1)
+        self.assertEqual(len(polygons),2)
 
     def test_polygons1b(self):
         p1s = [p for p in pairs(Circle(Point(0.0,0.0),1.0).polygon(4).close().points())]
@@ -90,7 +90,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.arcs()),6)
         polygons = eg.closedpolygons()
         #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
-        self.assertEqual(len(polygons),1)
+        self.assertEqual(len(polygons),2)
 
 
     def test_polygons2(self):

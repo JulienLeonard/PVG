@@ -2,10 +2,10 @@ from geoutils   import *
 from geomatcher import *
 
 #
-# class to build edges graph (linked by points)
-# 
+# class to build edges graph (linked by pointnodes)
+#  - an edge is oriented (ie reversing the nodes give the opposite edge)
+#  - an edge belongs to one and only one arc
 #
-
 class Edge:
 
     def __init__(self,node1,node2):
@@ -63,6 +63,9 @@ class Edge:
     def intersection(self,oedge):
         return raw_intersection(self.point1(),self.point2(),oedge.point1(),oedge.point2())
 
+#
+# nodes of edgegraph
+#
 class PointNode:
     def __init__(self,point):
         self.mp     = point
@@ -96,9 +99,10 @@ class PointNode:
             self.mprevedges.remove(edge)
 
 #
-# Arc is oriented from first point to last point
+# An arc is a sequence of edges with no bifurcation
+# And arc is oriented from first point to last point
+# An arc is at most part of one arccycle
 #
-
 class Arc:
     def __init__(self,edges):
         self.medges    = edges
@@ -106,6 +110,8 @@ class Arc:
         self.mopposite = None
         for edge in self.medges:
             edge.arc(self)
+        self.marccycle = None
+
 
     def edges(self):
         return self.medges
@@ -144,11 +150,6 @@ class Arc:
     def points(self):
         return [self.point1()] + [edge.point2() for edge in self.medges]
     
-    def isopposite(self,oarc):
-        if oarc.edge1() == self.edge2().opposite() and oarc.edge2() == self.edge1().opposite():
-            return True
-        return False
-
     def opposite(self,v=None):
         if v == None:
             return self.mopposite
@@ -158,14 +159,67 @@ class Arc:
 
     def coords(self):
         return [p.coords() for p in self.points()]
-        
 
+    def arccycle(self, v = None):
+        if v == None:
+            return self.marccycle
+        else:
+            self.marccycle = v
+            return self
+
+#
+# An arccycle is a right oriented cycle of arcs
+# An arc can be at most part of one arccycle
+# Arccycles are adjacent if they share at least one opposite arc
+#
+class ArcCycle:
+
+    def __init__(self,arcs):
+        self.marcs = arcs
+        self.madjs = []
+        for arc in self.marcs:
+            arc.arccycle(self)
+
+    def arcs(self):
+        return self.marcs
+
+    # list of points
+    # first point = last point by definition
+    def points(self):
+        result = []
+        for arc in self.marcs:
+            points = arc.points()
+            if len(result) == 0:
+                result = points
+            else:
+                result.extend(points[1:])
+        return result
+        
+    #
+    # return the list of (arc,adjarccycle) 
+    #
+    def adjs(self):
+        result = []
+        for arc in self.marcs:
+            result.append((arc,arc.opposite().arccycle()))
+
+    #
+    # return the list of adj arccycles (not duplicated)
+    #
+    def adjcycles(self):
+        return lremove(lunique([item[1] for item in self.adjs()]),None)
+
+        
+#
+# an edge graph is a structure to compute closed polygons from a set of segments  
+#
 class EdgeGraph:
 
     def __init__(self):
-        self.mnodes = []
-        self.medges = []
-        self.marcs  = None
+        self.mnodes     = []
+        self.medges     = []
+        self.marcs      = None
+        self.marccycles = None
 
     def nodes(self):
         return self.mnodes
@@ -182,15 +236,6 @@ class EdgeGraph:
 
     def add_edge(self,edge):
         self.medges.append(edge)
-
-    #
-    # TODO: optimize by making a map
-    #
-    def nodes2edge(self,node1,node2):
-        for edge in self.medges:
-            if (edge.node1() == node1 and edge.node2() == node2):
-                return edge
-        return None
 
     def createedges(self,p1,p2):
         edge12 = Edge(p1,p2)
@@ -209,7 +254,17 @@ class EdgeGraph:
         self.add_edge(edge21)
         return self
 
-    
+    def arccycles(self):
+        if self.marccycles == None:
+            self.computearccycles()
+        return self.marccycles
+
+    def add_arccycle(self,arccycle):
+        self.marccycles.append(arccycle)
+
+    #
+    # load a sequence of points
+    #
     def loadwithpointsequence(self,points):
         if len(points) < 1:
             return self
@@ -229,7 +284,10 @@ class EdgeGraph:
                 self.add_node(newnode)
                 prevnode = newnode
         return self
-    
+
+    #
+    # load a set of segments (with no particular order)
+    #
     def loadwithpointpairs(self,pointpairs):
         # manage float problems and unify same points
         pointpairs = GeoMatcher().checksegments(pointpairs)
@@ -248,10 +306,8 @@ class EdgeGraph:
         return self
 
     #
-    # compute arcs from edges
-    # an arc is a string of edges without bifurcation, oriented                
+    # get arcs of the edgegraph
     #
-    # algo:                 
     def arcs(self):
         if self.marcs == None:
             self._computearcs()
@@ -321,7 +377,7 @@ class EdgeGraph:
     #
     # explore the arc graph from arc and get all paths going back to arc
     #
-    def computearccycle(self,arcgraph,arc0):
+    def computecyclearcs(self,arcgraph,arc0):
         result = [arc0]
         carc   = arc0
         while True:
@@ -346,14 +402,11 @@ class EdgeGraph:
 
     #
     # compute a graph with arc oriented, and with the next arc the righest
-    #
+    # TODO: refactor as not resilient with trees pruning
     #
     def computearcgraph(self):
-        
-
-        #
         # first compute the graph node => arc
-        #
+
         nodearcs = {}
         for arc in self.arcs():
             for node in arc.extremities():
@@ -362,17 +415,18 @@ class EdgeGraph:
             node1 = arc.node1()
             nodearcs[node1].append(arc)
 
-        #
         # the prune arc that have no next or no prev
         #
         prunearcs = self.arcs()
         for arc in self.arcs():
             if len(nodearcs[arc.node2()]) == 1: # only the opposite
-                puts("arc end no following")
+                # puts("arc end no following")
                 prunearcs = lremove(prunearcs,arc)
                 prunearcs = lremove(prunearcs,arc.opposite())
-        puts("arcs",len(self.arcs()),"prunearcs",len(prunearcs))
+        # puts("arcs",len(self.arcs()),"prunearcs",len(prunearcs))
 
+        #
+        #
         nodearcs = {}
         for arc in prunearcs:
             for node in arc.extremities():
@@ -405,47 +459,28 @@ class EdgeGraph:
                 #puts("compute most right next arc for arc",arc.coords(),"next",arcgraph[arc].coords())
         return arcgraph
 
+
     #
     # compute all the arc cycles (minimal) of a arcs
     #
     def computearccycles(self):
+        self.marccycles = []
         arcgraph = self.computearcgraph()
         
-        touched = []
-        result  = []
         for arc in arcgraph.keys():
-            if not arc in touched:
-                arccycle = self.computearccycle(arcgraph,arc)
-                if not arccycle == None:
-                    result.append(arccycle)
-                    touched.extend(arccycle)
-        return result
+            if arc.arccycle() == None:
+                arcs = self.computecyclearcs(arcgraph,arc)
+                if not arcs == None:
+                    self.add_arccycle(ArcCycle(arcs))
+        return self.marccycles
 
 
-    def arccycle2polygon(self,arccycle):
-        result = []
-        for arc in arccycle:
-            points = arc.points()
-            if len(result) == 0:
-                result = points
-            else:
-                result.extend(points[1:])
-        return result
                 
     #
     # a closed polygon is a cycle in the arc graph
     # 
     #
     def closedpolygons(self):
-        result  = []
-        arccycles = self.computearccycles()
-        result = [self.arccycle2polygon(arccycle) for arccycle in arccycles]
+        return [arccycle.points() for arccycle in self.arccycles()]
 
-        # remove same polygons with reverse direction
-        newresult = []
-        for polygon in result:
-            if not lreverse(polygon) in newresult:
-                newresult.append(polygon)
-        result = newresult
-        return result
             
