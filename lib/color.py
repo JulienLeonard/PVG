@@ -141,7 +141,7 @@ class Color:
 
     @staticmethod
     def grey(v=0.5,a=1.0):
-        return COlor(v,v,v,a)
+        return Color(v,v,v,a)
 
     @staticmethod
     def random(a=1.0):

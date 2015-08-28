@@ -6,3 +6,5 @@ from circle      import *
 from SVGparser   import *
 from intersectionbuilder import *
 from edgegraph import *
+from circlepackingbaoswitch import *
+from baopattern import *
