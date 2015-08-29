@@ -60,6 +60,12 @@ class R:
             else:
                 return False
 
+    def rand(self,niter = None):
+        if niter == None:
+            return self.sample(rand())
+        else:
+            return [self.sample(rand()) for i in range(niter)]
+
 #
 # define a multi range object by spec [(a1,v1),(a2,v2),...,(an,vn)]
 #

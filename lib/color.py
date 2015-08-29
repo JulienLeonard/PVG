@@ -186,6 +186,10 @@ class Color:
     def hue2color(hue):
         return Color.hsv(hue, 1.0, 1.0,1.0)
 
+    @staticmethod
+    def index2color(period,index):
+        return Color.hue2color(float(index%period)/(float(period)))
+
 
 
 #
