@@ -485,6 +485,13 @@ def puts(*arg):
     sys.stdout.flush()
 
 #
+# synchronized stdout print with condition
+#
+def ifputs(condition,*args):
+    if condition:
+        puts(*args)
+
+#
 # utilitary method
 #
 def lidentity(list):

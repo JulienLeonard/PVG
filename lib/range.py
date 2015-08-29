@@ -37,6 +37,9 @@ class R:
             t = 1.0
         return sample((self.mv1,self.mv2),t)
 
+    def samples(self,nsamples):
+        return [self.sample(t) for t in usamples(nsamples)]
+
     def v(self,t):
         return sample((self.mv1,self.mv2),t)
 
