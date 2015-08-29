@@ -6,12 +6,6 @@ from quadtree      import *
 from circleadj     import *
 from circlepacking import *
 
-def index2color(period,index):
-    return color.hue2color((index%period)/(float(period)))
-
-def nextadjcircle(node1,node2,newr,side):
-    return circles2tangent(node1,"OUT",node2,"OUT",newr,side)
-
 class BaoNode(Circle):
 
     def __init__(self,circle,colorindex,index):
@@ -46,11 +40,11 @@ class BaoNode(Circle):
     def nodes(nodes,startindex = None):
         result = []
         if startindex == None:
-            cindex = 0
+            cindex = -1
         else:
             cindex = startindex + 1
         for node in nodes:
-            newindex = iff(startindex == None,0,cindex)
+            newindex = iff(startindex == None,-1,cindex)
             result.append(BaoNode(node,cindex,newindex))
             cindex += 1
         return result
@@ -61,10 +55,11 @@ def baonodes0():
 
 class BaoStack:
     
-    def __init__(self,lastnode,lastlastnode):
-        self.mlastnode     = lastnode
-        self.mlastlastnode = lastlastnode
-        self.mothernode    = lastlastnode
+    def __init__(self,nodes):
+        self.mnodes        = nodes
+        self.mlastnode     = nodes[-1]
+        self.mlastlastnode = nodes[-2]
+        self.mothernode    = nodes[-2]
         self.mlast3node    = None
 
     def set(self,nodes,lastindex):
@@ -73,20 +68,44 @@ class BaoStack:
         self.mothernode    = None
         self.mlast3node    = None
 
-    def context(self):
-        return (self.mlastnode,self.mlastlastnode,self.mlast3node,self.mothernode)
+    def lastindex(self):
+        return len(self.mnodes) - 1 
 
-    def rotate(self,newnode,othernode):
+    def stack(self,newnode,othernode):
+        self.mnodes.append(newnode)
         self.mlast3node    = self.mlastlastnode
         self.mlastlastnode = self.mlastnode
         self.mlastnode     = newnode
         self.mothernode    = othernode
+        return self.lastindex()
 
     def lastnodes(self):
         return [self.mlastnode,self.mlastlastnode,self.mlast3node]
     
-    def seed(self):
+    def lastseed(self):
         return (self.mlastnode,self.mothernode)
+
+    def excludednodes(self,othernode):
+        return self.lastnodes() + [othernode]
+
+
+    def findlastfreenode(self,nodes,lastindex):
+        freenode = nodes[lastindex]
+        while ((freenode.retouch() or freenode.notfound()) and lastindex > 0):
+            lastindex = lastindex - 1
+            freenode = nodes[lastindex]
+        return (freenode,lastindex)
+
+    def rewindtofreenode(self,lastindex):
+        (freenode,lastindex) = self.findlastfreenode(self.mnodes,lastindex)
+        self.set(self.mnodes,lastindex)
+        return lastindex
+
+    def nodes(self):
+        return self.mnodes
+
+    def newindex(self):
+        return len(self.mnodes)
 
 class CirclePackingBao:
     
@@ -95,73 +114,68 @@ class CirclePackingBao:
     def computenextnode(quadtree,node2,node1,newr,index):
         allsides = [1.0,-1.0]
         for iside in allsides:
-            newcircle = nextadjcircle(node2,node1,newr,iside)
+            newcircle = circles2tangentout(node2,node1,newr,iside)
             if not newcircle == None and not quadtree.iscolliding(newcircle):
                 newbaonode = BaoNode(newcircle,node2.colorindex() + 1,index + 1)
                 return newbaonode
         return None
 
-    @staticmethod
-    def findlastfreenode(nodes,lastindex):
-        freenode = nodes[lastindex]
-        while ((freenode.retouch() or freenode.notfound()) and lastindex > 0):
-            lastindex = lastindex - 1
-            freenode = nodes[lastindex]
-        return (freenode,lastindex)
 
     @staticmethod
     def findnewother(quadtree,lastnode,excludenodes,newr):
         bigcircle   = lastnode.scale( (lastnode.r() + newr * 2.1)/ lastnode.r() )
         collidings  = quadtree.colliding(bigcircle)
         ccollidings = lsubstract(collidings,excludenodes)
+        ccollidings = lremove([node if (node.index() >= 0) else None for node in ccollidings],None)
         sortlist = [(n.index,n) for n in ccollidings]
         sortlist.sort()
         return [item[1] for item in sortlist]
 
+    #
+    # lazy method to avoid calling findnewother if othernode exist and is successful
+    #
+    @staticmethod
+    def genothernodes(othernode,quadtree,lastnode,stack,newr):
+        if not othernode == None:
+            yield othernode
+        ccollidings = CirclePackingBao.findnewother(quadtree,lastnode,stack.excludednodes(othernode),newr)
+        for othernode in ccollidings:
+            yield othernode
 
     @staticmethod
     def iter(boundaries,inodes,baopattern,niter):
         nodes       = BaoNode.nodes(inodes,0)
         boundaries  = BaoNode.nodes(boundaries)        
-        stack       = BaoStack(nodes[-1],nodes[-2])
-        lastindex   = 1
+        stack       = BaoStack(nodes)
+        lastindex   = stack.lastindex()
         quadtree    = QuadTree().adds( boundaries + nodes )
         
         for iiter in range(niter):
             ifputs(iiter % 1000 == 0,"niter",iiter)
 
             # get current paramaters
-            (lastnode,othernode) = stack.seed()
+            (lastnode,othernode) = stack.lastseed()
             newr                 = baopattern.next().radius()
 
             # compute new node if possible
             newbaonode = None
 
-            if not othernode == None:
-                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,len(nodes))
-
-            if newbaonode == None:
-                ccollidings = CirclePackingBao.findnewother(quadtree,lastnode,(stack.lastnodes() + [othernode]),newr)
-                    
-                for othernode in ccollidings:
-                    newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,len(nodes))
-                    if not newbaonode == None:
-                        break
+            for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
+                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex())
+                if not newbaonode == None:
+                    break
 
             # update according to result
             if newbaonode == None:
                 lastnode.notfound(True)
-                (freenode,lastindex) = CirclePackingBao.findlastfreenode(nodes,lastindex)
-                stack.set(nodes,lastindex)
+                lastindex = stack.rewindtofreenode(lastindex)
             else:
                 othernode.retouch(True)
                 quadtree.add(newbaonode)
-                nodes.append(newbaonode)
                 baopattern.draw(newbaonode,lastindex)
-                lastindex = len(nodes)-1
-                stack.rotate(newbaonode,othernode)
+                lastindex = stack.stack(newbaonode,othernode)
 
             if lastindex < 1:
                 break
             
-        return nodes
+        return stack.nodes()
