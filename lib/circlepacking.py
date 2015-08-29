@@ -6,7 +6,9 @@ from quadtree import *
 from circleadj import *
 
 class CircleNode(Circle):
-    def __init__(self):
+    def __init__(self,center = None, radius = 1.0):
+        self.mcenter  = center
+        self.mr       = radius
         self.mcontent = None
 
 def radiusfmin(r1,r2):
