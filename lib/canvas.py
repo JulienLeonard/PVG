@@ -10,6 +10,7 @@ class Canvas():
         self.msizes            = ImageDim(1000,1000)
         self.mbackground       = Color.white()
         self.moutputdir        = defaultoutputdir()
+        self.mmargin           = 1.25
 
     def outputdir(self,outdir):
         self.moutputdir = outdir
@@ -27,9 +28,13 @@ class Canvas():
         self.mbackground = background
         return self
 
+    def margin(self,margin):
+        self.mmargin = margin
+        return self
+
     def render(self):
         if self.mrender == None:
-            self.mrender = RenderCenter(self.msizes,self.mbackground).outputfilepath(self.moutputfilename)
+            self.mrender = RenderCenter(self.msizes,self.mbackground).outputfilepath(self.moutputfilename).margin(self.mmargin)
         return self.mrender
 
     def save(self,outputfilepath):

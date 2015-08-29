@@ -25,6 +25,7 @@ class Render:
         self.mviewport  = viewport
         self.mfilename  = filename
         self.mbackcolor = backcolor
+        self.mmargin    = 1.25
         self.selfinit()
 
     def outputfilepath(self,v = None):
@@ -32,6 +33,13 @@ class Render:
             return self.mfilename
         else:
             self.mfilename = v
+            return self
+
+    def margin(self, v = None):
+        if v == None:
+            return self.mmargin
+        else:
+            self.mmargin = v
             return self
 
     def draw(self, shape, colorc = Color.black() ):
