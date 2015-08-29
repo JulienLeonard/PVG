@@ -6,14 +6,16 @@ class BaoPattern:
     def __init__(self):
         self.mradiuspattern = [1.0]
         self.mcolorpattern  = [Color.black()]
-        self.mindex   = 0
+        self.mindex         = 0
+        self.mfdraw         = None
 
     #
     # return (RatioRadius,Color)
     #
     def next(self):
         self.mindex += 1
-        return (lcircular(self.mradiuspattern,self.mindex),lcircular(self.mcolorpattern,self.mindex))
+        # return (self.nextradius(),self.nextcolor())
+        return self
 
     def radiuspattern(self,radiuspattern):
         self.mradiuspattern = radiuspattern
@@ -22,6 +24,23 @@ class BaoPattern:
     def colorpattern(self,colorpattern):
         self.mcolorpattern = colorpattern
         return self
+
+    def fdraw(self, v = None):
+        if v == None:
+            return self.mfdraw
+        else:
+            self.mfdraw = v
+            return self
+
+    def draw(self,newnode,index):
+        self.fdraw()(newnode,index,self.color())
+
+    def radius(self):
+        return lcircular(self.mradiuspattern,self.mindex)
+
+    def color(self):
+        return lcircular(self.mcolorpattern,self.mindex)
+    
 
 #
 # TODO: do proper inheritance of constructor

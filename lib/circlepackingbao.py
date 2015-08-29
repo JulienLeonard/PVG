@@ -92,7 +92,7 @@ class CirclePackingBao:
     
 
     @staticmethod
-    def computenextnode(stack,quadtree,node2,node1,newr,index):
+    def computenextnode(quadtree,node2,node1,newr,index):
         allsides = [1.0,-1.0]
         for iside in allsides:
             newcircle = nextadjcircle(node2,node1,newr,iside)
@@ -110,17 +110,17 @@ class CirclePackingBao:
         return (freenode,lastindex)
 
     @staticmethod
-    def findnewother(quadtree,stack,lastnode,othernode,newr):
+    def findnewother(quadtree,lastnode,excludenodes,newr):
         bigcircle   = lastnode.scale( (lastnode.r() + newr * 2.1)/ lastnode.r() )
         collidings  = quadtree.colliding(bigcircle)
-        ccollidings = lsubstract(collidings,stack.lastnodes() + [othernode])
+        ccollidings = lsubstract(collidings,excludenodes)
         sortlist = [(n.index,n) for n in ccollidings]
         sortlist.sort()
         return [item[1] for item in sortlist]
 
 
     @staticmethod
-    def iter(canvas,fdraw,boundaries,inodes,baopattern,niter):
+    def iter(boundaries,inodes,baopattern,niter):
         nodes       = BaoNode.nodes(inodes,0)
         boundaries  = BaoNode.nodes(boundaries)        
         stack       = BaoStack(nodes[-1],nodes[-2])
@@ -132,21 +132,20 @@ class CirclePackingBao:
 
             # get current paramaters
             (lastnode,othernode) = stack.seed()
-            (newr,newstyle)      = baopattern.next()
+            newr                 = baopattern.next().radius()
 
             # compute new node if possible
             newbaonode = None
 
             if not othernode == None:
-                newbaonode = CirclePackingBao.computenextnode(stack,quadtree,lastnode,othernode,newr,len(nodes))
+                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,len(nodes))
 
             if newbaonode == None:
-                ccollidings = CirclePackingBao.findnewother(quadtree,stack,lastnode,othernode,newr)
+                ccollidings = CirclePackingBao.findnewother(quadtree,lastnode,(stack.lastnodes() + [othernode]),newr)
                     
-                for ccolliding in ccollidings:
-                    newbaonode = CirclePackingBao.computenextnode(stack,quadtree,lastnode,ccolliding,newr,len(nodes))
+                for othernode in ccollidings:
+                    newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,len(nodes))
                     if not newbaonode == None:
-                        othernode = ccolliding
                         break
 
             # update according to result
@@ -158,7 +157,7 @@ class CirclePackingBao:
                 othernode.retouch(True)
                 quadtree.add(newbaonode)
                 nodes.append(newbaonode)
-                fdraw(canvas,newbaonode,lastindex,newstyle)
+                baopattern.draw(newbaonode,lastindex)
                 lastindex = len(nodes)-1
                 stack.rotate(newbaonode,othernode)
 
