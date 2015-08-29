@@ -149,7 +149,7 @@ class QuadTree:
         return 0
 
     def colliding(self,newshape):
-        shapes = self.rootquad.mayintersect( newshape )
+        shapes = lunique(self.rootquad.mayintersect( newshape ))
         # puts("mayhem",mayhem)
         # shapes = list(set(self.rootquad.mayintersect( newshape )))
         # print "mayintersect",shapes

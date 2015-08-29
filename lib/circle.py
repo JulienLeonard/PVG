@@ -6,17 +6,17 @@ from polygon  import *
 # define a circle object
 #
 class Circle:
-    def __init__(self,pcenter=Point(0.0,0.0),r=1.0):
-        self.mcenter = pcenter
-        self.mr      = r
+    def __init__(self,center=Point(0.0,0.0),radius=1.0):
+        self.mcenter = center
+        self.mradius = radius
 
     def coords(self,v=None):
         if not v == None:
             self.mcenter = Point(v[0],v[1])
-            self.mr      = v[2]
+            self.mradius = v[2]
             return self
         else:
-            return (self.mcenter.x(),self.mcenter.y(),self.mr)
+            return (self.x(),self.y(),self.radius())
 
     def center(self,v=None):
         if not v == None:
@@ -27,10 +27,10 @@ class Circle:
 
     def radius(self,v=None):
         if not v == None:
-            self.mr = v
+            self.mradius = v
             return self
         else:
-            return self.mr
+            return self.mradius
 
     def r(self,v=None):
         return self.radius(v)
