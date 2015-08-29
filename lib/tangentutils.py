@@ -51,6 +51,9 @@ def circles2tangent(c1,type1,c2,type2,radius,side):
     newcenter = c2.center().add(vnew)
     return Circle(newcenter,radius)
 
+def circles2tangentout(c1,c2,radius,side):
+    return circles2tangent(c1,"OUT",c2,"OUT",radius,side)
+
 def arecirclestangent(c1,c2,sensitivity=0.01):
     return circleintersect(c1,c2,sensitivity)
 

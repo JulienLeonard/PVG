@@ -60,6 +60,6 @@ class RenderCenter(RenderCairo):
         self.endpicture()
 
     def viewport(self):
-        return polygons2bbox([item[0] for item in self.mitems]).resize(1.25).viewport()
+        return polygons2bbox([item[0] for item in self.mitems]).resize(self.margin()).viewport()
         
             
