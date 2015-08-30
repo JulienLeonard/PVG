@@ -133,6 +133,10 @@ class Vector(Coords):
     def cross(self,ov):
         return (self.x() * ov.y() - self.y() * ov.x())
 
+    def add(self,v):
+        return Vector(self.x() + v.x(),self.y() + v.y())
+
+
 #
 # default defs
 #

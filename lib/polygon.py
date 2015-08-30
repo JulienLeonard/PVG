@@ -221,11 +221,11 @@ class Polygon:
                 #puts("s1",s1,"ns",ns)
                 i = raw_intersection(s1[0],s1[1],ns[0],ns[1])
                 #puts("intersection point",i)
-                if len(i) > 0:
-                    if i[0] == 'all':
+                if not i == None:
+                    if isinstance(i,PR):
                         puts("error: offset segs cannot be identicals")
                     else:
-                        segs[index]   = (s1[0],i)
+                        segs[index]      = (s1[0],i)
                         segs[index+2+ni] = (i,ns[1])
                         segs = lconcat(segs[:index+1],segs[index+2+ni:])
             else:
@@ -237,19 +237,19 @@ class Polygon:
 
     def offset(self,size):
         result = []
-        for p1,p2 in pairs(self.mpoints):
+        for p1,p2 in pairs(self.points()):
             v = vector(p1,p2)
-            if vlength(v) > 0.0001:
+            if v.length() > 0.0001:
                 v = v.ortho().normalize().scale(size)
-                result.append(padd(p1,v))
-                result.append(padd(p2,v))
+                result.extend([p1.add(v),p2.add(v)])
         
         newresult = [result[0]]
         for p in result[1:]:
-            if (vlength(vector(newresult[-1],p)) > 0.01):
+            if (vector(newresult[-1],p).length()) > 0.01:
                 newresult.append(p)
         
-        result = self.checkoffsetintersections(newresult)
+        # result = self.checkoffsetintersections(newresult)
+        result = newresult
 
         newresult = [result[0]]
         for p in result[1:]:
@@ -328,6 +328,9 @@ class Polygon:
 
     def sublines(self,ts):
         return [self.subline(t1,t2) for (t1,t2) in pairs(ts)]
+
+    def split(self,ntimes):
+        return [self.subline(t1,t2) for (t1,t2) in pairs(usamples(ntimes+1))]
                 
     def addline(self,size):
         result = self.mpoints[:]
@@ -393,6 +396,9 @@ class Polygon:
         
     def middle(self):
         return pmiddle(self.points())
+
+    def line(self,width):
+        return self.offset(width/2.0).concat(self.offset(-width/2.0).reverse())
 
 
 def polygonfromradiusangle(origin,radiuss,angles):
