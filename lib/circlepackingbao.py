@@ -107,6 +107,15 @@ class BaoStack:
     def newindex(self):
         return len(self.mnodes)
 
+    def node(self,index):
+        for node in self.mnodes:
+            if node.index() == index:
+                return node
+        return None
+
+    def nextothernode(self,othernode):
+        return self.node(othernode.index() + 1)
+
 class CirclePackingBao:
     
 
@@ -138,6 +147,8 @@ class CirclePackingBao:
     def genothernodes(othernode,quadtree,lastnode,stack,newr):
         if not othernode == None:
             yield othernode
+        if not othernode == None:
+            yield stack.nextothernode(othernode)
         ccollidings = CirclePackingBao.findnewother(quadtree,lastnode,stack.excludednodes(othernode),newr)
         for othernode in ccollidings:
             yield othernode

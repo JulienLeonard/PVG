@@ -40,7 +40,7 @@ def circles2tangent(c1,type1,c2,type2,radius,side):
     l2 = r2 + radius
     denom = (2.0 * l2 * l3)
     if denom == 0.0:
-        puts("circles2tangent: error with circles",c1.list(),c2.list())
+        # puts("circles2tangent: error with circles",c1.coords(),c2.coords())
         return None
     cosv = (l3 * l3 - l1 * l1 + l2 * l2)/denom
     if cosv < -1.0 or cosv > 1.0:
