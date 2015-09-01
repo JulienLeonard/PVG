@@ -149,7 +149,38 @@ class CurveBuilder:
             pvs = lconcat(pvs,[o1,o2])
         return regularbezierpolylinefrompointsvectors(pvs)
 
-    
+#
+# curve range
+#
+class CR:    
+
+    def __init__(self,c1,c2):
+        self.mv1 = c1
+        self.mv2 = c2
+
+    def sample(self,t):
+        return CurveBuilder.interline(self.mv1,self.mv2,t)
+
+    def samples(self,values):
+        if not type(values) == list:
+            values = usamples(values)
+        return [self.sample(t) for t in values]
+
+    def lines(self,values):
+        return [line.line() for line in self.samples(values)]
+
+
+def curveRange(self,abs1 = 0.0, abs2 = 0.5):
+    base = self
+    if not self.isclosed():
+        base = self.close()
+    line1 = base.subline(abs1,abs2)
+    line2 = base.subline(1.0,abs2)
+    return CR(line1,line2)
+
+Polygon.curveRange = curveRange
+
+
 
 
 
