@@ -397,7 +397,9 @@ class Polygon:
     def middle(self):
         return pmiddle(self.points())
 
-    def line(self,width):
+    def line(self,width=None):
+        if width == None:
+            width = self.length()/100.0
         return self.offset(width/2.0).concat(self.offset(-width/2.0).reverse())
 
 
