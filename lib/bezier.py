@@ -103,6 +103,9 @@ class Bezier:
 	def sym(self,center):
 		return bezierfrompointlist([p.sym(center) for p in self.points])
 
+	def symx(self,symx):
+		return bezierfrompointlist([Point(2.0*symx-p.x(),p.y())for p in self.points])
+
 	def _frame(self,t):
 		return (self._point(t),self._tangent(t))
 
@@ -435,6 +438,9 @@ class PolyBezier:
 	
 	def reverse(self):
 		return PolyBezier().adds([bezier.reverse() for bezier in lreverse(self.mbeziers)])
+
+	def symx(self,symx):
+		return PolyBezier().adds([bezier.symx(symx) for bezier in self.mbeziers])
 	
 	def clockwise(self):
 		if self.polygon().isClockwise():

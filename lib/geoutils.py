@@ -298,6 +298,14 @@ class BBox:
         xmin,ymin,xmax,ymax = self.coords()
         return [Point(xmin,ymin),Point(xmax,ymin),Point(xmin,ymax),Point(xmax,ymax)]
 
+    def squarepoints(self):
+        size   = self.size()
+        center = self.center()
+        return [Point(center.x()-size/2.0,center.y()-size/2.0),
+                   Point(center.x()-size/2.0,center.y()+size/2.0),
+                   Point(center.x()+size/2.0,center.y()+size/2.0),
+                   Point(center.x()+size/2.0,center.y()-size/2.0)]
+
     # def intersect(self,obbox):
     #     for p in obbox.corners():
     #         if self.contain(p):

@@ -14,11 +14,13 @@ class Silhouette:
     def add(self,polybezier):
         self._add(polybezier)
         self.computelevels()
+        return self
 
     def adds(self,polybeziers):
         for polybezier in polybeziers:
             self._add(polybezier)
         self.computelevels()
+        return self
 
 
     def _add(self,polybezier):
@@ -36,8 +38,11 @@ class Silhouette:
     def size(self):
         return self.mviewbox.size()
 
+    def bbox(self,factor=1.1):
+        return self.mviewbox.resize(factor)
+
     def viewport(self,factor=1.1):
-        return self.mviewbox.viewport(factor)
+        return self.mviewbox.resize(factor).viewport(factor)
 
     def computelevels(self):
         # puts("computelevels nbeziers",len(self.mbeziers))
@@ -93,6 +98,10 @@ class Silhouette:
             for bezier in silhouette.beziers():
                 result.add(bezier)
         return result
+
+    def symx(self,symx):
+        return Silhouette().adds([bezier.symx(symx) for bezier in self.beziers()])
+
 
 def svgpaths2silhouette(svgPaths):
     result = Silhouette()
