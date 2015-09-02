@@ -306,12 +306,22 @@ class BBox:
                    Point(center.x()+size/2.0,center.y()+size/2.0),
                    Point(center.x()+size/2.0,center.y()-size/2.0)]
 
-    # def intersect(self,obbox):
-    #     for p in obbox.corners():
-    #         if self.contain(p):
-    #             return True
-    #     return False
-            
+    def intersect(self,obbox):
+        (xmin0,ymin0,xmax0,ymax0) = self.coords()
+        (xmin,ymin,xmax,ymax)     = obbox.coords()
+        return (xmin <= xmax0 and xmax >= xmin0 and ymin <= ymax0 and ymax >= ymin0)
+
+    def split4(self):
+        (xmin,ymin,xmax,ymax) = self.coords()
+
+        middlex = (xmin + xmax)/2.0
+        middley = (ymin + ymax)/2.0
+        
+        return [BBox(xmin, ymin, middlex, middley),
+                BBox(xmin, middley, middlex, ymax),
+                BBox(middlex,middley, xmax,ymax),
+                BBox(middlex, ymin, xmax, middley)]
+
 
 
 def bbunion(bbox1,bbox2):
