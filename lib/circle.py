@@ -64,6 +64,10 @@ class Circle:
     def polygon(self,npoints=30):
         return Polygon([self.point(i) for i in usamples(npoints+1)][:-1])
         
+    @staticmethod
+    def intersect(c1,c2):
+        return circleintersect(c1,c2)
+
 
 C0 = Circle()
 

@@ -83,7 +83,7 @@ class CurveBuilder:
 
     @staticmethod
     def interline(line1,line2,t):
-        return Polygon([PR(line1.point(i),line2.point(i)).sample(t) for i in usamples(100)])
+        return Polygon([Segment(line1.point(i),line2.point(i)).sample(t) for i in usamples(100)])
 
     @staticmethod
     def interlinemap(up,down,left,right,factor):

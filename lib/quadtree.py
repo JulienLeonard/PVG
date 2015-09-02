@@ -1,13 +1,11 @@
 from geoutils import *
-from circle   import *
 
 class Quad:
-    def __init__(self,bbox,fshapeintersect):
+    def __init__(self,bbox):
         self.mbbox    = bbox
         self.msubquads = []
         self.mshapemap = {}
         self.mmaxshapenumber = 10
-        self.mfshapeintersect = fshapeintersect
 
     def descr(self):
         (xmin,ymin,xmax,ymax) = self.mbbox.coords()
@@ -60,7 +58,7 @@ class Quad:
             self.mshapemap[push] = []
 
         for c in self.ownshapes():
-            if self.mfshapeintersect(shape,c):
+            if Shape.intersect(shape,c):
                 self.mmaxshapenumber += 1
 
         self.mshapemap[push].append(shape)
@@ -69,7 +67,7 @@ class Quad:
             self.split()
 
     def split(self):
-        newsubquads  = [Quad(bbox,self.mfshapeintersect) for bbox in self.mmbox.split4()]
+        newsubquads  = [Quad(bbox) for bbox in self.mmbox.split4()]
         self.msubquads.extend(newsubquads)
         
         for push in self.mshapemap.keys():
@@ -95,13 +93,15 @@ class Quad:
     def bbox(self):
         return self.mbbox
 
+#
+# Generic Quadtree, using Shape.intersect 
+#
 class QuadTree:
-    def __init__(self,bbox0=None,,fshapeintersect=circleintersect):
+    def __init__(self,bbox0=None):
         if bbox0 == None:
             bbox0 = BBox(-1000.0,-1000.0,1000.0,1000.0)
-        self.mrootquad = Quad(bbox0,fshapeintersect)
+        self.mrootquad = Quad(bbox0)
         self.mpush = 0
-        self.mfshapeintersect = circleintersect
 
     def push(self):
         self.mpush += 1
@@ -121,45 +121,13 @@ class QuadTree:
     def iscolliding(self,newshape):
         shapes = self.mrootquad.mayintersect( newshape )
         for shape in shapes:
-            if self.mfshapeintersect(shape,newshape):
-                return 1
-        return 0
-
-    def colliding(self,newshape):
-        shapes = lunique(self.mrootquad.mayintersect( newshape ))
-        return [shape for shape in shapes if self.mfshapeintersect(shape,newshape)]
-
-    def shapes(self):
-        return self.mrootquad.shapes()
-
-#
-# Quadtree for segments
-#
-#
-class QuadTreeSeg:
-    def __init__(self,bbox0 == None):
-        if bbox0 == None:
-            bbox0 = BBox(-1000.0,-1000.0,1000.0,1000.0)        
-        self.mrootquad = Quad(bbox0)
-        self.mpush = 0
-
-    def push(self):
-        self.mpush += 1
-
-    def pop(self):
-        self.mrootquad.pop(self.mpush)
-        self.mpush += -1
-
-    def add(self,seg):
-        self.mrootquad.add(seg,0)
-
-    def iscolliding(self,newseg):
-        segs = self.mrootquad.mayintersect( newseg )
-        for seg in segs:
-            if not raw_intersection(newseg[0],newseg[1],seg[0],seg[1]) == None:
+            if Shape.intersect(shape,newshape):
                 return True
         return False
 
-    def colliding(self,newseg):
-        segs = list(set(self.mrootquad.mayintersect( newseg )))
-        return [seg for seg in segs if not raw_intersection(newseg[0],newseg[1],seg[0],seg[1]) == None]
+    def colliding(self,newshape):
+        shapes = lunique(self.mrootquad.mayintersect( newshape ))
+        return [shape for shape in shapes if Shape.intersect(shape,newshape)]
+
+    def shapes(self):
+        return self.mrootquad.shapes()

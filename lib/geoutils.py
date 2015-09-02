@@ -179,9 +179,9 @@ def pmiddle(points):
     return Point(sum(listx)/float(len(points)),sum(listy)/float(len(points)))
 
 #
-# class point range (ie Segment)
+# Segment
 #
-class PR:
+class Segment:
     
     def __init__(self,p1,p2):
         self.mp1 = p1
@@ -208,6 +208,9 @@ class PR:
     def coords(self):
         return self.mp1.coords() + self.mp2.coords()
 
+    @staticmethod
+    def intersect(seg1,seg2):
+        return (not raw_intersection(seg1.p1(),seg1.p2(),seg2.p1(),seg2.p2()) == None)
 
 def pequal(p1,p2,error=0.00001):
     if (vector(p1,p2).length() < error):
@@ -434,15 +437,15 @@ def raw_intersection (p1,p2,p3,p4):
 
         if R(x1,x2).contain(x3):
             if R(x1,x2).contain(x4):
-                result = PR(Point(x3,y3),Point(x4,y4))
+                result = Segment(Point(x3,y3),Point(x4,y4))
             else:
-                result = PR(Point(x3,y3),Point(x2,y2))
+                result = Segment(Point(x3,y3),Point(x2,y2))
         else:
             if R(x1,x2).contain(x4):
-                result = PR(Point(x1,y1),Point(x4,y4))
+                result = Segment(Point(x1,y1),Point(x4,y4))
             else: 
                 if R(x3,x4).contain(x1) and R(x3,x4).contain(x2):
-                    result =  PR(Point(x1,y1),Point(x2,y2))
+                    result =  Segment(Point(x1,y1),Point(x2,y2))
                 else:
                     result = None
 

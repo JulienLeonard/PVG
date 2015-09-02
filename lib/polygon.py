@@ -84,7 +84,7 @@ class Polygon:
 
     def _point(self,t,i1,i2):
         at = R(i1[0],i2[0]).abscissa(t)
-        return PR(i1[1],i2[1]).sample(at)
+        return Segment(i1[1],i2[1]).sample(at)
 
     def tangent(self,t):
         if len(self.mpoints) == 1:
@@ -222,7 +222,7 @@ class Polygon:
                 i = raw_intersection(s1[0],s1[1],ns[0],ns[1])
                 #puts("intersection point",i)
                 if not i == None:
-                    if isinstance(i,PR):
+                    if isinstance(i,Segment):
                         puts("error: offset segs cannot be identicals")
                     else:
                         segs[index]      = (s1[0],i)

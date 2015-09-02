@@ -461,7 +461,7 @@ class PolyBezier:
 				if nsize < 2:
 					result.append((p1,p2))
 				else:
-					newpoints = PR(p1,p2).samples(nsize)
+					newpoints = Segment(p1,p2).samples(nsize)
 					result.extend(pairs(newpoints))
 		return result
 		
@@ -473,10 +473,10 @@ def roundpolygon(polygon,factor):
     for (p1,p2) in pairs(polygon + [polygon[0]]):
 	    # puts("p1",p1,"p2",p2)    
         if factor == 0.5:
-            newpoints.append(PR(p1,p2).sample(0.5))
+            newpoints.append(Segment(p1,p2).sample(0.5))
         else:
             for cabs in [factor,1.0-factor]:
-                newpoints.append(PR(p1,p2).sample(cabs))
+                newpoints.append(Segment(p1,p2).sample(cabs))
     
     # then build regular bezier from the new points
     return regularbezierfrompoints(newpoints)
