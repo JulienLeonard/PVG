@@ -127,11 +127,11 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(raw_intersection(Point(0.8,0.0), Point(0.8,0.0), Point(0.0,0.0), Point(1.0,0.0)).coords(), Point(0.8,0.0).coords())
 
         # included segments
-        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.0,0.0),  Point(1.0,0.0)).coords(),  PR(Point(0.0,0.0),Point(1.0,0.0)).coords())
-        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.5,0.0),  Point(0.75,0.0)).coords(), PR(Point(0.5,0.0),Point(0.75,0.0)).coords())
-        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.75,0.0), Point(0.5,0.0)).coords(),  PR(Point(0.5,0.0),Point(0.75,0.0)).coords())
-        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(1.0,0.0),  Point(3.0,0.0)).coords(),  PR(Point(1.0,0.0),Point(2.0,0.0)).coords())
-        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(3.0,0.0),  Point(1.0,0.0)).coords(),  PR(Point(1.0,0.0),Point(2.0,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.0,0.0),  Point(1.0,0.0)).coords(),  Segment(Point(0.0,0.0),Point(1.0,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.5,0.0),  Point(0.75,0.0)).coords(), Segment(Point(0.5,0.0),Point(0.75,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.75,0.0), Point(0.5,0.0)).coords(),  Segment(Point(0.5,0.0),Point(0.75,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(1.0,0.0),  Point(3.0,0.0)).coords(),  Segment(Point(1.0,0.0),Point(2.0,0.0)).coords())
+        self.assertEqual(raw_intersection(Point(0.0,0.0), Point(2.0,0.0), Point(3.0,0.0),  Point(1.0,0.0)).coords(),  Segment(Point(1.0,0.0),Point(2.0,0.0)).coords())
 
         # point intersection
         self.assertEqual(raw_intersection(Point(0.0,0.0), Point(1.0,0.0), Point(0.5,1.0), Point(0.5,-1.0)).coords(), Point(0.5,0.0).coords())

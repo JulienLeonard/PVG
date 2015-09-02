@@ -16,9 +16,9 @@ class GeoMatcher:
                     index += 1
             
         pbbox     = points2bbox(pointindices.keys())
-        differror = pbbox.size()/100000.0
+        differror = pbbox.size()/10000.0
         # print "differror",differror
-        quadtree = QuadTree(pbbox.size()*10.0,pbbox.size()*10.0)
+        quadtree = QuadTree(pbbox)
         sames = {}
         for i in points.keys():
             sames[i] = [i]

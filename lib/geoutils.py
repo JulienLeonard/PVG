@@ -199,18 +199,38 @@ class Segment:
     def isPoint(self):
         return self.p1().coords() == self.p2().coords()
 
+    def middle(self):
+        return self.sample(0.5)
+
     def sample(self,t):
         return Point(self.mrx.sample(t),self.mry.sample(t))
 
     def samples(self,ntimes):
         return [self.sample(abs) for abs in usamples(ntimes)]
 
+    def points(self):
+        return (self.p1(),self.p2())
+
+    def point(self,t):
+        return self.sample(t)
+
     def coords(self):
-        return self.mp1.coords() + self.mp2.coords()
+        return self.p1().coords() + self.p2().coords()
+
+    def vector(self):
+        return vector(self.p1(),self.p2())
+
+    def length(self):
+        return self.vector().length()
 
     @staticmethod
     def intersect(seg1,seg2):
         return (not raw_intersection(seg1.p1(),seg1.p2(),seg2.p1(),seg2.p2()) == None)
+
+    @staticmethod
+    def intersection(seg1,seg2):
+        return raw_intersection(seg1.p1(),seg1.p2(),seg2.p1(),seg2.p2())
+
 
 def pequal(p1,p2,error=0.00001):
     if (vector(p1,p2).length() < error):
@@ -358,7 +378,6 @@ def polygons2bbox(polygons):
 
 def segviewbox(seg):
     return BBox().frompoints([seg[0],seg[1]])
-
 
 def vscale(v,ratio):
     return (v[0] * ratio, v[1] * ratio)

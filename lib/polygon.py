@@ -1,13 +1,48 @@
 from geoutils  import *
 
+class PointAbscissaRange:
+        
+    def __init__(self,t1,t2,seg):
+        self.mra   = R(t1,t2)
+        self.mseg  = seg
+
+    def arange(self):
+        return self.mra
+
+    def a1(self):
+        return self.arange().v1()
+
+    def a2(self):
+        return self.arange().v2()
+
+    def segment(self):
+        return self.mseg
+
+    def sample(self,t):
+        rt = self.mra.abscissa(t)
+        return self.mseg.point(rt)
+
+    def contain(self,t):
+        return (self.mra.v1() <= t and t <= self.mra.v2())
+
+    def point(self,t):
+        return self.sample(t)
+
+    def vector(self):
+        return self.mseg.vector()
+
+    def coords(self):
+        return [self.a1(),self.a2(),self.segment().coords()]
+
 #
 # class used to manage a seuqnce of points
 #
 class Polygon:
     def __init__(self,points):
-        self.mpoints  = points[:]
-        self.mlengths = []
-        self.mlength  = -1
+        self.mpoints    = points[:]
+        self.msegments  = [Segment(p1,p2) for (p1,p2) in pairs(self.mpoints)]
+        self.mparanges  = None
+        self.mlength    = None
 
     def points(self,npoints=None):
         if npoints == None:
@@ -15,11 +50,21 @@ class Polygon:
         else:
             return self.samples(npoints)
 
+    def segments(self):
+        return self.msegments
+    
+    def paranges(self):
+        if self.mparanges == None:
+            self._computeparanges()
+        return self.mparanges
+
     def bbox(self):
         return points2bbox(self.mpoints)
 
     def samples(self,npoints):
-        return [self.point(abs) for abs in usamples(npoints)]
+        if not type(npoints) == list:
+            npoints = usamples(npoints)
+        return [self.point(abs) for abs in npoints]
 
     def lengthsamples(self,size):
         result = []
@@ -31,81 +76,65 @@ class Polygon:
         result.append(self.point(1.0))
         return result
     
-    def lengths(self):
-        self._checklengths()
-        return self.mlengths
-
     def length(self):
-        self._checklengths()
+        if self.mlength == None:
+            self._computeparanges()
         return self.mlength
         
-    def _checklengths(self):
-        if len(self.mlengths) == 0:
-            self._computelengths()
-        
-    def _computelengths(self):
-        result = [[0.0,self.mpoints[0]]]
-        mylength = 0.0
-        for p1,p2 in pairs(self.mpoints):
-            mylength += vector(p1,p2).length()
-            result.append([mylength,p2])
+    def _computeparanges(self):
+        self.mparanges = []
+        result  = []
+        olength = 0.0
+        for seg in self.segments():
+            clength = olength + seg.length()
+            result.append((olength,clength,seg))
+            olength = clength
             
-        self.mlength = mylength
+        finallength = clength
+        self.mlength = finallength
         if self.mlength == 0.0:
-            self.mlengths.append([0.0,self.mpoints[0]])
-            for p in self.mpoints[1:]:
-                self.mlengths.append([1.0,p])
+            self.mparanges.append(PointAbscissaRange(0.0,1.0,self.segments()[0]))
+            for seg in self.segments()[1:]:
+                self.mparanges.append(PointAbscissaRange(1.0,1.0,seg))
         else:
-            for item in result:
-                self.mlengths.append([item[0]/mylength,item[1]])
+            for (t1,t2,seg) in result:
+                self.mparanges.append(PointAbscissaRange(t1/finallength,t2/finallength,seg))
 
-    def segment(self,t):
-        self._checklengths()
-        # print "lengths",self.lengths
+    def _pointabscissarange(self,t):
         if (t >= 1.0):
-            return [self.mlengths[-2],self.mlengths[-1]]
+            return self.paranges()[-1]
         elif (t <= 0.0):
-            return [self.mlengths[0],self.mlengths[1]]
-        for i1,i2 in pairs(self.mlengths):
-            # print "i1",i1,"i2",i2
-            if (i1[0] <= t and t < i2[0]):
-                return (i1,i2)
+            return self.paranges()[0]
+        for parange in self.paranges():
+            if parange.contain(t):
+                return parange
+        return None
 
     def curvabscissa(self,pointindex):
-        self._checklengths()
-        return self.mlengths[pointindex][0]
+        if pointindex == 0:
+            return 0.0
+        else:
+            self.paranges()[pointindex].a2()
 
     def point(self,t):
         if len(self.mpoints) == 1:
             return self.mpoints[0]
-        i1,i2 = self.segment(t)
-        result = self._point(t,i1,i2)
-        return result
-
-    def _point(self,t,i1,i2):
-        at = R(i1[0],i2[0]).abscissa(t)
-        return Segment(i1[1],i2[1]).sample(at)
+        return self._pointabscissarange(t).sample(t)
 
     def tangent(self,t):
         if len(self.mpoints) == 1:
             return Vector(0.0,0.0)
-        i1,i2 = self.segment(t)
-        return self._tangent(t,i1,i2)
-
-    def _tangent(self,t,i1,i2):
-        return vector(i1[1],i2[1])
+        return self._pointabscissarange(t).vector()
 
     def normal(self,t):
         if len(self.mpoints) == 1:
             return Vector(0.0,0.0)
-        return vortho(self.tangent(t))
+        return self.tangent(t).ortho()
 
     def frame(self,t):
-        i1,i2 = self.segment(t)
-        return (self._point(t,i1,i2),self._tangent(t,i1,i2))
+        parange = self._abscissapointrange(t)
+        return (parange.point(t),parange.vector())
 
-    def segments(self):
-        return [(p1,p2) for (p1,p2) in pairs(self.mpoints)]
 
     # return list of subsegments due to intersection
     def subpolygonsfromintersection(self,polygon2):
@@ -117,18 +146,17 @@ class Polygon:
         isfirstpointinter = False
         firstpoint = self.mpoints[0]
         for seg1 in segs1:
-            p11,p12 = seg1
+            p11 = seg1.p1()
             if len(subresult) == 0 or pdiff(subresult[-1], p11,differror):
                 subresult.append(p11)
             inters = []
             for seg2 in segs2:
-                p21,p22 = seg2
-                inter = raw_intersection(p11,p12,p21,p22)
+                inter = Segment.intersection(seg1,seg2)
                 if not inter == None:
                     print "inter",inter.coords()
                     inters.append(inter)
 
-            puts("seg1",[p.coords() for p in seg1],"inters",inters)
+            puts("seg1",seg1.coords(),"inters",inters)
             if len(inters):
                 sortinter = [(vector(p11,inter).length(),inter) for inter in inters]
                 sortinter.sort()
@@ -143,6 +171,7 @@ class Polygon:
                         subresult = [inter]
                     llo = ll
 
+        p11 = seg1.p2()
         if pdiff(subresult[-1], p12,differror):
             # print "subresult[-1]",subresult[-1],"p12",p12
             subresult.append(p12)
@@ -188,19 +217,17 @@ class Polygon:
         newpoints.extend(polygon2.points())
         return Polygon(newpoints)
 
-
     def rootframes(self):
         result = []
-        for p1,p2 in self.segments():
-            result.append((p1,vector(p1,p2)))
-        result.append((p2,vector(p1,p2)))
+        for seg in self.segments():
+            result.append((seg.p1(),seg.vector()))
+        result.append((seg.p2(),seg.vector()))
         return result              
 
     def rootnormals(self):
         result = []
-        for p1,p2 in self.segments():
-            pm = pmiddle([p1,p2])
-            result.append((pm,vector(p1,p2).normalize().ortho()))
+        for seg in self.segments():
+            result.append((seg.middle(),seg.vector().normalize().ortho()))
         return result
 
     def _pointoffset(self,rf,size):
@@ -212,36 +239,35 @@ class Polygon:
     def checkoffsetintersections(self,points):
         # now filter according to intersections
         # - build consecutives segs
-        segs = [(p1,p2) for p1,p2 in pairs(points)]
+        segs = [Segment(p1,p2) for (p1,p2) in pairs(points)]
         # - then compute intersections
         index = 0
         while index < len(segs)-2:
             s1 = segs[index]
             for (ni,ns) in enumerate(segs[index+2:]):
                 #puts("s1",s1,"ns",ns)
-                i = raw_intersection(s1[0],s1[1],ns[0],ns[1])
+                inter = Segment.intersection(s1,ns)
                 #puts("intersection point",i)
-                if not i == None:
+                if not inter == None:
                     if isinstance(i,Segment):
                         puts("error: offset segs cannot be identicals")
                     else:
-                        segs[index]      = (s1[0],i)
-                        segs[index+2+ni] = (i,ns[1])
+                        segs[index]      = Segment(s1.p1(),inter)
+                        segs[index+2+ni] = Segment(inter,ns.p2())
                         segs = lconcat(segs[:index+1],segs[index+2+ni:])
             else:
                 index += 1
 
-        newresult = [s[0] for s in segs]
-        newresult.append(segs[-1][1])
+        newresult = [s.p1() for s in segs]
+        newresult.append(segs[-1].p2())
         return newresult
 
     def offset(self,size):
         result = []
-        for p1,p2 in pairs(self.points()):
-            v = vector(p1,p2)
-            if v.length() > 0.0001:
-                v = v.ortho().normalize().scale(size)
-                result.extend([p1.add(v),p2.add(v)])
+        for seg in self.segments():
+            if seg.length() > 0.0001:
+                v = seg.vector().ortho().normalize().scale(size)
+                result.extend([seg.p1().add(v),seg.p2().add(v)])
         
         newresult = [result[0]]
         for p in result[1:]:
@@ -264,9 +290,9 @@ class Polygon:
         result = []
         index = 0;
         # points = [self.point(t) for t in usamples(30)]
-        for p1,p2 in pairs(self.mpoints):
-            if not pequal(p1,p2,0.01):
-                v  = vector(p1,p2).ortho().normalize()
+        for seg in self.segments():
+            if not seg.length() < 0.01:
+                v  = seg.vector().ortho().normalize()
                 v1 = v.scale(f.y(self.curvabscissa(index)))
                 v2 = v.scale(f.y(self.curvabscissa(index+1)))
                 result.append(p1.add(v1))
@@ -277,26 +303,6 @@ class Polygon:
             if not pequal(newresult[-1],p,0.001):
                 newresult.append(p)
         
-        #result = self.checkoffsetintersections(newresult)
-        #newresult = result
-
-        if False:
-            newresult = [result[0]]
-            for p in result[1:]:
-                if (vector(newresult[-1],p).length() > 0.01):
-                    newresult.append(p)
-            result = newresult
-
-            newresult = [result[0]]
-            cdist = dist(result[0],result[-1])
-            index = 1
-            for p in result[1:]:
-                if dist(p,newresult[-1]) < cdist/100.0:
-                    newresult.append(p)
-                else:
-                    if index < len(result) -1:
-                        newresult.append(pmiddle([result[index-1],result[index+1]]))
-                index +=1
         # print "newresult",newresult
         return Polygon(newresult)
 
@@ -304,7 +310,7 @@ class Polygon:
         return Polygon(lreverse(self.mpoints))
 
     def edges(self):
-        return [(i,j) for (i,j) in pairs(self.mpoints)]
+        return self.segments()
 
     def subline(self,t1_,t2_):
         if t1_ < t2_:
@@ -317,8 +323,8 @@ class Polygon:
             sens = -1.0
         point0  = self.point(t1)
         result = [point0]
-        for (t,p) in self.mlengths:
-            if (t > t1 and t < t2): 
+        for pa in self.mpointabscissas:
+            if (pa.abscissa() > t1 and p.abscissa() < t2): 
                 result.append(p)
         pointend = self.point(t2)
         result.append(pointend)
@@ -344,7 +350,7 @@ class Polygon:
         return Polygon(preduce(self.mpoints,factor))
 
     def y(self,t):
-        return self.point(t)[1]
+        return self.point(t).y()
 
     def translate(self,v):
         return Polygon([p.add(v) for p in self.points()])
@@ -366,8 +372,9 @@ class Polygon:
 
     def signedArea(self):
         signedArea = 0
-        for (p1,p2) in pairs(self.points()):
-            signedArea += (p1.x() * p2.y() - p2.x() * p1.y())
+        for seg in self.segments():
+            # TODO: TOCHECK
+            signedArea += (seg.p1().x() * seg.p2().y() - seg.p2().x() * seg.p1().y())
         return signedArea / 2
         
     def isClockwise(self):
