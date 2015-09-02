@@ -1,4 +1,5 @@
 from geoutils import *
+from shape    import *
 
 class Quad:
     def __init__(self,bbox):
@@ -67,7 +68,7 @@ class Quad:
             self.split()
 
     def split(self):
-        newsubquads  = [Quad(bbox) for bbox in self.mmbox.split4()]
+        newsubquads  = [Quad(bbox) for bbox in self.mbbox.split4()]
         self.msubquads.extend(newsubquads)
         
         for push in self.mshapemap.keys():
@@ -99,7 +100,7 @@ class Quad:
 class QuadTree:
     def __init__(self,bbox0=None):
         if bbox0 == None:
-            bbox0 = BBox(-1000.0,-1000.0,1000.0,1000.0)
+            bbox0 = BBox(Point(-1000.0,-1000.0),Point(1000.0,1000.0))
         self.mrootquad = Quad(bbox0)
         self.mpush = 0
 

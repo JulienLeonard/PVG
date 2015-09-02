@@ -6,4 +6,4 @@ from circle      import *
 from shape       import *
 from SVGparser   import *
 from intersectionbuilder import *
-from edgegraph import *
+from edgegraph   import *

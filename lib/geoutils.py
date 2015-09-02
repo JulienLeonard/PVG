@@ -305,9 +305,9 @@ class BBox:
         size   = self.size()
         center = self.center()
         return [Point(center.x()-size/2.0,center.y()-size/2.0),
-                   Point(center.x()-size/2.0,center.y()+size/2.0),
-                   Point(center.x()+size/2.0,center.y()+size/2.0),
-                   Point(center.x()+size/2.0,center.y()-size/2.0)]
+                Point(center.x()-size/2.0,center.y()+size/2.0),
+                Point(center.x()+size/2.0,center.y()+size/2.0),
+                Point(center.x()+size/2.0,center.y()-size/2.0)]
 
     def intersect(self,obbox):
         (xmin0,ymin0,xmax0,ymax0) = self.coords()
@@ -320,10 +320,10 @@ class BBox:
         middlex = (xmin + xmax)/2.0
         middley = (ymin + ymax)/2.0
         
-        return [BBox(xmin, ymin, middlex, middley),
-                BBox(xmin, middley, middlex, ymax),
-                BBox(middlex,middley, xmax,ymax),
-                BBox(middlex, ymin, xmax, middley)]
+        return [BBox(Point(xmin,    ymin)   , Point(middlex, middley)),
+                BBox(Point(xmin,    middley), Point(middlex, ymax   )),
+                BBox(Point(middlex, middley), Point(xmax,    ymax   )),
+                BBox(Point(middlex, ymin)   , Point(xmax,    middley))]
 
 
 

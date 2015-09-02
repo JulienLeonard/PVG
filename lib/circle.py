@@ -50,7 +50,10 @@ class Circle:
 
     def viewbox(self):
         x,y,r = self.coords()
-        return [x-r,y-r,x+r,y+r]
+        return BBox(Point(x-r,y-r),Point(x+r,y+r))
+
+    def bbox(self):
+        return self.viewbox()
 
     def x(self):
         return self.center().x()
