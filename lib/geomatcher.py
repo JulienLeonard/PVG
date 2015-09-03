@@ -8,7 +8,7 @@ class GeoMatcher:
         points = {} 
         index = 0
         for seg in segs:
-            for p in seg:
+            for p in seg.points():
                 if not p in pointindices:
                     # print "point",p,"index",index
                     pointindices[p] = index
@@ -42,11 +42,13 @@ class GeoMatcher:
 
         result = []
         for seg in segs:
-            p1,p2 = seg
+            p1,p2 = seg.points()
             i1,i2 = pointindices[p1],pointindices[p2]
             s1,s2 = sames[i1],sames[i2]
             np1,np2 = points[s1],points[s2]
             # print "geomatcher seg",p1,p2,"gives",np1,np2
-            result.append((np1,np2))
+            newseg = Segment(np1,np2)
+            if newseg.length() > 0.000001:
+                result.append(newseg)
         return result
         

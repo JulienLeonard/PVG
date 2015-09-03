@@ -44,6 +44,9 @@ class Edge:
     def nodes(self):
         return [self.node1(),self.node2()]
 
+    def points(self):
+        return [self.point1(),self.point2()]
+
     def vector(self):
         return vector(self.point1(),self.point2())
 
@@ -73,6 +76,9 @@ class PointNode:
         self.mprevedges = []
         
     def p(self):
+        return self.mp
+
+    def point(self):
         return self.mp
 
     def coords(self):
@@ -237,18 +243,18 @@ class EdgeGraph:
     def add_edge(self,edge):
         self.medges.append(edge)
 
-    def createedges(self,p1,p2):
-        edge12 = Edge(p1,p2)
-        edge21 = Edge(p2,p1)
+    def createedges(self,n1,n2):
+        edge12 = Edge(n1,n2)
+        edge21 = Edge(n2,n1)
 
         edge12.opposite(edge21)
         edge21.opposite(edge12)
         
-        p1.add_nextedge(edge12)
-        p1.add_prevedge(edge21)
+        n1.add_nextedge(edge12)
+        n1.add_prevedge(edge21)
         
-        p2.add_nextedge(edge21)
-        p2.add_prevedge(edge12)
+        n2.add_nextedge(edge21)
+        n2.add_prevedge(edge12)
         
         self.add_edge(edge12)
         self.add_edge(edge21)
@@ -288,18 +294,19 @@ class EdgeGraph:
     #
     # load a set of segments (with no particular order)
     #
-    def loadwithpointpairs(self,pointpairs):
+    def loadwithsegments(self,segments_):
         # manage float problems and unify same points
-        pointpairs = GeoMatcher().checksegments(pointpairs)
+        segments = GeoMatcher().checksegments(segments_)
 
         # build adjacency and nodes
         nodes = {}
-        for (p1,p2) in pointpairs:
-            for p in [p1,p2]:
+        for seg in segments:
+            for p in seg.points():
                 if not p in nodes:
                     nodes[p] = PointNode(p)
                     self.add_node(nodes[p])
 
+            (p1,p2) = seg.points()
             self.createedges(nodes[p1],nodes[p2])
 
         # TODO: check adjacency with preexisting edges too !
@@ -375,6 +382,21 @@ class EdgeGraph:
         return self
 
     #
+    # return for each node the number of arcs after (for debug purpose)
+    #
+    def nodenarcs(self):
+        nodearcs = {}
+        for arc in self.arcs():
+            for node in arc.extremities():
+                if not node in nodearcs:
+                    nodearcs[node] = []
+            node1 = arc.node1()
+            nodearcs[node1].append(arc)
+
+        return [(node,nodearcs[node]) for node in nodearcs.keys()]
+        
+
+    #
     # explore the arc graph from arc and get all paths going back to arc
     #
     def computecyclearcs(self,arcgraph,arc0):
@@ -401,12 +423,10 @@ class EdgeGraph:
         return result
 
     #
-    # compute a graph with arc oriented, and with the next arc the righest
-    # TODO: refactor as not resilient with trees pruning
+    # from the computed arcs, remove the one that are not inside a cycle
+    # TODO: to generalize
     #
-    def computearcgraph(self):
-        # first compute the graph node => arc
-
+    def prunearcs(self):
         nodearcs = {}
         for arc in self.arcs():
             for node in arc.extremities():
@@ -415,18 +435,23 @@ class EdgeGraph:
             node1 = arc.node1()
             nodearcs[node1].append(arc)
 
-        # the prune arc that have no next or no prev
-        #
-        prunearcs = self.arcs()
+        prunearcs = []
         for arc in self.arcs():
-            if len(nodearcs[arc.node2()]) == 1: # only the opposite
-                # puts("arc end no following")
-                prunearcs = lremove(prunearcs,arc)
-                prunearcs = lremove(prunearcs,arc.opposite())
+            if not (len(nodearcs[arc.node2()]) == 1 or len(nodearcs[arc.opposite().node2()]) == 1): # only the opposite
+                prunearcs.append(arc)
+        return prunearcs
         # puts("arcs",len(self.arcs()),"prunearcs",len(prunearcs))
 
+
+    #
+    # compute a graph with arc oriented, and with the next arc the righest
+    # TODO: refactor as not resilient with trees pruning
+    #
+    def computearcgraph(self):
+        # first compute the graph node => arc
+
         #
-        #
+        prunearcs = self.prunearcs()
         nodearcs = {}
         for arc in prunearcs:
             for node in arc.extremities():
