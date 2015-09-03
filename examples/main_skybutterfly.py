@@ -1,9 +1,10 @@
-from PVG import *
+from PVG              import *
+from circlepackingbao import *
 
-canvas = Canvas().background(Color.grey(0.9))
+canvas = Canvas().size(10000).background(Color.grey(0.9))
 parser = SVGParser().parse("halfbutterfly.svg")
 silhouettes = [layer.silhouette() for layer in parser.layers()]
-rcolor = Roller([Color.black(),Color.red(),Color.yellow()])
+rcolor = Roller([])
 
 sortlist = []
 for silhouette in silhouettes:
@@ -32,24 +33,26 @@ def drawcell(render,polygon,sym = True):
 
     polygon = polygon.clockwise()
 
-    def myfdraw(render,pattern,lastindex,newcolor):
-        newdrawing = (cscale( pattern.lastnode(), 0.9),newcolor)
+    def myfdraw(lastnode,lastindex,newcolor):
+        newdrawing = (cscale( lastnode, 0.9),newcolor)
         drawings.append(newdrawing)
         canvas.draw( newdrawing[0], newdrawing[1] )
 
     # rootnodes = circle2nodepair(Circle(polygon.middle(),2.0))
 
-    rpattern = [item for i in range(10,100) for item in [2.0] * i + [2.0]]
-    cpattern = [item for i in range(10,100) for item in [Color.white()] * i + [Color.red()]]
+    rpattern = [item for i in range(10,100) for item in [0.25] * i + [0.5]]
+    cpattern = [Color.hue2color(float(index)/20.0) for index in range(20)]
 
-    baopattern = BaoPattern().sidepattern([1.0]).radiuspattern(rpattern).colorpattern(cpattern)
+    baopattern = BaoPattern().radiuspattern(rpattern).colorpattern(cpattern).fdraw(myfdraw)
 
     # render.drawcircles(rootnodes,Color.green())
-    boundaries = [Circle(p,1.0) for p in polygon.lengthsamples(1.0)]
-    rootnodes  = lowercirclepair(boundaries)
+    boundaries = [Circle(p,0.25) for p in polygon.lengthsamples(0.5)]
+    rootnodes  = lreverse([c.scale(1.5) for c in lowercirclepair(boundaries)])
 
+    canvas.draw(boundaries,Color.green())
+    canvas.draw(rootnodes,Color.red())
 
-    result = CirclePackingBaoSwitch(rootnodes,baopattern,myfdraw).iter(render,rootnodes  + boundaries,100)
+    result = CirclePackingBao().iter(boundaries,rootnodes,baopattern,20)
 
 
 for silhouette in silhouettes:
@@ -67,7 +70,11 @@ for silhouette in silhouettes:
 
         for poly in polygons:
             drawcell(canvas,poly)
+            break
     else:
+        canvas.draw(silhouette.polygons()[0],Color.black())
         drawcell(canvas,silhouette.polygons()[0],False)
+    break
+
 
 canvas.save("main_skybutterfly.png")

@@ -1,4 +1,5 @@
 from PVG              import *
+from baopattern       import *
 from circlepackingbao import *
 
 canvas = Canvas()
