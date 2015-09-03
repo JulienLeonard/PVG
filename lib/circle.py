@@ -32,6 +32,9 @@ class Circle:
         else:
             return self.mradius
 
+    def radius2(self):
+        return self.mradius * self.mradius
+
     def r(self,v=None):
         return self.radius(v)
 
@@ -40,6 +43,9 @@ class Circle:
 
     def translate(self,tv):
         return Circle(self.center().add(tv),self.radius())
+
+    def symx(self,symx):
+        return Circle(self.center().symx(symx),self.radius())
 
     def sample(self,abscissa):
         angle = anglerange().sample(abscissa)
@@ -66,9 +72,14 @@ class Circle:
 
     def polygon(self,npoints=30):
         return Polygon([self.point(i) for i in usamples(npoints+1)][:-1])
+
+    def contain(self,p,strict=False):
+        op = iff(strict, infeq, inf) 
+        limit = iff(strict,0.0,-self.radius()/100000.0)
+        return op(vector(self.center(),p).length() - self.radius(), limit)
         
     @staticmethod
-    def intersect(c1,c2):
+    def intersect(c1,c2,strict=False):
         return circleintersect(c1,c2)
 
 

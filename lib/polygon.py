@@ -34,6 +34,12 @@ class PointAbscissaRange:
     def coords(self):
         return [self.a1(),self.a2(),self.segment().coords()]
 
+    def point1(self):
+        return self.mseg.p1()
+
+    def point2(self):
+        return self.mseg.p2()
+
 #
 # class used to manage a seuqnce of points
 #
@@ -265,9 +271,8 @@ class Polygon:
     def offset(self,size):
         result = []
         for seg in self.segments():
-            if seg.length() > 0.0001:
-                v = seg.vector().ortho().normalize().scale(size)
-                result.extend([seg.p1().add(v),seg.p2().add(v)])
+            v = seg.vector().ortho().normalize().scale(size)
+            result.extend([seg.p1().add(v),seg.p2().add(v)])
         
         newresult = [result[0]]
         for p in result[1:]:
@@ -323,9 +328,9 @@ class Polygon:
             sens = -1.0
         point0  = self.point(t1)
         result = [point0]
-        for pa in self.mpointabscissas:
-            if (pa.abscissa() > t1 and p.abscissa() < t2): 
-                result.append(p)
+        for pa in self.mparanges:
+            if (pa.a1() > t1 and pa.a2() < t2): 
+                result.append(pa.point2())
         pointend = self.point(t2)
         result.append(pointend)
         if sens < 0.0:
@@ -409,6 +414,26 @@ class Polygon:
             width = self.length()/100.0
         return self.offset(width/2.0).concat(self.offset(-width/2.0).reverse())
 
+    @staticmethod
+    def ispolyinside(poly1,poly2):
+        for p in poly1.points():
+            if not poly2.contain(p):
+                return False
+        return True
+
+    @staticmethod
+    def hierachy(polygons):
+        containgraph = {}
+        for i in range(len(polygons)-1):
+            for j in range(i+1,len(polygons)):
+                if Polygon.ispolyinside(polygons[i],polygons[j]):
+                    containgraph[polygons[i]] = polygons[j]
+                elif Polygon.ispolyinside(polygons[j],polygons[i]):
+                    containgraph[polygons[j]] = polygons[i]
+        
+        # TODO: to finish
+                    
+
 
 def polygonfromradiusangle(origin,radiuss,angles):
     result = [origin]
@@ -416,7 +441,7 @@ def polygonfromradiusangle(origin,radiuss,angles):
         result.append(result[-1].add(angle2vector(a).scale(r)))
     return Polygon(result)
     
-def square(center,size):
+def square(center = P0, size = 1.0):
     return Polygon([Point(center.x()-size/2.0,center.y()-size/2.0),
                    Point(center.x()-size/2.0,center.y()+size/2.0),
                    Point(center.x()+size/2.0,center.y()+size/2.0),

@@ -104,7 +104,7 @@ class Bezier:
 		return bezierfrompointlist([p.sym(center) for p in self.points])
 
 	def symx(self,symx):
-		return bezierfrompointlist([Point(2.0*symx-p.x(),p.y())for p in self.points])
+		return bezierfrompointlist([p.symx(symx) for p in self.points])
 
 	def _frame(self,t):
 		return (self._point(t),self._tangent(t))
