@@ -5,6 +5,7 @@ from test_circle    import *
 from test_polygon   import *
 from test_color     import *
 from test_edgegraph import *
+from test_shape     import *
 
 
 if __name__ == '__main__':
