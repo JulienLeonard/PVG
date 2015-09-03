@@ -22,6 +22,9 @@ class R:
         else:
             return self.mv2
 
+    def middle(self):
+        return (self.mv1+self.mv2)/2.0
+
     def minv(self):
         return min(self.v1(),self.v2())
 

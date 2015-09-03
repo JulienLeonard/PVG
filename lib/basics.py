@@ -590,3 +590,9 @@ def lstop(list,stopitem):
             result.append(item)
     return result
     
+def inf(v1,v2):
+    return v1 < v2
+
+def infeq(v1,v2):
+    return v1 <= v2
+
