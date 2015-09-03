@@ -53,8 +53,11 @@ class Point(Coords):
     def rotate(self,center,angle):
         return center.add( vector(center,self).rotate(angle) )
 
-    def sym(p,center):
-        return center.add(vector(p,center))
+    def sym(self,center):
+        return center.add(vector(self,center))
+
+    def symx(self,symx):
+        return Point(2.0*symx-self.x(),self.y())
 
 
 #
@@ -83,9 +86,9 @@ class Vector(Coords):
     # compute the power2 of the length of the vector
     #
     def length2(self):
-        _x = self.x()
-        _y = self.y()
-        return _x *_x + _y *_y
+        x = self.x()
+        y = self.y()
+        return (x *x + y *y)
 
     #
     # compute the norm of the vector
@@ -220,16 +223,41 @@ class Segment:
     def vector(self):
         return vector(self.p1(),self.p2())
 
+    def normal(self):
+        return self.vector().ortho()
+
     def length(self):
         return self.vector().length()
 
+    def length2(self):
+        return self.vector().length2()
+
+    def split(self,ntimes):
+        return [Segment(p1,p2) for (p1,p2) in pairs(self.samples(ntimes+1))]
+
+    def splitmaxsize(self,maxsize):
+        if self.length() <= maxsize:
+            return [self]
+        else:
+            return self.split(int(math.ceil(self.length()/maxsize)))
+
+    def bbox(self):
+        return points2bbox([self.p1(),self.p2()])
+
     @staticmethod
-    def intersect(seg1,seg2):
+    def intersect(seg1,seg2,strict=False):
         return (not raw_intersection(seg1.p1(),seg1.p2(),seg2.p1(),seg2.p2()) == None)
 
     @staticmethod
     def intersection(seg1,seg2):
         return raw_intersection(seg1.p1(),seg1.p2(),seg2.p1(),seg2.p2())
+
+    @staticmethod
+    def sort(segments):
+        sortlist = [(seg.p1().x(),seg.p2().x(),seg) for seg in segments]
+        sortlist.sort()
+        return [seg for (dum,dum,seg) in sortlist]
+
 
 
 def pequal(p1,p2,error=0.00001):
@@ -316,6 +344,14 @@ class BBox:
         if xmin <= x and x <= xmax and ymin <= y and y <= ymax:
             return True
         return False
+
+    def containbbox(self,obbox):
+        xmin1,ymin1,xmax1,ymax1 = self.coords()
+        xmin2,ymin2,xmax2,ymax2 = obbox.coords()
+        if xmin1 < xmin2 and xmax2 < xmax1 and ymin1 < ymin2 and ymax2 < ymax2:
+            return True
+        return False
+
     
     def corners(self):
         xmin,ymin,xmax,ymax = self.coords()
@@ -445,6 +481,7 @@ def raw_intersection (p1,p2,p3,p4):
     uanum = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)
     ubnum = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)
     if (denom == 0.0 and uanum == 0.0 and ubnum == 0.0):
+        # puts("denom == 0.0 and uanum == 0.0 and ubnum == 0.0")
         pp1 = min((x1,y1),(x2,y2))
         pp2 = max((x1,y1),(x2,y2))
         pp3 = min((x3,y3),(x4,y4))
@@ -454,19 +491,34 @@ def raw_intersection (p1,p2,p3,p4):
         x3,y3 = pp3
         x4,y4 = pp4
 
-        if R(x1,x2).contain(x3):
-            if R(x1,x2).contain(x4):
-                result = Segment(Point(x3,y3),Point(x4,y4))
-            else:
-                result = Segment(Point(x3,y3),Point(x2,y2))
-        else:
-            if R(x1,x2).contain(x4):
-                result = Segment(Point(x1,y1),Point(x4,y4))
-            else: 
-                if R(x3,x4).contain(x1) and R(x3,x4).contain(x2):
-                    result =  Segment(Point(x1,y1),Point(x2,y2))
+        if x1 == x2 and x2 == x3 and x3 == x4:
+            if R(y1,y2).contain(y3):
+                if R(y1,y2).contain(y4):
+                    result = Segment(Point(x3,y3),Point(x4,y4))
                 else:
-                    result = None
+                    result = Segment(Point(x3,y3),Point(x2,y2))
+            else:
+                if R(y1,y2).contain(y4):
+                    result = Segment(Point(x1,y1),Point(x4,y4))
+                else: 
+                    if R(y3,y4).contain(y1) and R(y3,y4).contain(y2):
+                        result =  Segment(Point(x1,y1),Point(x2,y2))
+                    else:
+                        result = None
+        else:
+            if R(x1,x2).contain(x3):
+                if R(x1,x2).contain(x4):
+                    result = Segment(Point(x3,y3),Point(x4,y4))
+                else:
+                    result = Segment(Point(x3,y3),Point(x2,y2))
+            else:
+                if R(x1,x2).contain(x4):
+                    result = Segment(Point(x1,y1),Point(x4,y4))
+                else: 
+                    if R(x3,x4).contain(x1) and R(x3,x4).contain(x2):
+                        result =  Segment(Point(x1,y1),Point(x2,y2))
+                    else:
+                        result = None
 
         if not result == None:
             if result.isPoint():
