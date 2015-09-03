@@ -1,17 +1,26 @@
-from utils     import *
-from drawutils import *
-from geoutils  import *
-from bezier import *
-from tangentutils import *
-from quadtree import *
+from PVG           import *
 from circlepacking import *
-from circlestring import *
-# from voronoiutils import *
-from tangentutils import *
-from quadtree import *
-from circlepacking import *
-from polyline import *
-import color
+
+#
+# Packing result structure: contain the result of a maximum packing result from a set of seeds (usually from a contour)
+#
+#
+class SeedMaxResult:
+
+    def __init__(self, seed, circle,collider = None):
+        self.mseed     = seed
+        self.mcircle   = circle
+        self.mcollider = collider
+
+    def seed(self):
+        return self.mseed
+
+    def circle(self):
+        return self.mcircle
+
+    def collider(self):
+        return self.mcollider
+
 
 #
 # Seed definitions: a seed is a geometric structure to compute a next circle, given a radius
@@ -48,29 +57,29 @@ class Seed:
         print "to be overloaded: must give all the circles from the seed"
 
     def maxcircle(self,rrange,quadtree,withmaxcollision = False):
-        crmin = self.computecircle(rrange[0])
+        crmin = self.computecircle(rrange.minv())
         if quadtree.iscolliding(crmin):
             puts("no circlemin")
-            return ""
+            return None
 
         lastgoodcircle = crmin
-        maxcollision = ""
+        maxcollision   = None
 
-        for j in range(10):
-            rrmiddle = lmean(rrange)
+        for j in range(20):
+            rrmiddle = rrange.middle()
             crmiddle = self.computecircle(rrmiddle)
             if quadtree.iscolliding(crmiddle):
-                rrange = (rrange[0],rrmiddle)
+                rrange = R(rrange.minv(),rrmiddle)
                 if withmaxcollision:
                     maxcollision = nearestcircle(self.c(),quadtree.colliding(crmiddle),self.cs())
             else:
                 lastgoodcircle = crmiddle
-                rrange = (rrmiddle,rrange[1])
+                rrange = R(rrmiddle,rrange.maxv())
 
         if withmaxcollision:
-            return (lastgoodcircle,maxcollision)
+            return SeedMaxResult(self,lastgoodcircle,maxcollision)
         else:
-            return lastgoodcircle
+            return SeedMaxResult(self,lastgoodcircle,None)
 
     #
     # when given new circle, compute the new seeds to use as recursive
@@ -78,7 +87,9 @@ class Seed:
     def recursive(self,frecursive,newcircle):
         print "to be overloaded : mut return a list of new seeds"
         
-
+#
+# Seed defined byt 2 adjacent circles
+#
 
 class Seed2(Seed):
     def c1(self):
@@ -95,11 +106,11 @@ class Seed2(Seed):
         return [self.c1(),self.c2()]
 
     def computecircle(self,radius):
-        return circles2tangent(self.c1(),"OUT",self.c2(),"OUT",radius, self.side())
+        return circles2tangentout(self.c1(),self.c2(),radius, self.side())
 
     @classmethod
     def isdefmatching(cls,tempdef):
-        if type(tempdef[0]) is tuple and len(tempdef[0]) == 3 and type(tempdef[1]) is tuple and len(tempdef[1]) == 3 and type(tempdef[2]) is float:
+        if isinstance(tempdef[0],Circle) and isinstance(tempdef[1],Circle) and type(tempdef[2]) is float:
             return True
         return False
 
@@ -109,8 +120,11 @@ class Seed2(Seed):
                            Seed2().seeddef([self.c1(),newcircle,-1.0]),
                            Seed2().seeddef([self.c2(),newcircle,-1.0])])
 
-seed20 = Seed2().seeddef([Circle(0.0,-0.5,1.0),Circle(0.0,0.5,1.0),1.0])
-    
+seed20 = Seed2().seeddef([Circle(Point(0.0,-0.5),1.0),Circle(Point(0.0,0.5),1.0),1.0])
+
+#
+# Seed defined by a circle and an angle
+#    
 class SeedAngle(Seed):
     def c(self):
         return self.mdef[0]
@@ -125,33 +139,34 @@ class SeedAngle(Seed):
 
     @classmethod
     def isdefmatching(cls,tempdef):
-        if type(tempdef[0]) is tuple and len(tempdef[0]) == 3 and type(tempdef[1]) is float:
+        if isinstance(tempdef[0],Circle) and type(tempdef[1]) is float:
             return True
         return False
 
-
+#
+# Seed defined by a Segment and a Side
+#
 class SeedSegment(Seed):
     def p1(self):
-        return self.segment()[0]
+        return self.segment().p1()
 
     def p2(self):
-        return self.segment()[1]
+        return self.segment().p2()
     
     def side(self):
         return self.mdef[1]
 
     def center(self):
-        return pmiddle([self.p1(),self.p2()])
+        return self.segment().middle()
 
     def size(self):
-        return dist(self.p1(),self.p2())
+        return self.segment().length()
 
     def c(self):
-        return (self.center()[0],self.center()[1],self.size()/100.0)
+        return Circle(self.center(),self.size()/100.0)
 
     def cs(self):
-        return [(self.p1()[0],self.p1()[1],self.size()/100.0),
-                (self.p2()[0],self.p2()[1],self.size()/100.0)]
+        return [Circle(self.p1(),self.size()/100.0), Circle(self.p2(),self.size()/100.0)]
 
     def segment(self):
         return self.mdef[0]
@@ -161,41 +176,43 @@ class SeedSegment(Seed):
 
     @classmethod
     def isdefmatching(cls,tempdef):
-        if type(tempdef[0]) is tuple and len(tempdef[0]) == 2 and type(tempdef[1]) is float and type(tempdef[0][0]) is tuple and  len(tempdef[0][0]) == 2 and type(tempdef[0][1]) is tuple and len(tempdef[0][1]) == 2:
+        if isinstance(tempdef[0]) == Segment and type(tempdef[1]) is float:
             return True
         return False
 
-
-
+#
+# Define a Seed by a point and a vector and a side
+#
 class SeedNormal(Seed):
+    def __init__(self,point,normal,side):
+        self.mpoint  = point
+        self.mnormal = normal.normalize()
+        self.mside   = side
+
     def p(self):
-        return self.mdef[0]
+        return self.mpoint
+
+    def point(self):
+        return self.mpoint
 
     def normal(self):
-        return self.mdef[1]
+        return self.mnormal
     
     def side(self):
-        return self.mdef[2]
-
-    def size(self):
-        return self.mdef[3]
-
-    def c(self):
-        return (self.p()[0],self.p()[1],self.size())
-
-    def cs(self):
-        return [self.c()]
+        return self.mside
 
     def computecircle(self,radius):
-        newcenter = padd(self.p(),vscale(self.normal(),self.side() * (radius + self.size())))
-        return circlefromcenterradius(newcenter,radius)
+        newcenter = self.p().add(self.normal().scale(self.side() * radius))
+        return Circle(newcenter,radius)
+
+    def coords(self):
+        return self.p().coords() + self.normal().coords() + (self.side(),"")
 
     @classmethod
     def isdefmatching(cls,tempdef):
-        if len(tempdef) == 4:
+        if isinstance(tempdef[0],Point) and isinstance(tempdef[1],Vector) and type(tempdef[2]) is Float:
             return True
         return False
-
 
 
 #
@@ -215,38 +232,33 @@ def elaborateseeds(seeds):
     # puts("elaborateseeds result ",len(result))
     return result            
 
-#
-# Packing result structure: contain the result of a maximum packing result froma set of seeds (usually from a contour)
-#
-#
-#
 
 class MaxPackingResult:
     def __init__(self):
-        self.mdata = []
+        self.mresults = []
 
-    def add(self,data):
-        self.mdata.append(data)
+    def add(self,result):
+        self.mresults.append(result)
 
     def circles(self):
-        return [c for (c,seed) in self.mdata]
+        return [result.circle() for result in self.mresults]
 
-    def data(self,index):
-        if not index < len(self.mdata):
-            return ""
-        return self.mdata[index]
+    def result(self,index):
+        if not index < len(self.result):
+            return None
+        return self.mresult[index]
 
-    def circle(self,index):
-        data0 = self.data(0)
-        if data0 == "":
-            return ""
-        else:
-            return data0[0]
+    def circle(self,index = None):
+        if index == None:
+            index = 0
+        return self.result(0).circle()
 
 
 def fidentity(v):
     return v
 
+SeedToCompute  = None
+SeedImpossible = -1
 
 #
 # compute the maximum sized circles from the seeds and not colliding with the quadtree content
@@ -259,77 +271,70 @@ def fidentity(v):
 #
 # seeds are a list of seed objects
 #
-def maxcirclesfromseeds(boundaries,seeds,rrange,niter,ftransform = "",frecursive=""):
-    seeds = elaborateseeds(seeds)
-
-    quadtree   = QuadTree(100000.0,100000.0)
+def maxcirclesfromseeds(boundaries, seeds, bbox, niter = 1, ftransform = None, frecursive = None):
+    quadtree = QuadTree(bbox.resize(20.0))
     quadtree.adds(boundaries)
-    (dmin,dmax) = rrange
-    rallmax = 0.0
-    crallmax = ""
-    result = MaxPackingResult()
-    cache = {}
 
-    # init cache
+    rrange   = R(bbox.size()/1000.0,bbox.size())
+    result   = MaxPackingResult()
+    
     for seed in seeds:
-        cache[seed] = ""
+        seed.mresult = None
 
     for iiter in range(niter):
         puts("iter",iiter)
-        crallmax = ""
-        rallmax = 0.0
-        maxseed = ""
+        rallmax  = 0.0
+        maxseed  = None
 
         # first recompute the max circle from the invalidate seeds
         for seed in seeds:
-            if cache[seed] == "" and cache[seed] != -1:
-                cache[seed] = seed.maxcircle((dmin,dmax),quadtree)
+            if seed.mresult == SeedToCompute and not seed.mresult == SeedImpossible:
+                seed.mresult = seed.maxcircle(rrange,quadtree)
 
         # then compute the new max
         for seed in seeds:
-            if cache[seed] != -1:
-                if cache[seed] != "":
-                    rrmax =  cradius(cache[seed])
+            if not seed.mresult == SeedImpossible:
+                if not seed.mresult == SeedToCompute:
+                    rrmax =  seed.mresult.circle().radius()
                     if rrmax > rallmax:
-                        # puts("new seed max",cache[seed])
+                        # puts("new seed max",seed.mresult.circle().coords())
                         rallmax  = rrmax
-                        crallmax = cache[seed]
                         maxseed  = seed
                         
                 else:
                     # puts("seed",seed,"no use, mark it")
-                    cache[seed] = -1
+                    seed.mresult = SeedImpossible
                 
         
         # add the new max circle 
-        if crallmax != "":
+        if not maxseed == None:
             # puts("new max circle",crallmax)
-            if frecursive == "":
-                if ftransform == "":
-                    newcs = [crallmax]
-                else:
-                    newcs = [ftransform(crallmax)]
+            crallmax = maxseed.mresult.circle()
+            if frecursive == None:
+                if not ftransform == None:
+                    crallmax = ftransform(crallmax)
+                newcs = [crallmax]
             else:
                 (newcs,newseeds) = maxseed.recursive(frecursive,cfcircle)
 
             for newc in newcs:
-                result.add((newc,maxseed))
+                result.add(SeedMaxResult(maxseed,newc))
                 quadtree.add(newc)
             
-            if not frecursive == "":
+            if not frecursive == None:
                 newseeds = TODO
                 seeds.extend(newseeds)
                 for newseed in newseeds:
-                    cache[newseed] = ""
+                    newseed.mresult = SeedToCompute
 
 
             # invalidate the seed circles colliding
             for seed in seeds:
-                if cache[seed] != "" and cache[seed] != -1:
+                if not seed.mresult == SeedToCompute and not seed.mresult == SeedImpossible:
                     for newc in newcs:
-                        if circleintersect(newc,cache[seed]):
+                        if Shape.intersect(newc,seed.mresult.circle()):
                             # puts("invalidate seed",seed)
-                            cache[seed] = ""
+                            seed.mresult = SeedToCompute
                             break
         else:
             puts("no more new max circle, stop")
@@ -342,7 +347,7 @@ def maxcirclesfromseeds(boundaries,seeds,rrange,niter,ftransform = "",frecursive
 # compute tha maximum sized circle from the seeds and not colliding with the quadtree content
 #
 def maxcirclefromseeds(boundaries,seeds,rrange):
-    return maxcirclesfromseeds(boundaries,seeds,rrange,1).circle(0)
+    return maxcirclesfromseeds(boundaries,seeds,rrange).circle()
 
 
 #
@@ -1165,11 +1170,6 @@ def maxcirclepackingcollisionlane(seeds,rseeds,quadtree,dmax,niter,ftransform,mi
     
     return result
 
-#
-# define segment seeds as a segment + side
-#
-def seedsfromsegments(segments,sides):
-    return [(segment,side) for segment in segments for side in sides]
 
 #
 #
@@ -1180,7 +1180,7 @@ def seedsfrompointnormals(pns,sides,size):
 
 def psplitevenly(p1,p2,maxdist):
     nsplit = int(dist(p1,p2) / maxdist) + 1
-    return PR(p1,p2).samples(nsplit)
+    return Segment(p1,p2).samples(nsplit)
     
     
 #
@@ -1207,4 +1207,38 @@ def seedsfrompolypointnormals(poly,sides,size,rangelseg=""):
                 result.append(pn)
     
     return [(pn[0],pn[1],side,size) for pn in result for side in sides]
-        
+
+#
+# define segment seeds as a segment + side
+#
+def segments2seeds(segments,sides=[-1.0,1.0]):
+    return [SegmentSeed().seeddef((segment,side)) for segment in segments for side in sides]
+
+#
+# define segment seeds as a segment + side
+#
+def segments2normalseeds(segments,maxsize=None,sides=[-1.0,1.0],nitems = None):
+    result = []
+    for seg in segments:
+        for segment in seg.splitmaxsize(maxsize):
+            for side in sides:
+                result.append(SeedNormal(segment.middle(),segment.normal(),side))
+    if not nitems == None:
+        result = litems(result,int(float(len(result))/float(nitems)))
+    return result
+
+#
+# compute the n max circles inside a polygon
+#
+def polygonmaxcircles(self,niter):
+    base = self.clockwise()
+    if not base.isclosed():
+        base = base.close()
+    
+    segments = base.segments()
+    seeds    = segments2normalseeds(segments,base.length()/100.0,[-1.0])
+    # puts("segments",[seg.coords() for seg in segments])
+    # puts("seeds",len(seeds),[seed.coords() for seed in seeds])
+    return maxcirclesfromseeds(segments, seeds, base.bbox(), niter).circles()
+
+Polygon.maxcircles = polygonmaxcircles
