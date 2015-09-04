@@ -382,6 +382,16 @@ class BBox:
                 BBox(Point(middlex, middley), Point(xmax,    ymax   )),
                 BBox(Point(middlex, ymin)   , Point(xmax,    middley))]
 
+    def symx(self,symx):
+        newp1 = self.mpmin.symx(symx)
+        newp2 = self.mpmax.symx(symx)
+        xmin  = min(newp1.x(),newp2.x())
+        xmax  = max(newp1.x(),newp2.x())
+        return BBox(Point(xmin,newp1.y()),Point(xmax,newp2.y()))
+
+    def unionsymx(self,symx):
+        return bbunion(self,self.symx(symx))
+
 
 
 def bbunion(bbox1,bbox2):
