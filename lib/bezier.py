@@ -421,6 +421,9 @@ class PolyBezier:
 	def viewbox(self):
 		return bbunions([bezier.viewbox() for bezier in self.mbeziers])
 
+	def bbox(self):
+		return self.viewbox()
+
 	def point(self,t):
 		for (rmin,rmax,bezier) in self.mranges:
 			if rmin <= t and t < rmax:

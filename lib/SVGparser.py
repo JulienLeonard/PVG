@@ -1,6 +1,8 @@
 from xml.dom import minidom
-from silhouette import *
-from color      import *
+from polygon        import *
+from shapehierarchy import *
+from bezier         import *
+from color          import *
 
 class SVGStyle:
 
@@ -44,13 +46,32 @@ class SVGPath:
     def __init__(self,pathstring,stylestring):
         self.mpathstring  = pathstring
         self.mstyle       = SVGStyle(stylestring)
+        self.mhierarchy   = None
+        self.mbeziers     = None
+        self.mpolygons    = None
 
     def fillcolor(self):
         return self.mstyle.fillcolor()
 
-    def silhouette(self):
-        # puts("pathstring",self.mpathstring)
-        return Silhouette().loadsvgstring(self.mpathstring)
+    def beziers(self):
+        if self.mbeziers == None:
+            (fpoints,beziers) = svg2bezier(self.mpathstring)
+            self.mbeziers = beziers
+        return self.mbeziers
+
+    def polygons(self):
+        if self.mpolygons == None:
+            self.mpolygons = [Polygon(bezier.points()) for bezier in self.beziers()]
+        return self.mpolygons
+
+    def hierarchy(self):
+        if self.mhierarchy == None:
+            self.mhierarchy = ShapeHierarchy().adds(self.polygons())
+        return self.mhierarchy
+
+    def bbox(self):
+        return bbunions([bezier.bbox() for bezier in self.beziers()])
+    
 
 class SVGLayer:
 
@@ -66,8 +87,15 @@ class SVGLayer:
     def add_paths(self,paths):
         self.mpaths.extend(paths)
 
-    def silhouette(self):
-        return  Silhouette.merge([path.silhouette() for path in self.mpaths])
+    def hierarchy(self):
+        return  ShapeHierarchy.merge([path.hierarchy() for path in self.mpaths])
+
+    def bbox(self):
+        return bbunions([path.bbox() for path in self.mpaths])
+
+    def polygons(self):
+        return [poly for path in self.mpaths for poly in path.polygons()]
+
 
 class SVGParser:
     
@@ -76,6 +104,8 @@ class SVGParser:
         self.mlayers   = None
 
     def layers(self):
+        if self.mlayers == None:
+            self.parse()
         return self.mlayers
 
     def parse(self,filepath=None):
@@ -94,9 +124,13 @@ class SVGParser:
         return self
 
     def paths(self):
-        if self.mlayers == None and self.mfilepath != None:
-            self.parse()
-        return [path for layer in self.mlayers for path in layer.paths()]
+        return [path for layer in self.layers() for path in layer.paths()]
+
+    def bbox(self):
+        return bbunions([layer.bbox() for layer in self.layers()])
+
+    def polygons(self):
+        return [poly for layer in self.layers() for poly in layer.polygons()]
 
 def svgPaths(filepath):
     return SVGParser().parse(filepath).paths()

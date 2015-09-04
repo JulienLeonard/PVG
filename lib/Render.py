@@ -1,6 +1,7 @@
 from color    import *
 from geoutils import *
 from circle   import *
+from polygon  import *
 import time
 import os
 

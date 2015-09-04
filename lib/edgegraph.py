@@ -1,5 +1,6 @@
 from geoutils   import *
 from geomatcher import *
+from polygon    import *
 
 #
 # class to build edges graph (linked by pointnodes)
@@ -502,3 +503,7 @@ class EdgeGraph:
                     self.add_arccycle(ArcCycle(arcs))
         return self.marccycles
             
+    def polygons(self):
+        return [Polygon(arccycle.points()) for arccycle in self.arccycles()]
+
+
