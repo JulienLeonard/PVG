@@ -32,7 +32,7 @@ class BS:
 class CirclePackingBaoSwitch:
     
     def __init__(self,inodes,baopattern,fdraw):
-        self.lastindex = 1
+        self.lastindex  = 1
         self.nodes      = inodes
         self.baopattern = baopattern
         self.fdraw      = fdraw

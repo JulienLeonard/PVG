@@ -1,6 +1,3 @@
-import sys
-sys.path.insert(0, './../lib')
-
 from utils import *
 
 import unittest

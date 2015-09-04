@@ -2,13 +2,6 @@ from utils import *
 from range import *
 
 #
-# define angle range
-#
-def anglerange():
-    return R(0.0,2* math.pi)
-
-
-#
 # Interface to define 2D geometry entity (Point or Vector)
 #
 class Coords:
@@ -58,6 +51,10 @@ class Point(Coords):
 
     def symx(self,symx):
         return Point(2.0*symx-self.x(),self.y())
+
+    @staticmethod
+    def P0():
+        return Point(0.0,0.0)
 
 
 #
@@ -139,14 +136,18 @@ class Vector(Coords):
     def add(self,v):
         return Vector(self.x() + v.x(),self.y() + v.y())
 
+    @staticmethod
+    def V0():
+        return Vector(0.0,0.0)
 
-#
-# default defs
-#
-VX0 = Vector(1.0,0.0)
-VY0 = Vector(0.0,0.1)
-V0  = Vector(0.0,0.0)
-P0  = Point(0.0,0.0)
+    @staticmethod
+    def VX0():
+        return Vector(1.0,0.0)
+    
+    @staticmethod
+    def VY0():
+        return Vector(0.0,1.0)
+
 
 #
 # shortcut: build a vector from extremities

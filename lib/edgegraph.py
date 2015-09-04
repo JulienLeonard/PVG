@@ -153,6 +153,9 @@ class Arc:
     def point1(self):
         return self.node1().p()
 
+    def point2(self):
+        return self.node2().p()
+
     def points(self):
         return [self.point1()] + [edge.point2() for edge in self.medges]
     
@@ -274,18 +277,18 @@ class EdgeGraph:
     def loadwithpointsequence(self,points):
         if len(points) < 1:
             return self
-        pointpairs = GeoMatcher().checksegments([(p1,p2) for (p1,p2) in pairs(points)])
+        segments = GeoMatcher().checksegments([Segment(p1,p2) for (p1,p2) in pairs(points)])
 
         firstnode = None
-        for (p1,p2) in pointpairs:
+        for seg in segments:
             if firstnode == None:
-                firstnode = PointNode(p1)
+                firstnode = PointNode(seg.p1())
                 self.add_node(firstnode)
                 prevnode = firstnode
-            if p2 == firstnode.p():
+            if seg.p2() == firstnode.p():
                 self.createedges(prevnode,firstnode)
             else:
-                newnode = PointNode(p2)
+                newnode = PointNode(seg.p2())
                 self.createedges(prevnode,newnode)
                 self.add_node(newnode)
                 prevnode = newnode
@@ -498,14 +501,4 @@ class EdgeGraph:
                 if not arcs == None:
                     self.add_arccycle(ArcCycle(arcs))
         return self.marccycles
-
-
-                
-    #
-    # a closed polygon is a cycle in the arc graph
-    # 
-    #
-    def closedpolygons(self):
-        return [arccycle.points() for arccycle in self.arccycles()]
-
             

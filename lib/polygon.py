@@ -1,4 +1,6 @@
 from geoutils  import *
+from edgegraph import *
+from circle    import *
 
 class PointAbscissaRange:
         
@@ -432,30 +434,31 @@ class Polygon:
                     containgraph[polygons[j]] = polygons[i]
         
         # TODO: to finish
-                    
 
-
-def polygonfromradiusangle(origin,radiuss,angles):
-    result = [origin]
-    for r,a in zip(radiuss,angles):
-        result.append(result[-1].add(angle2vector(a).scale(r)))
-    return Polygon(result)
+    @staticmethod
+    def fromRadiusAngle(origin,radiuss,angles):
+        result = [origin]
+        for r,a in zip(radiuss,angles):
+            result.append(result[-1].add(angle2vector(a).scale(r)))
+        return Polygon(result)
     
-def square(center = P0, size = 1.0):
-    return Polygon([Point(center.x()-size/2.0,center.y()-size/2.0),
-                   Point(center.x()-size/2.0,center.y()+size/2.0),
-                   Point(center.x()+size/2.0,center.y()+size/2.0),
-                   Point(center.x()+size/2.0,center.y()-size/2.0)]).close()
+    @staticmethod
+    def square(center = Point.P0(), size = 1.0):
+        return Polygon([Point(center.x()-size/2.0,center.y()-size/2.0),
+                        Point(center.x()-size/2.0,center.y()+size/2.0),
+                        Point(center.x()+size/2.0,center.y()+size/2.0),
+                        Point(center.x()+size/2.0,center.y()-size/2.0)]).close()
+    
+    @staticmethod
+    def rectangle(x1,y1,x2,y2):
+        return Polygon([Point(x1,y1),Point(x2,y1),Point(x2,y2),Point(x1,y2)]).close()
 
-def rectangle(x1,y1,x2,y2):
-    return Polygon([Point(x1,y1),Point(x2,y1),Point(x2,y2),Point(x1,y2)]).close()
+    @staticmethod
+    def fromEdgeGraph(eg):
+        return [Polygon(arccycle.points()) for arccycle in eg.arccycles()]
 
-def polygonsignedarea(points):
-    return Polygon(points).signedArea()
 
-def polygonclockwise(polygon):
-    return polygon.clockwise()
+def circlepolygon(self,npoints=30):
+    return Polygon([self.point(i) for i in usamples(npoints+1)][:-1])
 
-def ispolygonclockwise(polygon):
-    return polygon.isClockwise()
-
+Circle.polygon = circlepolygon

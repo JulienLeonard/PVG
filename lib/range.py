@@ -71,6 +71,14 @@ class R:
         else:
             return [self.sample(rand()) for i in range(niter)]
 
+    #
+    # define angle range
+    #
+    @staticmethod
+    def angle():
+        return R(0.0,2* math.pi)
+
+
 #
 # define a multi range object by spec [(a1,v1),(a2,v2),...,(an,vn)]
 #

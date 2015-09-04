@@ -1,12 +1,8 @@
-import sys
-sys.path.insert(0, './../lib')
-
-from utils import *
-from range import *
+from utils    import *
+from range    import *
 from geoutils import *
 
 import unittest
-
 
 class PointTest(unittest.TestCase):
     
@@ -35,8 +31,8 @@ class PointTest(unittest.TestCase):
         self.assertEqual(Point(1.0,1.0).sub(Point(0.0,1.0)).coords(), (1.0,0.0))
 
     def test_rotate(self):
-        self.assertEqual(True, (0.0001 > dist2(Point(1.0,0.0).rotate(Point(0.0,0.0),anglerange().sample(0.25)), Point(0.0,1.0))))
-        self.assertEqual(True, (0.0001 > dist2(Point(2.0,2.0).rotate(Point(0.0,2.0),anglerange().sample(0.25)), Point(0.0,4.0))))
+        self.assertEqual(True, (0.0001 > dist2(Point(1.0,0.0).rotate(Point(0.0,0.0),R.angle().sample(0.25)), Point(0.0,1.0))))
+        self.assertEqual(True, (0.0001 > dist2(Point(2.0,2.0).rotate(Point(0.0,2.0),R.angle().sample(0.25)), Point(0.0,4.0))))
         
     def test_sym(self):
         self.assertEqual(Point(1.0,0.0).sym(Point(0.0,0.0)).coords(), (-1.0,0.0))
@@ -81,7 +77,7 @@ class VectorTest(unittest.TestCase):
         self.assertEqual(newv.coords(), (1.0,0.0))
 
     def test_rotate(self):
-        self.assertEqual(True, (0.0001 > dist2(Vector(0.0,0.2).rotate(anglerange().sample(0.25)), Vector(-0.2,0.0))))
+        self.assertEqual(True, (0.0001 > dist2(Vector(0.0,0.2).rotate(R.angle().sample(0.25)), Vector(-0.2,0.0))))
 
     def test_scale(self):
         self.assertEqual(Vector(0.0,0.2).scale(10.0).coords(), (0.0,2.0))
@@ -93,8 +89,8 @@ class VectorTest(unittest.TestCase):
 class UtilsTest(unittest.TestCase):
     
     def test_anglerange(self):
-        self.assertEqual(anglerange().v1(),0.0)
-        self.assertEqual(anglerange().v2(),2* math.pi)
+        self.assertEqual(R.angle().v1(),0.0)
+        self.assertEqual(R.angle().v2(),2* math.pi)
         
     def test_vector(self):
         self.assertEqual(vector(Point(0.0,1.0),Point(2.0,3.0)).coords(), (2.0,2.0))

@@ -1,4 +1,5 @@
 from geoutils import *
+from circle   import *
 from shape    import *
 
 class Quad:

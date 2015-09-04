@@ -91,6 +91,12 @@ class Silhouette:
     def allpolygons(self):
         return [poly for level in self.mpolys.keys() for poly in self.mpolys[level]]
 
+    def allsegments(self,lengthsample = None):
+        if not lengthsample == None:
+            return [Segment(p1,p2) for poly in self.allpolygons() for (p1,p2) in pairs(poly.lengthsamples(lengthsample))]
+        else:
+            return [seg for poly in self.allpolygons() for seg in poly.segments()]
+
     @staticmethod
     def merge(silhouettes):
         result = Silhouette()

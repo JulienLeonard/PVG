@@ -1,4 +1,5 @@
 from geoutils import *
+from circle   import *
 from quadtree import *
 
 class GeoMatcher:
