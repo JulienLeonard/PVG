@@ -1,5 +1,6 @@
 from utils    import *
 from geoutils import *
+from polygon  import *
 
 #
 # define a circle object
@@ -77,6 +78,9 @@ class Circle:
     @staticmethod
     def intersect(c1,c2,strict=False):
         return circleintersect(c1,c2)
+
+    def polygon(self,npoints=30):
+        return Polygon([self.point(i) for i in usamples(npoints+1)][:-1])
 
 
 C0 = Circle()

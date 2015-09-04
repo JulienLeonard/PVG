@@ -1,5 +1,7 @@
 from geoutils import *
+from polygon  import *
 from circle   import *
+from bezier   import *
 
 class Shape:
 
@@ -37,4 +39,12 @@ class Shape:
         puts("intersect not defined",shape1,shape2)
 
 
-
+    @staticmethod
+    def contain(shape1,shape2,strict=False):
+        if isinstance(shape1,Circle) and isinstance(shape2,Circle):
+            return Circle.contain(shape1,shape2,strict)
+        if isinstance(shape1,Segment) and isinstance(shape2,Segment):
+            return Segment.contain(shape1,shape2,strict)
+        if isinstance(shape1,Polygon) and isinstance(shape2,Polygon):
+            return Polygon.contain(shape1,shape2,strict)
+        

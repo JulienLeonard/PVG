@@ -1,6 +1,4 @@
 from geoutils  import *
-from edgegraph import *
-from circle    import *
 
 class PointAbscissaRange:
         
@@ -454,11 +452,5 @@ class Polygon:
         return Polygon([Point(x1,y1),Point(x2,y1),Point(x2,y2),Point(x1,y2)]).close()
 
     @staticmethod
-    def fromEdgeGraph(eg):
-        return [Polygon(arccycle.points()) for arccycle in eg.arccycles()]
-
-
-def circlepolygon(self,npoints=30):
-    return Polygon([self.point(i) for i in usamples(npoints+1)][:-1])
-
-Circle.polygon = circlepolygon
+    def middlex(polygon):
+        return polygon.middle().x()
