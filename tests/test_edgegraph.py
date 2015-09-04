@@ -61,7 +61,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),14)
         self.assertEqual(len(eg.nodes()),8)
         self.assertEqual(len(eg.arcs()),6)
-        polygons = Polygon.fromEdgeGraph(eg)
+        polygons = eg.polygons()
         #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
         self.assertEqual(len(polygons),0)
 
@@ -73,7 +73,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),8)
         self.assertEqual(len(eg.nodes()),4)
         self.assertEqual(len(eg.arcs()),2)
-        polygons = Polygon.fromEdgeGraph(eg)
+        polygons = eg.polygons()
         #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
         self.assertEqual(len(polygons),2)
 
@@ -85,7 +85,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),12)
         self.assertEqual(len(eg.nodes()),6)
         self.assertEqual(len(eg.arcs()),6)
-        polygons = Polygon.fromEdgeGraph(eg)
+        polygons = eg.polygons()
         #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
         self.assertEqual(len(polygons),2)
 
@@ -99,7 +99,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),18)
         self.assertEqual(len(eg.nodes()),8)
         self.assertEqual(len(eg.arcs()),6)
-        polygons = Polygon.fromEdgeGraph(eg)
+        polygons = eg.polygons()
         #puts("closedpolygons test_polygons2",[[p.coords() for p in polygon] for polygon in polygons])
         self.assertEqual(len(polygons),2)
 
@@ -112,7 +112,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),10)
         self.assertEqual(len(eg.arcs()),6)
         # puts("closedpolygons test_polygons3",[[p.coords() for p in polygon] for polygon in eg.closedpolygons()])
-        polygons = Polygon.fromEdgeGraph(eg)
+        polygons = eg.polygons()
         #puts("polygons",[[p.coords() for p in polygon] for polygon in polygons])
         self.assertEqual(len(polygons),3)
 
@@ -125,7 +125,7 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),14)
         self.assertEqual(len(eg.arcs()),10)
         #puts("closedpolygons test_polygons4",[[p.coords() for p in polygon] for polygon in eg.closedpolygons()])
-        self.assertEqual(len(Polygon.fromEdgeGraph(eg)),3)
+        self.assertEqual(len(eg.polygons()),3)
 
     def test_polygons5(self):
         s1s = Circle(Point(0.0,0.0),1.0).polygon(4).close().segments()
@@ -136,4 +136,4 @@ class EdgeGraphTest(unittest.TestCase):
         self.assertEqual(len(eg.edges()),20)
         self.assertEqual(len(eg.arcs()),20)
         #puts("closedpolygons test_polygons5",[[p.coords() for p in polygon] for polygon in eg.closedpolygons()])
-        self.assertEqual(len(Polygon.fromEdgeGraph(eg)),5)
+        self.assertEqual(len(eg.polygons()),5)
