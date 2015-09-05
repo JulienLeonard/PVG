@@ -18,6 +18,43 @@ class ImageDim:
 
     def height(self):
         return self.mheight
+
+class Drawing:
+
+    def __init__(self,shape,style):
+        self.mshape = shape
+        self.mstyle = style
+        
+    def shape(self):
+        return self.mshape
+
+    def style(self):
+        return self.mstyle
+
+
+class Frame:
+    
+    def __init__(self):
+        self.mdrawings  = []
+
+    def drawings(self):
+        return self.mdrawings
+
+    def add(self,drawing):
+        self.mdrawings.append(drawing)
+        return self
+
+    def adds(self,drawings):
+        for drawing in drawings:
+            self.add(drawing)
+        return self
+
+    def symx(self,symx):
+        return Frame().adds([Drawing(drawing.shape().symx(symx),drawing.style()) for drawing in self.drawings()])
+
+    def draw(self,shape,style = Color.black()):
+        self.add(Drawing(shape,style))
+
     
 
 class Render:
@@ -43,16 +80,23 @@ class Render:
             self.mmargin = v
             return self
 
-    def draw(self, shape, colorc = Color.black() ):
+    def draw(self, shape, colorc = None ):
         if type(shape) == list:
             shapes = shape
             for shape in shapes:
                 self.draw(shape,colorc)
-
-        if isinstance(shape,Circle):
-            self.drawcircle(shape,colorc)
-        elif isinstance(shape,Polygon):
-            self.drawpolygon(shape,colorc)
+        else:
+            if isinstance(shape,Frame):
+                for drawing in shape.drawings():
+                    puts("shape",shape,"drawing",drawing)
+                    self.draw(drawing.shape(),drawing.style())
+            else:
+                if colorc == None:
+                    colorc = Color.black()
+                if isinstance(shape,Circle):
+                    self.drawcircle(shape,colorc)
+                elif isinstance(shape,Polygon):
+                    self.drawpolygon(shape,colorc)
         return self
 
     def drawpolygon( self, polygon, colorc = Color.black() ):

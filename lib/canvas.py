@@ -41,6 +41,6 @@ class Canvas():
         self.render().outputfilepath(outputfilepath)
         self.render().end()
 
-    def draw(self,shape,style = Color.black()):
+    def draw(self,shape,style = None):
         self.render().draw(shape,style)
         return self
