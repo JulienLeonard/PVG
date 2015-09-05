@@ -391,7 +391,7 @@ class Polygon:
         else:
             return self.reverse()
 
-    def contain(self,point):
+    def containpoint(self,point):
         if not self.viewbox().contain(point):
             return False
         else:
@@ -417,7 +417,7 @@ class Polygon:
     @staticmethod
     def ispolyinside(poly1,poly2):
         for p in poly1.points():
-            if not poly2.contain(p):
+            if not poly2.containpoint(p):
                 return False
         return True
 
@@ -454,3 +454,15 @@ class Polygon:
     @staticmethod
     def middlex(polygon):
         return polygon.middle().x()
+
+    #
+    # WARNING: only works for convex polygons
+    #
+    @staticmethod
+    def contain(poly1,poly2,strict):
+        for p in poly2.points():
+            if not poly1.containpoint(p):
+                return False
+        return True
+            
+        
