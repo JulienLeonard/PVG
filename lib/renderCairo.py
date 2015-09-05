@@ -43,23 +43,22 @@ class RenderCairo(Render):
 
 class RenderCenter(RenderCairo):
     def __init__(self,imagedim,backcolor=Color.white()):
-        self.mitems    = []
-        self.mimagedim = imagedim
+        self.mdrawings  = []
+        self.mimagedim  = imagedim
         self.mbackcolor = backcolor
 
     def drawpolygon( self, polygon, colorc = Color.black()):
         if not polygon == None:
-            self.mitems.append((polygon,colorc))
+            self.mdrawings.append(Drawing(polygon,colorc))
 
     def end(self):
         self.initpicture(self.mimagedim,self.mbackcolor)
         self.setviewport(self.viewport())
-        for item in self.mitems:
-            polygon,color = item
-            self.drawpolygonpicture(polygon,color)
+        for drawing in self.mdrawings:
+            self.drawpolygonpicture(drawing.shape(),drawing.style())
         self.endpicture()
 
     def viewport(self):
-        return polygons2bbox([item[0] for item in self.mitems]).resize(self.margin()).viewport()
+        return bbunions([drawing.shape().bbox() for drawing in self.mdrawings]).resize(self.margin()).viewport()
         
             

@@ -59,7 +59,7 @@ class Seed:
     def maxcircle(self,rrange,quadtree,withmaxcollision = False):
         crmin = self.computecircle(rrange.minv())
         if quadtree.iscolliding(crmin):
-            puts("no circlemin")
+            # puts("no circlemin")
             return None
 
         lastgoodcircle = crmin
