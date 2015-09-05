@@ -41,6 +41,7 @@ class Shape:
 
     @staticmethod
     def contain(shape1,shape2,strict=False):
+        puts("Shape.contain",shape1,shape2)
         if isinstance(shape1,Circle) and isinstance(shape2,Circle):
             return Circle.contain(shape1,shape2,strict)
         if isinstance(shape1,Segment) and isinstance(shape2,Segment):

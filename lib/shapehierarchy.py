@@ -27,7 +27,7 @@ class ShapeNode:
     #
     def add(self,newshape):
         for node in self.subnodes():
-            if Shape.contain(node.shape,newshape):
+            if Shape.contain(node.shape(),newshape):
                 node.add(newshape)
                 return self
         self.msubnodes.append(ShapeNode(newshape))
@@ -84,7 +84,7 @@ class ShapeHierarchy:
         return self.mlevel0.subshapes()[0]
 
     def shapesbylevel(self,level):
-        return self.mlevel0.shapesbylevel(level+1)
+        return self.mlevel0.shapesbylevel(level)
 
     @staticmethod
     def merge(ohierarchies):
