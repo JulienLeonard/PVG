@@ -682,7 +682,7 @@ def maxcirclespackingangles(seeds,quadtree,dmax,ftransform,niter,nangles,dmin):
     # init cache
     cache = {}
     for seed in seeds:
-        cache.update({(seed,angle) : "" for angle in samples((0.0,2*3.14159),nangles+1)[:-1]})
+        cache.update({(seed,angle) : "" for angle in R.angle().samples(nangles+1)[:-1]})
 
     for iiter in range(niter):
         if iiter % 100 == 0:
@@ -720,7 +720,7 @@ def maxcirclespackingangles(seeds,quadtree,dmax,ftransform,niter,nangles,dmin):
             result.addcircleadj(maxseed[0],newc)
             quadtree.add(newc)
             cache[maxseed] = -1
-            newseeds = [(newc,angle) for angle in samples((0.0,2*3.14159),nangles+1)[:-1]]
+            newseeds = [(newc,angle) for angle in R.angle().samples(nangles+1)[:-1]]
             
             for newseed in newseeds:
                 cache[newseed] = ""
@@ -781,7 +781,7 @@ def maxcirclespackingangleslines(seeds,quadtree,dmax,ftransform,niter,nangles,dm
 
     # init cache
     for seed in seeds:
-        cache = {(seed,angle) : "" for angle in samples((0.0,2*3.14159),nangles+1)[:-1]}
+        cache = {(seed,angle) : "" for angle in R.angle.samples(nangles+1)[:-1]}
 
     for iiter in range(niter):
         if iiter % 10 == 0:
@@ -823,7 +823,7 @@ def maxcirclespackingangleslines(seeds,quadtree,dmax,ftransform,niter,nangles,dm
             cache[maxseed] = -1
             newseeds = []
             for newc in newcs:
-                newseeds = newseeds + [(newc,angle) for angle in samples((0.0,2*3.14159),nangles+1)[:-1]]
+                newseeds = newseeds + [(newc,angle) for angle in R.angle().samples(nangles+1)[:-1]]
             
             for newseed in newseeds:
                 cache[newseed] = ""

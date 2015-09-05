@@ -161,13 +161,15 @@ class CR:
     def sample(self,t):
         return CurveBuilder.interline(self.mv1,self.mv2,t)
 
-    def samples(self,values):
-        if not type(values) == list:
-            values = usamples(values)
-        return [self.sample(t) for t in values]
+    def samples(self,ncurves=None,abscissas=None):
+        if not ncurves == None:
+            return [self.sample(t) for t in usamples(ncurves)]
+        if not abscissas == None:
+            return [self.sample(t) for t in abscissas]
+        return None
 
-    def lines(self,values):
-        return [line.line() for line in self.samples(values)]
+    def lines(self,ncurves=None,abscissas=None):
+        return [line.line() for line in self.samples(ncurves,values)]
 
 
 def curveRange(self,abs1 = 0.0, abs2 = 0.5):

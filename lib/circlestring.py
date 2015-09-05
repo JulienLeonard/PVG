@@ -24,15 +24,15 @@ def circlestring(polyline,circlesize):
         # print "sabs ",sabs
     return result
 
-def circlestring2(polyline,circlesize):
-    ncircles = int(polyline.length()/circlesize)
-    points = [polyline.point(i) for i in samples((0.0,1.0),ncircles + 1)]
+def circlestring2(polygon,circlesize):
+    ncircles = int(polygon.length()/circlesize)
+    points   = polygon.samples(ncircles+1)
     # puts("points",points)
     result = [circlefromdiameter(p1,p2) for (p1,p2) in pairs(points)]
     return result
 
-def circlestring3(polyline,ncircles):
-    points = [polyline.point(i) for i in samples((0.0,1.0),ncircles + 1)]
+def circlestring3(polygon,ncircles):
+    points = polylgon.samples(ncircles + 1)
     # puts("points",points)
     result = [circlefromdiameter(p1,p2) for (p1,p2) in pairs(points)]
     return result

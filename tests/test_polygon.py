@@ -18,12 +18,12 @@ class PolygonTest(unittest.TestCase):
     def test_bbox(self):
         self.assertEqual(Circle().polygon(100).bbox().coords(),(-1.0,-1.0,1.0,1.0))
 
-    def test_contain(self):
-        self.assertEqual(Circle().polygon(100).contain(Point(0.0,0.0)),True)
-        self.assertEqual(Circle().polygon(100).contain(Point(0.0,2.0)),False)
-        self.assertEqual(Circle().polygon(100).contain(Point(0.0,1.0)),False)
-        self.assertEqual(Circle().polygon(100).contain(Point(0.0,0.999)),True)
-        self.assertEqual(Circle().polygon(100).contain(Point(0.9,0.9)),False)
+    def test_containpoint(self):
+        self.assertEqual(Circle().polygon(100).containpoint(Point(0.0,0.0)),True)
+        self.assertEqual(Circle().polygon(100).containpoint(Point(0.0,2.0)),False)
+        self.assertEqual(Circle().polygon(100).containpoint(Point(0.0,1.0)),False)
+        self.assertEqual(Circle().polygon(100).containpoint(Point(0.0,0.999)),True)
+        self.assertEqual(Circle().polygon(100).containpoint(Point(0.9,0.9)),False)
 
     def test_samples(self):
         self.assertEqual([coord for p in Polygon.square(Point.P0(),1.0).samples(9) for coord in p.coords()],[-0.5,-0.5,-0.5,0.0,-0.5,0.5,0.0,0.5,0.5,0.5,0.5,0.0,0.5,-0.5,0.0,-0.5,-0.5,-0.5])

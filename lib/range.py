@@ -40,10 +40,12 @@ class R:
             t = 1.0
         return sample((self.mv1,self.mv2),t)
 
-    def samples(self,values):
-        if not type(values) == list:
-            values = usamples(values)
-        return [self.sample(t) for t in values]
+    def samples(self,nsamples=None,abscissas=None):
+        if not nsamples == None:
+            return [self.sample(t) for t in usamples(nsamples)]
+        if not abscissas == None:
+            return [self.sample(t) for t in abscissas]
+        return None
 
     def v(self,t):
         return sample((self.mv1,self.mv2),t)

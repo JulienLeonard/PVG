@@ -56,8 +56,11 @@ class Polygon:
         else:
             return self.samples(npoints)
 
-    def segments(self):
-        return self.msegments
+    def segments(self,bylength=None):
+        if bylength == None:
+            return self.msegments
+        else:
+            return [Segment(p1,p2) for (p1,p2) in pairs(self.samples(bylength=bylength))]
     
     def paranges(self):
         if self.mparanges == None:
@@ -67,11 +70,15 @@ class Polygon:
     def bbox(self):
         return points2bbox(self.mpoints)
 
-    def samples(self,npoints):
-        if not type(npoints) == list:
-            npoints = usamples(npoints)
-        return [self.point(abs) for abs in npoints]
-
+    def samples(self,npoints=None,abscissas=None,bylength=None):
+        if not npoints  == None:
+            return [self.point(abs) for abs in usamples(npoints)]
+        if not abscissa == None:
+            return [self.point(abs) for abs in abscissas]
+        if not bylength == None:
+            return self.lengthsamples(bylength)
+        return None
+        
     def lengthsamples(self,size):
         result = []
         cabs = 0.0

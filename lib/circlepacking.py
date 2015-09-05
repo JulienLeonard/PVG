@@ -140,7 +140,7 @@ def makeradiusroller(vlist):
 
 def makeradiusesf(v1,v2,nsamples):
   def result(r1,r2):
-     return samples((min(r1,r2)*v1,min(r1,r2)*v2),nsamples)
+     return R(min(r1,r2)*v1,min(r1,r2)*v2).samples(nsamples)
   return result
 
 def makeradiuscontextanglef(v1,v2):

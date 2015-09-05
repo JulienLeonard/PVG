@@ -209,8 +209,11 @@ class Segment:
     def sample(self,t):
         return Point(self.mrx.sample(t),self.mry.sample(t))
 
-    def samples(self,ntimes):
-        return [self.sample(abs) for abs in usamples(ntimes)]
+    def samples(self,npoints=None,abscissas=None):
+        if not npoints == None:
+            return [self.sample(abs) for abs in usamples(npoints)]
+        if not abscissas == None:
+            return [self.sample(abs) for abs in abscissas]
 
     def points(self):
         return (self.p1(),self.p2())

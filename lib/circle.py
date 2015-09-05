@@ -51,8 +51,12 @@ class Circle:
         angle = R.angle().sample(abscissa)
         return self.center().add(Vector.VX0().rotate(angle).scale(self.r()))
 
-    def samples(self,abscissas):
-        return [self.sample(abscissa) for abscissa in abscissas]
+    def samples(self,npoints=None,abscissas=None):
+        if not npoints == None:
+            return [self.sample(abscissa) for abscissa in usamples(npoints)]
+        if not abscissas == None:
+            return [self.sample(abscissa) for abscissa in abscissas]
+        return None
 
     def viewbox(self):
         x,y,r = self.coords()
@@ -80,7 +84,7 @@ class Circle:
         return circleintersect(c1,c2)
 
     def polygon(self,npoints=30):
-        return Polygon([self.point(i) for i in usamples(npoints+1)][:-1])
+        return Polygon(self.samples(npoints=npoints+1)[:-1])
 
 
 C0 = Circle()
@@ -119,7 +123,7 @@ def circlepoint(circle,abs):
     return circle.point(abs)
 
 def circlepoints(circle,npoints,offset):
-    abss = samples((offset,1.0+offset),npoints)
+    abss = R(offset,1.0+offset).samples(npoints)
     return [circlepoint(circle,abs) for abs in abss]
 
 def circlepolygon(circle,npoints):
