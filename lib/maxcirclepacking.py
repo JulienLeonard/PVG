@@ -1230,7 +1230,7 @@ def segments2normalseeds(segments,maxsize=None,sides=[-1.0,1.0],nitems = None):
 #
 # compute the n max circles inside a polygon
 #
-def polygonmaxcircles(self,niter):
+def polygonmaxcircles(self,niter = 1, ftransform = None, frecursive = None):
     base = self.clockwise()
     if not base.isclosed():
         base = base.close()
@@ -1239,6 +1239,6 @@ def polygonmaxcircles(self,niter):
     seeds    = segments2normalseeds(segments,base.length()/100.0,[-1.0])
     # puts("segments",[seg.coords() for seg in segments])
     # puts("seeds",len(seeds),[seed.coords() for seed in seeds])
-    return maxcirclesfromseeds(segments, seeds, base.bbox(), niter).circles()
+    return maxcirclesfromseeds(segments, seeds, base.bbox(), niter,ftransform,frecursive).circles()
 
 Polygon.maxcircles = polygonmaxcircles
