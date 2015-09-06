@@ -50,17 +50,27 @@ class Polygon:
         self.mparanges  = None
         self.mlength    = None
 
-    def points(self,npoints=None):
-        if npoints == None:
+    def points(self,npoints=None,abscissas=None,bylength=None):
+        if npoints == None and abscissas == None and bylength == None:
             return self.mpoints
-        else:
-            return self.samples(npoints)
+        if not npoints  == None:
+            return [self.point(abs) for abs in usamples(npoints)]
+        if not abscissas == None:
+            return [self.point(abs) for abs in abscissas]
+        if not bylength == None:
+            return self.lengthsamples(bylength)
+        return None
 
-    def segments(self,bylength=None):
-        if bylength == None:
+    def segments(self,nsegments=None,abscissas=None,bylength=None):
+        if nsegments == None and abscissas == None and bylength == None:
             return self.msegments
-        else:
-            return [Segment(p1,p2) for (p1,p2) in pairs(self.samples(bylength=bylength))]
+        if not nsegments == None:
+            return [Segment(p1,p2) for (p1,p2) in pairs(self.points(nsegments+1))]
+        if not abscissas == None:
+            return [Segment(p1,p2) for (p1,p2) in pairs(self.points(abscissas=abscissas))]
+        if not bylength == None:
+            return [Segment(p1,p2) for (p1,p2) in pairs(self.points(bylength=bylength))]
+        return None
     
     def paranges(self):
         if self.mparanges == None:
@@ -71,13 +81,7 @@ class Polygon:
         return points2bbox(self.mpoints)
 
     def samples(self,npoints=None,abscissas=None,bylength=None):
-        if not npoints  == None:
-            return [self.point(abs) for abs in usamples(npoints)]
-        if not abscissa == None:
-            return [self.point(abs) for abs in abscissas]
-        if not bylength == None:
-            return self.lengthsamples(bylength)
-        return None
+        return self.points(npoints,abscissas,bylength)
         
     def lengthsamples(self,size):
         result = []
@@ -420,6 +424,26 @@ class Polygon:
         if width == None:
             width = self.length()/100.0
         return self.offset(width/2.0).concat(self.offset(-width/2.0).reverse())
+
+    #
+    # subdivide polygon by faces, ie by lines with no big direction changes
+    #
+    def faces(self):
+        points = self.clockwise().points()
+        points = points + points[0:2]
+        result = []
+        ccurrent = [points[0]]
+        for (p1,p2,p3) in triplets(points):
+            ccurrent.append(p2)
+            crossprod = vector(p1,p2).normalize().cross(vector(p2,p3).normalize())
+            puts("crossprod",crossprod)
+            if crossprod < -0.5:
+                result.append(ccurrent)
+                ccurrent = [p2]
+        ccurrent.append(p3)
+        result.append(ccurrent)
+
+        return [Polygon(ps) for ps in result]
 
     @staticmethod
     def ispolyinside(poly1,poly2):
