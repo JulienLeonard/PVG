@@ -5,51 +5,48 @@ from quadtree import *
 class GeoMatcher:
 
     def checksegments(self,segs):
-        pointindices = {}
-        points = {} 
-        index = 0
-        for seg in segs:
-            for p in seg.points():
-                if not p in pointindices:
-                    # print "point",p,"index",index
-                    pointindices[p] = index
-                    points[index] = p
-                    index += 1
-            
-        pbbox     = points2bbox(pointindices.keys())
-        differror = pbbox.size()/10000.0
-        # print "differror",differror
+        points    = [p for seg in segs for p in seg.points()]
+        # puts("GeoMatcher points",points)
+
+        pbbox     = points2bbox(points)
+        differror = pbbox.size()/5000.0
+
         quadtree = QuadTree(pbbox)
         sames = {}
-        for i in points.keys():
-            sames[i] = [i]
-        for p in pointindices.keys():
-            newcircle = Circle(p,differror) 
-            ccircles = quadtree.colliding(newcircle)
-            # print "ccircle",p[0],p[1],ccircles
-            if len(ccircles):
-                i = pointindices[p]
+        for point in points:
+            if not point in sames:
+                sames[point] = [point]
+                newcircle = Circle(point,differror) 
+                ccircles = quadtree.colliding(newcircle)
                 for ccircle in ccircles:
-                    op = ccircle.center()
-                    oi = pointindices[op]
-                    sames[oi].append(i)
-                    sames[i].append(oi)
-                    # print "same",points[i],points[oi]
-            quadtree.add(newcircle)
-                    
-        for i in points.keys():
-            sames[i] = lmin(sames[i])
-            # print "point",points[i],"same",points[sames[i]]
+                    opoint = ccircle.center()
+                    sames[opoint].append(point)
+                    sames[point].append(opoint)
+                quadtree.add(newcircle)
 
-        result = []
+        newpoints = {}
+        for point in sames.keys():
+            #puts("point",point,"coords",point.coords(),"same",sames[point])
+            if len(sames[point]) > 1: 
+                if not point in newpoints:
+                    newpoint = pmiddle(sames[point])
+                    for p in sames[point]:
+                        newpoints[p] = newpoint
+            else:
+                newpoints[point] = point
+
+        #for point in newpoints.keys():
+        #    puts("point key",point,"coords",point.coords(),"newpoint",newpoints[point],"coords",newpoints[point].coords())
+
+        segexts = {}
         for seg in segs:
-            p1,p2 = seg.points()
-            i1,i2 = pointindices[p1],pointindices[p2]
-            s1,s2 = sames[i1],sames[i2]
-            np1,np2 = points[s1],points[s2]
-            # print "geomatcher seg",p1,p2,"gives",np1,np2
-            newseg = Segment(np1,np2)
-            if newseg.length() > 0.000001:
-                result.append(newseg)
-        return result
+            if not newpoints[seg.p1()] == seg.p1() or not newpoints[seg.p2()] == seg.p2():
+                newseg = Segment(newpoints[seg.p1()],newpoints[seg.p2()])
+            else:
+                newseg = seg
+
+            if not newseg.p1() == newseg.p2() and not (newseg.p1(),newseg.p2()) in segexts and not (newseg.p2(),newseg.p1()) in segexts:
+                segexts[(newseg.p1(),newseg.p2())] = newseg
+
+        return segexts.values()
         

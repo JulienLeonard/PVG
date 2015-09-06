@@ -262,6 +262,10 @@ class Segment:
         sortlist.sort()
         return [seg for (dum,dum,seg) in sortlist]
 
+    @staticmethod
+    def S0():
+        return Segment(Point(0.0,0.0),Point(1.0,0.0))
+
 
 
 def pequal(p1,p2,error=0.00001):

@@ -278,7 +278,8 @@ class EdgeGraph:
     def loadwithpointsequence(self,points):
         if len(points) < 1:
             return self
-        segments = GeoMatcher().checksegments([Segment(p1,p2) for (p1,p2) in pairs(points)])
+
+        segments = [Segment(p1,p2) for (p1,p2) in pairs(points)]
 
         firstnode = None
         for seg in segments:
