@@ -88,7 +88,7 @@ class Render:
         else:
             if isinstance(shape,Frame):
                 for drawing in shape.drawings():
-                    puts("shape",shape,"drawing",drawing)
+                    # puts("shape",shape,"drawing",drawing)
                     self.draw(drawing.shape(),drawing.style())
             else:
                 if colorc == None:
