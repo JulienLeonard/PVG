@@ -49,6 +49,11 @@ class BaoNode(Circle):
             cindex += 1
         return result
 
+    @staticmethod
+    def fromcircle(circle):
+        x,y,r = circle.coords()
+        return [BaoNode(Circle().coords((x-r/2.0,y,r/2.0)),0,0),BaoNode(Circle().coords((x+r/2.0,y,r/2.0)),1,1)]
+
 
 def baonodes0():
     return [BaoNode(Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(Circle().coords((2.0,0.0,1.0)),1,1)]
