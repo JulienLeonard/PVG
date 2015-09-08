@@ -185,6 +185,12 @@ class Arc:
             self.mpolygon = Polygon(self.points())
         return self.mpolygon
 
+    def length(self):
+        return sum([vector(p1,p2).length() for (p1,p2) in pairs(self.points())])
+
+    def pointextremities(self):
+        return (self.point1(),self.point2())
+
 #
 # An arccycle is a right oriented cycle of arcs
 # An arc can be at most part of one arccycle

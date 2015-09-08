@@ -183,6 +183,20 @@ def curveRange(self,abs1 = 0.0, abs2 = 0.5):
 Polygon.curveRange = curveRange
 
 
+#
+# 
+#
+class QuadGeometry:
 
+    def __init__(self,left,up,right,down):
+        self.mleft  = left
+        self.mup    = up
+        self.mright = right
+        self.mdown  = down
+        
+    def point(self,p):
+        x,y = p.coords()
 
+    def horizontal(self,t):
+        return Polygon([self.point(Point(x,t)) for x in usamples(100)])
 
