@@ -353,6 +353,16 @@ class Polygon:
 
     def split(self,ntimes):
         return [self.subline(t1,t2) for (t1,t2) in pairs(usamples(ntimes+1))]
+
+    def splitintwo(self,t):
+        if t <= 0.5:
+            ot = t + 0.5
+            it = t
+            return [self.subline(it,ot),self.subline(ot,1.0).concat(self.subline(0.0,it))]
+        else:
+            it = t - 0.5
+            ot = t
+            return [self.subline(ot,1.0).concat(self.subline(0.0,it)),self.subline(it,ot)]
                 
     def addline(self,size):
         result = self.mpoints[:]
@@ -424,26 +434,6 @@ class Polygon:
         if width == None:
             width = self.length()/100.0
         return self.offset(width/2.0).concat(self.offset(-width/2.0).reverse())
-
-    #
-    # subdivide polygon by faces, ie by lines with no big direction changes
-    #
-    def faces(self):
-        points = self.clockwise().points()
-        points = points + points[0:2]
-        result = []
-        ccurrent = [points[0]]
-        for (p1,p2,p3) in triplets(points):
-            ccurrent.append(p2)
-            crossprod = vector(p1,p2).normalize().cross(vector(p2,p3).normalize())
-            puts("crossprod",crossprod)
-            if crossprod < -0.5:
-                result.append(ccurrent)
-                ccurrent = [p2]
-        ccurrent.append(p3)
-        result.append(ccurrent)
-
-        return [Polygon(ps) for ps in result]
 
     @staticmethod
     def ispolyinside(poly1,poly2):

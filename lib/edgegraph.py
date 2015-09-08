@@ -118,7 +118,7 @@ class Arc:
         for edge in self.medges:
             edge.arc(self)
         self.marccycle = None
-
+        self.mpolygon  = None
 
     def edges(self):
         return self.medges
@@ -176,6 +176,14 @@ class Arc:
         else:
             self.marccycle = v
             return self
+
+    def aggx(self):
+        return self.point1().x() + self.point2().x()
+
+    def polygon(self):
+        if self.mpolygon == None:
+            self.mpolygon = Polygon(self.points())
+        return self.mpolygon
 
 #
 # An arccycle is a right oriented cycle of arcs
@@ -506,5 +514,4 @@ class EdgeGraph:
             
     def polygons(self):
         return [Polygon(arccycle.points()) for arccycle in self.arccycles()]
-
 
