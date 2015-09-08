@@ -37,7 +37,7 @@ class PolygonTest(unittest.TestCase):
     def test_length(self):
         self.assertEqual(Polygon.square(Point.P0(),1.0).length(),4.0)
 
-    def test_faces(self):
-        self.assertEqual(len(Circle().polygon(100).faces()),1)
-        self.assertEqual(len(Circle().polygon(10).faces()),10)
-        # self.assertEqual(len(Polygon.square(Point.P0(),1.0).faces()),4)
+    # def test_faces(self):
+    #     self.assertEqual(len(Circle().polygon(100).faces()),1)
+    #     self.assertEqual(len(Circle().polygon(10).faces()),10)
+    #     # self.assertEqual(len(Polygon.square(Point.P0(),1.0).faces()),4)
