@@ -4,7 +4,7 @@ from polygon   import *
 
 class Voronoi:
     def __init__(self,points):
-        self.mpoints   = [p.coords() for p in points]
+        self.mpoints   = lunique([p.coords() for p in points])
         self.mcontext  = None
         self.mpolygons = []
         self.compute(self.mpoints)

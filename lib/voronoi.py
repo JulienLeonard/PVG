@@ -31,6 +31,7 @@ Calculate Delaunay triangulation and the Voronoi polygons for a set of
 #  April, 2010
 
 import math
+from basics import *
 
 __all__ = ['voronoi']
 
@@ -365,6 +366,8 @@ class Edge(object):
         dy = float(site2.y - site1.y)
         adx = abs(dx)  # make sure that the difference in positive
         ady = abs(dy)
+
+        # puts("site2",site2.x,site2.y,"site1",site1.x,site1.y)
 
         # get the slope of the line
         newedge.c = float(site1.x * dx + site1.y * dy + (dx*dx + dy*dy)*0.5)
