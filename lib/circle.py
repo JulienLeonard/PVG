@@ -60,7 +60,7 @@ class Circle:
 
     def viewbox(self):
         x,y,r = self.coords()
-        return BBox(Point(x-r,y-r),Point(x+r,y+r))
+        return BBox(x-r,y-r,x+r,y+r)
 
     def bbox(self):
         return self.viewbox()
@@ -74,10 +74,10 @@ class Circle:
     def point(self,abscissa):
         return self.sample(abscissa)
 
-    def contain(self,p,strict=False):
+    def containpoint(self,p,strict=False):
         op = iff(strict, infeq, inf) 
-        limit = iff(strict,0.0,-self.radius()/100000.0)
-        return op(vector(self.center(),p).length() - self.radius(), limit)
+        limit = iff(strict,0.0,-self.radius()/1000.0)
+        return op(vector(self.center(),p).length2() - self.radius()*self.radius(), limit * limit)
         
     @staticmethod
     def intersect(c1,c2,strict=False):

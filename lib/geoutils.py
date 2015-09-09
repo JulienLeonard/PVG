@@ -302,21 +302,27 @@ class Viewport:
 
 class BBox:
 
-    def __init__(self,pmin=None,pmax=None):
-        self.mpmin = pmin
-        self.mpmax = pmax
+    def __init__(self,xmin,ymin,xmax,ymax):
+        self.mxmin = xmin
+        self.mxmax = xmax
+        self.mymin = ymin
+        self.mymax = ymax
         
+    @staticmethod
+    def fromCenterSize(ccenter,csize):
+        return BBox(ccenter.x() - csize/2.0,ccenter.y() - csize/2.0, ccenter.x() + csize/2.0, ccenter.y() + csize/2.0)
+
     def coords(self):
-        return self.mpmin.coords() + self.mpmax.coords()
+        return (self.mxmin,self.mymin,self.mxmax,self.mymax)
 
     def center(self):
-        return pmiddle([self.mpmin,self.mpmax])
+        return Point((self.mxmin + self.mxmax)/2.0, (self.mymin + self.mymax)/2.0)
 
     def xsize(self):
-        return (self.mpmax.x() - self.mpmin.x())
+        return (self.mxmax - self.mxmin)
 
     def ysize(self):
-        return (self.mpmax.y() - self.mpmin.y())
+        return (self.mymax - self.mymin)
 
     def width(self):
         return self.xsize()
@@ -344,7 +350,7 @@ class BBox:
         newxmax = xcenter + newwidth/2.0
         newymin = ycenter - newheight/2.0
         newymax = ycenter + newheight/2.0
-        return BBox(Point(newxmin,newymin),Point(newxmax,newymax))
+        return BBox(newxmin,newymin,newxmax,newymax)
 
     def contain(self,point):
         xmin,ymin,xmax,ymax = self.coords()
@@ -363,7 +369,7 @@ class BBox:
     
     def corners(self):
         xmin,ymin,xmax,ymax = self.coords()
-        return [Point(xmin,ymin),Point(xmax,ymin),Point(xmin,ymax),Point(xmax,ymax)]
+        return [Point(xmin,ymin),Point(xmax,ymin),Point(xmax,ymax),Point(xmin,ymax)]
 
     def squarepoints(self):
         size   = self.size()
@@ -384,17 +390,17 @@ class BBox:
         middlex = (xmin + xmax)/2.0
         middley = (ymin + ymax)/2.0
         
-        return [BBox(Point(xmin,    ymin)   , Point(middlex, middley)),
-                BBox(Point(xmin,    middley), Point(middlex, ymax   )),
-                BBox(Point(middlex, middley), Point(xmax,    ymax   )),
-                BBox(Point(middlex, ymin)   , Point(xmax,    middley))]
+        return [BBox(xmin,    ymin   , middlex, middley),
+                BBox(xmin,    middley, middlex, ymax   ),
+                BBox(middlex, middley, xmax,    ymax   ),
+                BBox(middlex, ymin   , xmax,    middley)]
 
     def symx(self,symx):
-        newp1 = self.mpmin.symx(symx)
-        newp2 = self.mpmax.symx(symx)
-        xmin  = min(newp1.x(),newp2.x())
-        xmax  = max(newp1.x(),newp2.x())
-        return BBox(Point(xmin,newp1.y()),Point(xmax,newp2.y()))
+        newxmin = 2.0 * symx - self.mxmin
+        newxmax = 2.0 * symx - self.mxmax
+        xmin  = min(newxmin,newxmax)
+        xmax  = max(newxmin,newxmax)
+        return BBox(xmin,self.mymin,xmax,self.mymax)
 
     def unionsymx(self,symx):
         return bbunion(self,self.symx(symx))
@@ -405,11 +411,11 @@ def bbunion(bbox1,bbox2):
     # puts ("bbunion",bbox1,bbox2)
     xmin1,ymin1,xmax1,ymax1 = bbox1.coords()
     xmin2,ymin2,xmax2,ymax2 = bbox2.coords()
-    xmin = lmin([xmin1,xmin2])
-    ymin = lmin([ymin1,ymin2])
-    xmax = lmax([xmax1,xmax2])
-    ymax = lmax([ymax1,ymax2])
-    return BBox(Point(xmin,ymin),Point(xmax,ymax))
+    xmin = min(xmin1, xmin2)
+    ymin = min(ymin1, ymin2)
+    xmax = max(xmax1, xmax2)
+    ymax = max(ymax1, ymax2)
+    return BBox(xmin,ymin,xmax,ymax)
 
 def bbunions(bboxlist):
     result = bboxlist[0]
@@ -423,7 +429,16 @@ def point2bbox(p):
 def points2bbox(points):
     if len(points) < 1:
         return None
-    return bbunions([point2bbox(p) for p in points])
+    xmin = points[0].x()
+    ymin = points[0].y()
+    xmax = xmin
+    ymax = ymin
+    for p in points[1:]:
+        xmin = min(p.x(),xmin)
+        ymin = min(p.y(),ymin)
+        xmax = max(p.x(),xmax)
+        ymax = max(p.y(),ymax)
+    return BBox(xmin,ymin,xmax,ymax)
 
 def polygons2bbox(polygons):
     if len(polygons) < 1:

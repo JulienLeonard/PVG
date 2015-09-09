@@ -139,8 +139,8 @@ class UtilsTest(unittest.TestCase):
 class BBoxTest(unittest.TestCase):
     
     def test_unionsymx(self):
-        self.assertEqual(BBox(Point(-2.0,-2.0),Point(-1.0,-1.0)).unionsymx(0.0).coords(),(-2.0,-2.0,2.0,-1.0))
-        self.assertEqual(BBox(Point(-2.0,-2.0),Point(-1.0,-1.0)).unionsymx(-1.5).coords(),(-2.0,-2.0,-1.0,-1.0))
+        self.assertEqual(BBox(-2.0,-2.0,-1.0,-1.0).unionsymx(0.0).coords(),(-2.0,-2.0,2.0,-1.0))
+        self.assertEqual(BBox(-2.0,-2.0,-1.0,-1.0).unionsymx(-1.5).coords(),(-2.0,-2.0,-1.0,-1.0))
 
 
 
