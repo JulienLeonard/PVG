@@ -9,7 +9,7 @@ class Shape:
     def intersectSegmentCircle(segment,circle,strict=False):
         result = False
         for p in segment.points():
-            if circle.contain(p,strict):
+            if circle.containpoint(p,strict):
                 result = True
                 break
         if not result:    

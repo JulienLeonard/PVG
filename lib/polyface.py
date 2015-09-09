@@ -46,46 +46,51 @@ class Polyface:
             for pi in (p1,p2):
                 if not pi in nodes:
                     nodes[pi] = []
-            nodes[p].append((arc,op))
+            arc = iff (p == p1, arc, arc.opposite())
+            nodes[p].append(arc)
 
         for p in nodes.keys():
             puts("p",p,"nexts",len(nodes[p]))
         sortlist = sorted(nodes.keys(),key=Point.x)
         p0   = sortlist[0]
         pend = sortlist[-1]
-        (front1,front2) = [[item] for item in nodes[p0]]
+        arcpaths = [[arc] for arc in nodes[p0]]
         
-        newfronts = []
-        for front in (front1,front2):
-            (arc,p2) = front[-1]
-            if not p2 == pend:
-                newarc = nodes[p][0]
-                op     = iff (newarc.p1() == p2, newarc.p2(), newarc.p1())
-                front.append((newarc,op))
-            newfronts.append(front)
-        (front1,front2) = newfronts
-
-        (front1,front2) = [[arc for (arc,p2) in front] for front in (front1,front2)]
+        newpaths = []
+        for path in arcpaths:
+            newpath = path
+            while True:
+                carc = newpath[-1]
+                p2   = carc.point2()
+                if carc.point2() == pend:
+                    break
+                puts("followings",nodes[p2])
+                newarc = nodes[p2][0]
+                newpath.append(newarc)
+            newpaths.append(newpath)
+        arcpaths = newpaths
 
         newfronts = []
         sides     = []
-        for front in (front1,front2):
-            if len(front) > 1:
-                arc0 = front[0]
+        for arcpath in arcpaths:
+            if len(arcpath) > 1:
+                arc0 = arcpath[0]
                 if abs(arc0.point1().x() - arc0.point2().x()) < arc0.length() * 0.1:
-                    sides.append(front[0])
-                    front = front[1:]
+                    sides.append(arc0)
+                    arcpath = arcpath[1:]
                     
-            if len(front) > 1:
-                arcend = front[-1]
+            if len(arcpath) > 1:
+                arcend = arcpath[-1]
                 if abs(arcend.point1().x() - arcend.point2().x()) < arcend.length() * 0.1:
-                    sides.append(front[-1])
-                    front = front[:-1]
+                    sides.append(arcend)
+                    arcpath = arcpath[:-1]
 
-            newfronts.append(front)
-        (front1,front2) = [Polygon([p for arc in front for p in arc.points()]) for front in newfronts]
+            newfronts.append(arcpath)
+
             
-        return ((front1,front2),sides)
+        polypaths = [Polygon([arcpath[0].point1()] + [p for arc in arcpath for p in arc.points()[1:]]) for arcpath in newfronts]
+            
+        return (polypaths,sides)
                 
 
 

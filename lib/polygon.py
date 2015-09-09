@@ -45,7 +45,7 @@ class PointAbscissaRange:
 #
 class Polygon:
     def __init__(self,points):
-        self.mpoints    = points[:]
+        self.mpoints    = points
         self.msegments  = [Segment(p1,p2) for (p1,p2) in pairs(self.mpoints)]
         self.mparanges  = None
         self.mlength    = None
@@ -107,7 +107,7 @@ class Polygon:
             result.append((olength,clength,seg))
             olength = clength
             
-        finallength = clength
+        finallength = olength
         self.mlength = finallength
         if self.mlength == 0.0:
             self.mparanges.append(PointAbscissaRange(0.0,1.0,self.segments()[0]))
