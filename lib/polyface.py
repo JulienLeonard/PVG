@@ -50,31 +50,42 @@ class Polyface:
 
         for p in nodes.keys():
             puts("p",p,"nexts",len(nodes[p]))
-        sortlist = sorted(nodes.keys(),Point.x)
+        sortlist = sorted(nodes.keys(),key=Point.x)
         p0   = sortlist[0]
         pend = sortlist[-1]
         (front1,front2) = [[item] for item in nodes[p0]]
+        
+        newfronts = []
         for front in (front1,front2):
             (arc,p2) = front[-1]
             if not p2 == pend:
                 newarc = nodes[p][0]
                 op     = iff (newarc.p1() == p2, newarc.p2(), newarc.p1())
                 front.append((newarc,op))
+            newfronts.append(front)
+        (front1,front2) = newfronts
 
-        for front in (front1,front2):
-            front = [arc for (arc,p2) in front]
+        (front1,front2) = [[arc for (arc,p2) in front] for front in (front1,front2)]
 
+        newfronts = []
+        sides     = []
         for front in (front1,front2):
             if len(front) > 1:
                 arc0 = front[0]
                 if abs(arc0.point1().x() - arc0.point2().x()) < arc0.length() * 0.1:
+                    sides.append(front[0])
                     front = front[1:]
+                    
             if len(front) > 1:
                 arcend = front[-1]
                 if abs(arcend.point1().x() - arcend.point2().x()) < arcend.length() * 0.1:
+                    sides.append(front[-1])
                     front = front[:-1]
 
-        return (front1,front2)
+            newfronts.append(front)
+        (front1,front2) = [Polygon([p for arc in front for p in arc.points()]) for front in newfronts]
+            
+        return ((front1,front2),sides)
                 
 
 

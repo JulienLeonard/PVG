@@ -9,15 +9,18 @@ import unittest
 class PolyfaceTest(unittest.TestCase):
     
     def test_init(self):
-        eg = EdgeGraph().loadwithsegments(Circle().polygon(10).close().segments())
-        self.assertEqual(len(eg.polyfaces()),1)
+        eg = EdgeGraph().loadwithsegments(Circle().polygon(10).close().segments() + [Segment(Point(-1.0,0.0),Point(1.0,0.0))])
+        self.assertEqual(len(eg.polyfaces()),2)
         polyface = eg.polyfaces()[0]
-        self.assertEqual(len(polyface.arccycle().points()),11)
+        self.assertEqual(len(polyface.arccycle().points()),7)
 
     def test_longitudes(self):
-        eg = EdgeGraph().loadwithsegments(Circle().polygon(9).close().segments())
+        eg = EdgeGraph().loadwithsegments(Circle().polygon(10).close().segments() + [Segment(Point(-1.0,0.0),Point(1.0,0.0))])
         polyface = eg.polyfaces()[0]
-        longitudes = polyface.longitudes()
-        self.assertEqual(len(longitudes[0]),1)
+        (longitudes,sides) = polyface.longitudes()
+        self.assertEqual(len(longitudes),2)
+        self.assertEqual(len(sides),0)
+        self.assertEqual(len(longitudes[0].points()),6)
+        self.assertEqual(len(longitudes[1].points()),2)
         
 
