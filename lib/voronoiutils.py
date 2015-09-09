@@ -1,16 +1,17 @@
 from utils     import *
 from geoutils  import *
+from polygon   import *
 
 class Voronoi:
     def __init__(self,points):
-        self.mpoints   = points 
+        self.mpoints   = [p.coords() for p in points]
         self.mcontext  = None
         self.mpolygons = []
-        self.compute(points)
+        self.compute(self.mpoints)
 
     def compute(self,points):
         import voronoi
-        self.mcontext  = voronoi.voronoi([p.coords() for p in points])
+        self.mcontext  = voronoi.voronoi(points)
 
         self.medges    = self.buildtriforedges()
 
@@ -92,7 +93,7 @@ class Voronoi:
         return exts
 
     def buildpolygonsfromexts(self,points,exts):
-        # print "voronoi polygons"
+        # puts("voronoi polygons exts keys",exts.keys(),"values",exts.values())
         polygons = []
         cindex = 0
         for v in exts.keys():
@@ -119,7 +120,7 @@ class Voronoi:
             for p in poly:
                 if pequal(p,v,0.00001):
                     return poly
-        return ""
+        return None
 
     def boundarypoints(self):
         result = [self.mcontext.vertices[i] for (l,i) in self.boundarylines()]
@@ -141,7 +142,7 @@ class Voronoi:
         (xmin,ymin,xmax,ymax) = bbox
         for (l,verti) in self.boundarylines():
             a,b,c = self.mcontext.lines[l]
-            print "a,b,c",a,b,c
+            # print "a,b,c",a,b,c
             if abs(0.0-b) < 0.0001:
                 ys = [ymin,ymax]
                 xs = [(c/a - b/a * y) for y in ys]
@@ -155,7 +156,7 @@ class Voronoi:
             for epoint in points:
                 eresult = True
                 poly = self.polygonfromvertice(verti)
-                if len(poly) > 1:
+                if poly != None:
                     for (p1,p2) in circlepairs(poly):
                         if pdiff(p1,vertcoords,0.000001) and pdiff(p2,vertcoords,0.000001):
                             inter = raw_intersection(p1,p2,vertcoords,epoint) 
