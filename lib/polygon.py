@@ -46,6 +46,7 @@ class PointAbscissaRange:
 class Polygon:
     def __init__(self,points):
         self.mpoints    = points
+        # puts("createpolygon",[p.coords() for p in points])
         self.msegments  = [Segment(p1,p2) for (p1,p2) in pairs(self.mpoints)]
         self.mparanges  = None
         self.mlength    = None
@@ -103,6 +104,7 @@ class Polygon:
         result  = []
         olength = 0.0
         for seg in self.segments():
+            # puts("seg",seg,"coords",seg.coords())
             clength = olength + seg.length()
             result.append((olength,clength,seg))
             olength = clength
@@ -173,7 +175,7 @@ class Polygon:
                     print "inter",inter.coords()
                     inters.append(inter)
 
-            puts("seg1",seg1.coords(),"inters",inters)
+            # puts("seg1",seg1.coords(),"inters",inters)
             if len(inters):
                 sortinter = [(vector(p11,inter).length(),inter) for inter in inters]
                 sortinter.sort()
@@ -339,11 +341,14 @@ class Polygon:
             sens = -1.0
         point0  = self.point(t1)
         result = [point0]
+        toadd = False
         for pa in self.mparanges:
-            if (pa.a1() > t1 and pa.a2() < t2): 
+            if pa.a2() >= t1 and pa.a2() <= t2:
                 result.append(pa.point2())
         pointend = self.point(t2)
-        result.append(pointend)
+        if not pequal(pointend,result[-1]):
+            result.append(pointend)
+        # puts("result",[p.coords() for p in result])
         if sens < 0.0:
             result = lreverse(result)
         return Polygon(result)
