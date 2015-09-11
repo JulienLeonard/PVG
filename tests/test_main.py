@@ -9,6 +9,7 @@ from test_shape      import *
 from test_geomatcher import *
 from test_polyface   import *
 from test_voronoi    import *
+from test_polygraph  import *
 
 if __name__ == '__main__':
     unittest.main()
