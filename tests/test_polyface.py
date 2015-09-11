@@ -20,7 +20,8 @@ class PolyfaceTest(unittest.TestCase):
         (longitudes,sides) = polyface.longitudes()
         self.assertEqual(len(longitudes),2)
         self.assertEqual(len(sides),0)
-        self.assertEqual(len(longitudes[0].points()),2)
-        self.assertEqual(len(longitudes[1].points()),6)
+        long1,long2 = iff(len(longitudes[0].points()) > len(longitudes[1].points()),(longitudes[0],longitudes[1]),(longitudes[1],longitudes[0]))
+        self.assertEqual(len(long1.points()),6)
+        self.assertEqual(len(long2.points()),2)
         
 
