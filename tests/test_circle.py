@@ -35,11 +35,11 @@ class CircleTest(unittest.TestCase):
         self.assertEqual(Circle().coords((1.0,2.0,3.0)).translate(Vector(3.0,2.0)).center().y(), 4.0)
 
     def test_contain(self):
-        self.assertEqual(Circle().containpoint(Point.P0()), True)
-        self.assertEqual(Circle().containpoint(Point(0.5,0.5)),  True)
-        self.assertEqual(Circle().containpoint(Point(1.0,0.0)),  False)
+        self.assertEqual(Circle().containpoint(Point.P0()),           True)
+        self.assertEqual(Circle().containpoint(Point(0.5,0.5)),       True)
+        self.assertEqual(Circle().containpoint(Point(1.0,0.0)),       True)
         self.assertEqual(Circle().containpoint(Point(1.0,0.0),True),  False)
-        self.assertEqual(Circle().containpoint(Point(1.01,0.0)), False)
-        self.assertEqual(Circle().containpoint(Point(1.0,1.0)),  False)
+        self.assertEqual(Circle().containpoint(Point(1.01,0.0)),      False)
+        self.assertEqual(Circle().containpoint(Point(1.0,1.0)),       False)
 
     
