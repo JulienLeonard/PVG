@@ -16,11 +16,11 @@ class Shape:
             p1,p2 = segment.points()
             p3    = circle.center()
             u = ((p3.x()-p1.x()) * (p2.x()-p1.x()) + (p3.y()-p1.y())*(p2.y() - p1.y())) / segment.length2()
-            op = iff(strict, infeq, inf) 
+            op = iff(strict, inf, infeq) 
             if op(-1.0, u) and op(u, 1.0):
                 nearestpoint = p1.add(vector(p1,p2).scale(u))
                     # puts("nearestpoint",nearestpoint.coords())
-                result = circle.contain(nearestpoint,strict)
+                result = circle.containpoint(nearestpoint,strict)
             else:
                 result = False
             # puts("intersect segment",segment.coords(),"circle",circle.coords(),"result",result)
