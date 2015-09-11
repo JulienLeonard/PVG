@@ -1,5 +1,6 @@
-from geoutils import *
-from polyface import *
+from geoutils  import *
+from polyface  import *
+from edgegraph import *
 
 #
 # adjacent graph of polyfaces
@@ -8,7 +9,7 @@ class Polygraph:
 
     def __init__(self,polyfaces):
         self.mpolyfaces = polyfaces
-        self.madj = None
+        self.madj       = None
     
 
     def polyfaces(self):
@@ -47,3 +48,8 @@ class Polygraph:
             return None
         return self.adj()[polyface]
         
+
+def edgegraph_polygraph(self):
+    return Polygraph(self.polyfaces())
+
+EdgeGraph.polygraph = edgegraph_polygraph

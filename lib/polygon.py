@@ -368,7 +368,7 @@ class Polygon:
             it = t - 0.5
             ot = t
             return [self.subline(ot,1.0).concat(self.subline(0.0,it)),self.subline(it,ot)]
-                
+
     def addline(self,size):
         result = self.mpoints[:]
         p1 = result[-2]
