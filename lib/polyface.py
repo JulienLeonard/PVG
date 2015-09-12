@@ -2,32 +2,49 @@ from geoutils  import *
 from polygon   import *
 from edgegraph import *
 
+#
+# a Face is a non-oriented arc
+#
+class Face:
+
+    def __init__(self,points):
+        self.mpoints = points
+
+#
+# Polyface is a circular list of Faces, computed by polygraph
+#
 class Polyface:
 
-    def __init__(self,arccycle):
-        self.marccycle = arccycle
+    def __init__(self,faces):
+        self.mfaces    = faces
         self.mpolygon  = None
-        
-    def arccycle(self):
-        return self.marccycle
+        self.madj      = {face: [] for face in faces}
+
+    def faces(self):
+        return self.mfaces
+
+    def add_adj(self,face,polyface):
+        self.madj[face].append(polyface)
+
+    @staticmethod
+    def add_adjacence(face,polyface1,polyface2):
+        polyface1.add_adj(face,polyface2)
+        polyface2.add_adj(face,polyface1)
 
     def polygon(self):
         if self.mpolygon == None:
-            self.mpolygon = Polygon(self.arccycle().points())
+            self.mpolygon = Polygon([p for face in self.faces() for p in face.points()])
         return self.mpolygon
 
-    def faces(self):
-        return [Polygon(arc.points()) for arc in self.arccycle().arcs()]
-
     def vertexes(self):
-        return [arc.points()[0] for arc in self.arccycle().arcs()]
+        return [face.points()[0] for face in self.faces()]
 
     def length(self):
         return self.polygon().length()
 
     def face(self,fkey,reverse = False):
-        sortedarcs = sorted(self.arccycle().arcs(),key=fkey)
-        result = iff(reverse,sortedarcs[-1],sortedarcs[0])
+        sortedfaces = sorted(self.faces(),key=fkey)
+        result = iff(reverse,sortedfaces[-1],sortedfaces[0])
         return result
 
 
@@ -38,65 +55,55 @@ class Polyface:
     #
     def longitudes(self):
         nodes = {}
-        for arc in self.arccycle().arcs():
-            puts("arc",arc,"points",len(arc.points()))
-            p1,p2 = arc.pointextremities()
+        for face in self.faces():
+            puts("face",face,"points",len(face.points()))
+            p1,p2 = face.pointextremities()
             p  = iff (p1.x() <= p2.x(), p1, p2)
             op = iff (p == p1, p2, p1)
             for pi in (p1,p2):
                 if not pi in nodes:
                     nodes[pi] = []
-            arc = iff (p == p1, arc, arc.opposite())
-            nodes[p].append(arc)
+            nodes[p].append(face)
 
         for p in nodes.keys():
             puts("p",p,"nexts",len(nodes[p]))
         sortlist = sorted(nodes.keys(),key=Point.x)
         p0   = sortlist[0]
         pend = sortlist[-1]
-        arcpaths = [[arc] for arc in nodes[p0]]
+        facepaths = [[face] for face in nodes[p0]]
         
         newpaths = []
-        for path in arcpaths:
+        for path in facepaths:
             newpath = path
             while True:
-                carc = newpath[-1]
-                p2   = carc.point2()
-                if carc.point2() == pend:
+                cface = newpath[-1]
+                p2   = cface.point2()
+                if cface.point2() == pend:
                     break
                 puts("followings",nodes[p2])
-                newarc = nodes[p2][0]
-                newpath.append(newarc)
+                newface = nodes[p2][0]
+                newpath.append(newface)
             newpaths.append(newpath)
-        arcpaths = newpaths
+        facepaths = newpaths
 
         newfronts = []
         sides     = []
-        for arcpath in arcpaths:
-            if len(arcpath) > 1:
-                arc0 = arcpath[0]
-                if abs(arc0.point1().x() - arc0.point2().x()) < arc0.length() * 0.1:
-                    sides.append(arc0)
-                    arcpath = arcpath[1:]
+        for facepath in facepaths:
+            if len(facepath) > 1:
+                face0 = facepath[0]
+                if abs(face0.point1().x() - face0.point2().x()) < face0.length() * 0.1:
+                    sides.append(face0)
+                    facepath = facepath[1:]
                     
-            if len(arcpath) > 1:
-                arcend = arcpath[-1]
-                if abs(arcend.point1().x() - arcend.point2().x()) < arcend.length() * 0.1:
-                    sides.append(arcend)
-                    arcpath = arcpath[:-1]
+            if len(facepath) > 1:
+                faceend = facepath[-1]
+                if abs(faceend.point1().x() - faceend.point2().x()) < faceend.length() * 0.1:
+                    sides.append(faceend)
+                    facepath = facepath[:-1]
 
-            newfronts.append(arcpath)
+            newfronts.append(facepath)
 
             
-        polypaths = [Polygon([arcpath[0].point1()] + [p for arc in arcpath for p in arc.points()[1:]]) for arcpath in newfronts]
+        polypaths = [Polygon([facepath[0].point1()] + [p for face in facepath for p in face.points()[1:]]) for facepath in newfronts]
             
         return (polypaths,sides)
-                
-
-
-        
-def edgegraph_polyfaces(self):
-    allpolyfaces = [Polyface(arccycle) for arccycle in self.arccycles()]
-    return [polyface for polyface in allpolyfaces if polyface.polygon().isClockwise()]
-
-EdgeGraph.polyfaces = edgegraph_polyfaces
