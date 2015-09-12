@@ -8,7 +8,17 @@ from edgegraph import *
 class Face:
 
     def __init__(self,points):
-        self.mpoints = points
+        self.mpolygon = Polygon(points)
+
+    def polygon(self):
+        return self.mpolygon
+
+    def points(self):
+        return self.mpolygon.points()
+
+    def length(self):
+        return self.mpolygon.length()
+
 
 #
 # Polyface is a circular list of Faces, computed by polygraph
@@ -18,13 +28,13 @@ class Polyface:
     def __init__(self,faces):
         self.mfaces    = faces
         self.mpolygon  = None
-        self.madj      = {face: [] for face in faces}
+        self.madj      = {face: None for face in faces}
 
     def faces(self):
         return self.mfaces
 
     def add_adj(self,face,polyface):
-        self.madj[face].append(polyface)
+        self.madj[face] = polyface
 
     @staticmethod
     def add_adjacence(face,polyface1,polyface2):
@@ -47,6 +57,13 @@ class Polyface:
         result = iff(reverse,sortedfaces[-1],sortedfaces[0])
         return result
 
+    def adjacents(self):
+        return lremove([self.adjacent(face) for face in self.faces()],None)
+
+    def adjacent(self,face):
+        if not face in self.madj:
+            return None
+        return self.madj[face]
 
     #
     # if number of arcs > 3, get a 4 sides polyface by computing the two smallest faces, then aggregating in between
@@ -56,54 +73,56 @@ class Polyface:
     def longitudes(self):
         nodes = {}
         for face in self.faces():
-            puts("face",face,"points",len(face.points()))
-            p1,p2 = face.pointextremities()
-            p  = iff (p1.x() <= p2.x(), p1, p2)
-            op = iff (p == p1, p2, p1)
-            for pi in (p1,p2):
-                if not pi in nodes:
-                    nodes[pi] = []
-            nodes[p].append(face)
+            polygon = face.polygon()
+            puts("face",face,"points",len(polygon.points()))
+            p1,p2   = polygon.pointextremities()
+            p       = iff (p1.x() <= p2.x(), p1, p2)
+            op      = iff (p == p1,          p2, p1)
+            polygon = iff (p == p1,          polygon, polygon.reverse())
+            for p in (p1,p2):
+                if not p in nodes:
+                    nodes[p] = []
+            nodes[p1].append(polygon)
 
         for p in nodes.keys():
             puts("p",p,"nexts",len(nodes[p]))
         sortlist = sorted(nodes.keys(),key=Point.x)
         p0   = sortlist[0]
         pend = sortlist[-1]
-        facepaths = [[face] for face in nodes[p0]]
+        polypaths = [[poly] for poly in nodes[p0]]
         
         newpaths = []
-        for path in facepaths:
+        for path in polypaths:
             newpath = path
             while True:
-                cface = newpath[-1]
-                p2   = cface.point2()
-                if cface.point2() == pend:
+                cpoly = newpath[-1]
+                p2   = cpoly.point2()
+                if cpoly.point2() == pend:
                     break
                 puts("followings",nodes[p2])
-                newface = nodes[p2][0]
-                newpath.append(newface)
+                newpoly = nodes[p2][0]
+                newpath.append(newpoly)
             newpaths.append(newpath)
-        facepaths = newpaths
+        polypaths = newpaths
 
         newfronts = []
         sides     = []
-        for facepath in facepaths:
-            if len(facepath) > 1:
-                face0 = facepath[0]
-                if abs(face0.point1().x() - face0.point2().x()) < face0.length() * 0.1:
-                    sides.append(face0)
-                    facepath = facepath[1:]
+        for polypath in polypaths:
+            if len(polypath) > 1:
+                poly0 = polypath[0]
+                if abs(poly0.point1().x() - poly0.point2().x()) < poly0.length() * 0.1:
+                    sides.append(poly0)
+                    polypath = polypath[1:]
                     
-            if len(facepath) > 1:
-                faceend = facepath[-1]
-                if abs(faceend.point1().x() - faceend.point2().x()) < faceend.length() * 0.1:
-                    sides.append(faceend)
-                    facepath = facepath[:-1]
+            if len(polypath) > 1:
+                polyend = polypath[-1]
+                if abs(polyend.point1().x() - polyend.point2().x()) < polyend.length() * 0.1:
+                    sides.append(polyend)
+                    polypath = polypath[:-1]
 
-            newfronts.append(facepath)
+            newfronts.append(polypath)
 
             
-        polypaths = [Polygon([facepath[0].point1()] + [p for face in facepath for p in face.points()[1:]]) for facepath in newfronts]
+        polypaths = [Polygon([polypath[0].point1()] + [p for poly in polypath for p in poly.points()[1:]]) for polypath in newfronts]
             
         return (polypaths,sides)

@@ -62,6 +62,15 @@ class Polygon:
             return self.lengthsamples(bylength)
         return None
 
+    def point1(self):
+        return self.mpoints[0]
+
+    def point2(self):
+        return self.mpoints[-1]
+
+    def pointextremities(self):
+        return (self.point1(),self.point2())
+
     def segments(self,nsegments=None,abscissas=None,bylength=None):
         if nsegments == None and abscissas == None and bylength == None:
             return self.msegments

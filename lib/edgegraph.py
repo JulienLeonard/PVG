@@ -233,6 +233,11 @@ class ArcCycle:
     def adjcycles(self):
         return lremove(lunique([item[1] for item in self.adjs()]),None)
 
+    #
+    # 
+    #
+    def isClockwise(self):
+        return Polygon(self.points()).isClockwise()
         
 #
 # an edge graph is a structure to compute closed polygons from a set of segments  
@@ -285,6 +290,9 @@ class EdgeGraph:
 
     def add_arccycle(self,arccycle):
         self.marccycles.append(arccycle)
+
+    def clockwise_arccycles(self):
+        return [arccycle for arccycle in self.arccycles() if arccycle.isClockwise()]
 
     #
     # load a sequence of points

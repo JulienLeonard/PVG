@@ -19,8 +19,8 @@ class Polygraph:
         # first compute faces
         faces = {}
         newfaces = [list]
-        for arccycle in edgegraph.arccycles():
-            for arc in arccycles().arcs():
+        for arccycle in edgegraph.clockwise_arccycles():
+            for arc in arccycle.arcs():
                 if not arc in faces:
                     newface = Face(arc.points())
                     newfaces.append(newface)
@@ -28,10 +28,10 @@ class Polygraph:
                         faces[carc] = newface
                     
         # then compute polyfaces
-        result = [Polyface([faces[arc] for arc in arccyle.arcs()]) for arccycle in edgegraph.arccycles()]
+        result = [Polyface([faces[arc] for arc in arccycle.arcs()]) for arccycle in edgegraph.clockwise_arccycles()]
 
         # then compute adjacents faces
-        result = Polygraph.computeadjacence(result)
+        result = Polygraph.computeadj(result)
 
         return result
 
