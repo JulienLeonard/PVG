@@ -34,6 +34,7 @@ class Polyface:
         return self.mfaces
 
     def add_adj(self,face,polyface):
+        puts("add_adj",self,face,polyface)
         self.madj[face] = polyface
 
     @staticmethod
@@ -74,22 +75,24 @@ class Polyface:
         nodes = {}
         for face in self.faces():
             polygon = face.polygon()
-            puts("face",face,"points",len(polygon.points()))
+            # puts("face",face,"points",polygon.points())
             p1,p2   = polygon.pointextremities()
-            p       = iff (p1.x() <= p2.x(), p1, p2)
-            op      = iff (p == p1,          p2, p1)
-            polygon = iff (p == p1,          polygon, polygon.reverse())
-            for p in (p1,p2):
+            mp      = iff (p1.x() <= p2.x(), p1, p2)
+            op      = iff (mp == p1,          p2, p1)
+            polygon = iff (mp == p1,          polygon, polygon.reverse())
+            for p in [p1,p2]:
                 if not p in nodes:
                     nodes[p] = []
-            nodes[p1].append(polygon)
+            nodes[mp].append(polygon)
 
-        for p in nodes.keys():
-            puts("p",p,"nexts",len(nodes[p]))
+        #for p in nodes.keys():
+        #    puts("p",p,"nexts",len(nodes[p]))
         sortlist = sorted(nodes.keys(),key=Point.x)
         p0   = sortlist[0]
         pend = sortlist[-1]
         polypaths = [[poly] for poly in nodes[p0]]
+        #puts("polypaths",polypaths)
+
         
         newpaths = []
         for path in polypaths:
@@ -99,7 +102,7 @@ class Polyface:
                 p2   = cpoly.point2()
                 if cpoly.point2() == pend:
                     break
-                puts("followings",nodes[p2])
+                # puts("followings",nodes[p2])
                 newpoly = nodes[p2][0]
                 newpath.append(newpoly)
             newpaths.append(newpath)

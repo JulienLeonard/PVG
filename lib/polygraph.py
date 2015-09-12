@@ -45,6 +45,7 @@ class Polygraph:
                 faces[face].append(polyface)
         
         for face in faces.keys():
+            # puts("face",face,"polyfaces",faces[face])
             if len(faces[face]) == 2:
                 (polyface1,polyface2) = faces[face]
                 Polyface.add_adjacence(face,polyface1,polyface2)
