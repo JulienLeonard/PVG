@@ -34,7 +34,7 @@ class Polyface:
         return self.mfaces
 
     def add_adj(self,face,polyface):
-        puts("add_adj",self,face,polyface)
+        # puts("add_adj",self,face,polyface)
         self.madj[face] = polyface
 
     @staticmethod

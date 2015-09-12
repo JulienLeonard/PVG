@@ -24,7 +24,7 @@ class Polygraph:
                 if not arc in faces:
                     newface = Face(arc.points())
                     newfaces.append(newface)
-                    for carc in [arc,arc.opposite]:
+                    for carc in [arc,arc.opposite()]:
                         faces[carc] = newface
                     
         # then compute polyfaces

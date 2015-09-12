@@ -26,7 +26,7 @@ class GeomatcherTest(unittest.TestCase):
         segmentspoints = lunique([p for seg in segments  for p in seg.points()])
         newsegspoints  = lunique([p for seg in newsegs   for p in seg.points()])
 
-        puts("newsegspoints",newsegspoints)
+        # puts("newsegspoints",newsegspoints)
 
         self.assertEqual(len(newsegs),len(segments))
         self.assertEqual(len(newsegspoints), (len(segmentspoints) - 2))
