@@ -443,7 +443,7 @@ class EdgeGraph:
 
     #
     # from the computed arcs, remove the one that are not inside a cycle
-    # TODO: to generalize
+    # TODO: to generalize with subtrees not in cycles
     #
     def prunearcs(self):
         nodearcs = {}
