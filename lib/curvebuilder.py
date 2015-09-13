@@ -56,8 +56,8 @@ class CurveBuilder:
         pvs.extend([mp01,v,p1,vscale(v,-1.0)])
 
             
-        ppoints = [bezierfrompointvector(p0,v0,p1,v1).polyline().points[:-1] for (p0,v0,p1,v1) in lsplit(pvs,4)]
-        return Polyline(lflatten(ppoints))
+        ppoints = [bezierfrompointvector(p0,v0,p1,v1).polygon().points[:-1] for (p0,v0,p1,v1) in lsplit(pvs,4)]
+        return Polygon(lflatten(ppoints))
 
     @staticmethod
     def extensionbezier(bezier):
@@ -87,25 +87,25 @@ class CurveBuilder:
 
     @staticmethod
     def interlinemap(up,down,left,right,factor):
-        polyline = CurveBuilder.interline(up,down,factor)
-        result   = CurveBuilder.mapline(polyline,left.point(factor),right.point(factor))
+        polygon = CurveBuilder.interline(up,down,factor)
+        result   = CurveBuilder.mapline(polygon,left.point(factor),right.point(factor))
         return result
 
     @staticmethod
-    def mapline(polyline,ext1,ext2):
-        v1 = vector(polyline.point(0.0),polyline.point(1.0))
+    def mapline(polygon,ext1,ext2):
+        v1 = vector(polygon.points()[0],polygon.points()[-1])
         v2 = vector(ext1,ext2)
-        center = polyline.point(0.0)
-        result1 = polyline.translate(vector(center,ext1))
+        center = polygon.points()[0]
+        result1 = polygon.translate(vector(center,ext1))
         #print "translate points ",result1.points()
         angle = vsangle(v2,v1)
         #print "angle ",angle
         result2 = result1.rotate(ext1,angle)
         #print "rotate points ",result2.points()
-        if vlength(v1) == 0.0:
+        if v1.length() == 0.0:
             factor = 0.0
         else:
-            factor = vlength(v2)/vlength(v1)
+            factor = v2.length()/v1.length()
         #print "factor ",factor
         result = result2.scale(ext1,factor)
         #print "scale points ",result.points()
@@ -118,7 +118,7 @@ class CurveBuilder:
         pb2 = poly2.point(t23)
         v1  = vscale(vnorm(poly1.tangent(1.0-t12)),vlength(vector(pb1,pb2)) * reverse *1.0/3.0)
         v2  = vscale(vnorm(poly2.tangent(t23)),vlength(vector(pb1,pb2)) * reverse *-1.0/3.0)
-        return [poly1.subline(0.0,1.0-t12),bezierfrompointvector(pb1,v1,pb2,v2).polyline(),poly2.subline(t23,1.0)]
+        return [poly1.subline(0.0,1.0-t12),bezierfrompointvector(pb1,v1,pb2,v2).polygon(),poly2.subline(t23,1.0)]
 
     @staticmethod
     def closingbezier(poly1,poly2):
@@ -129,7 +129,7 @@ class CurveBuilder:
         tan1 = vscale(vnorm(v1),vlength(vector(p1,p2))*1.0/3.0)
         tan2 = vscale(vnorm(v2),vlength(vector(p1,p2))*-1.0/3.0)
         bezier = bezierfrompointvector(p1,tan1,p2,tan2)
-        return bezier.polyline()
+        return bezier.polygon()
 
     @staticmethod
     def multiinterline(abslines,t):
@@ -147,7 +147,7 @@ class CurveBuilder:
         pvs = []
         for (o1,o2) in offrames:
             pvs = lconcat(pvs,[o1,o2])
-        return regularbezierpolylinefrompointsvectors(pvs)
+        return regularbezierpolygonfrompointsvectors(pvs)
 
 #
 # curve range
