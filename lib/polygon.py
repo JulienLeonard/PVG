@@ -90,6 +90,9 @@ class Polygon:
     def bbox(self):
         return points2bbox(self.mpoints)
 
+    def sample(self,t):
+        return self.point(t)
+
     def samples(self,npoints=None,abscissas=None,bylength=None):
         return self.points(npoints,abscissas,bylength)
         

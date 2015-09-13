@@ -32,13 +32,13 @@ class GeoQuad:
 
 
     @staticmethod
-    def square(center,size,npointsperface):
-        faces = [Polygon(Polygon([p1,p2]).points(npointsperface)) for (p1,p2) in pairs(Polygon.square(center,size))]
+    def square(center = Point(0.5,0.5),size = 1.0,npointsperface = 10):
+        faces = [Polygon(Polygon([p1,p2]).points(npointsperface)) for (p1,p2) in pairs(Polygon.square(center,size).points())]
         return GeoQuad(faces[0],faces[1],faces[2].reverse(),faces[3].reverse())
 
     @staticmethod
     def rectangle(x1,y1,x2,y2,npointsperface):
-        faces = [Polygon(Polygon([p1,p2]).points(npointsperface)) for (p1,p2) in pairs(Polygon.rectangle(x1,y1,x2,y2))]
+        faces = [Polygon(Polygon([p1,p2]).points(npointsperface)) for (p1,p2) in pairs(Polygon.rectangle(x1,y1,x2,y2).points())]
         return GeoQuad(faces[0],faces[1],faces[2].reverse(),faces[3].reverse())
 
 
@@ -49,5 +49,4 @@ class GeoQuad:
         (newleft1,newleft2)   = self.mleft.split(abscissa)
         (newright1,newright2) = self.mright.split(abscissa)
         newup1 = self.ycurve(abscissa)
-        return (GeoQuad(newleft1,newup1,newright1,self.mdown),GeoQuad(newleft2,self.mup,newright2,newup1)
-        
+        return (GeoQuad(newleft1,newup1,newright1,self.mdown),GeoQuad(newleft2,self.mup,newright2,newup1))

@@ -11,6 +11,7 @@ from test_polyface      import *
 from test_voronoi       import *
 from test_polygraph     import *
 from test_curvebuilder  import *
+from test_geoquad       import *
 
 if __name__ == '__main__':
     unittest.main()
