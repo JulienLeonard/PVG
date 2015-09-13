@@ -182,3 +182,8 @@ def curveRange(self,abs1 = 0.0, abs2 = 0.5):
 
 Polygon.curveRange = curveRange
 
+
+def polygon_maponpoints(self,p1,p2):
+    return CurveBuilder.mapline(self,p1,p2)
+
+Polygon.maponpoints = polygon_maponpoints
