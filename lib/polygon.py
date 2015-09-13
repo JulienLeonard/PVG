@@ -368,16 +368,6 @@ class Polygon:
     def split(self,ntimes):
         return [self.subline(t1,t2) for (t1,t2) in pairs(usamples(ntimes+1))]
 
-    def splitintwo(self,t):
-        if t <= 0.5:
-            ot = t + 0.5
-            it = t
-            return [self.subline(it,ot),self.subline(ot,1.0).concat(self.subline(0.0,it))]
-        else:
-            it = t - 0.5
-            ot = t
-            return [self.subline(ot,1.0).concat(self.subline(0.0,it)),self.subline(it,ot)]
-
     def addline(self,size):
         result = self.mpoints[:]
         p1 = result[-2]

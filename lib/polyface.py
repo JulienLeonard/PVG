@@ -44,11 +44,34 @@ class Polyface:
 
     def polygon(self):
         if self.mpolygon == None:
-            self.mpolygon = Polygon([p for face in self.faces() for p in face.points()])
+            points = None
+            for face in self.faces():
+                if points == None:
+                    points = face.points()[:]
+                else:
+                    facepoints = face.points()[:]
+                    if not points[-1] == facepoints[0] and not points[-1] == facepoints[-1]:
+                        points.reverse()
+                    if points[-1] == facepoints[-1]:
+                        facepoints.reverse()
+                    if not points[-1] == facepoints[0]:
+                        puts("Polyface def error")
+                    
+                    points.extend(facepoints[1:])
+            self.mpolygon = Polygon(points)
         return self.mpolygon
 
     def vertexes(self):
-        return [face.points()[0] for face in self.faces()]
+        result = None
+        for face in self.faces():
+            if result == None:
+                result = [face.points()[0]]
+            else:
+                newp = face.points()[0]
+                if result[-1] == newp:
+                    newp = face.points()[-1]
+                result.append(newp)
+        return result
 
     def length(self):
         return self.polygon().length()
