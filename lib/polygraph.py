@@ -77,7 +77,7 @@ class Polygraph:
             for p in (p1,p2):
                 if not p in faceexts:
                     faceexts[p] = FaceExtremity(p)
-                face.add_extremity(face,faceexts[p])
+                face.add_faceextremity(faceexts[p])
                 faceexts[p].add_face(face)
                     
         # then compute polyfaces
