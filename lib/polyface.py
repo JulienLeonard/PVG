@@ -2,13 +2,24 @@ from geoutils  import *
 from polygon   import *
 from edgegraph import *
 
+class FaceExtremity:
+
+    def __init__(self,point):
+        self.mpoint = point
+        self.mfaces = []
+
+    def add_face(self,face):
+        self.mfaces.append(face)
+
 #
 # a Face is a non-oriented arc
 #
 class Face:
 
     def __init__(self,points):
-        self.mpolygon = Polygon(points)
+        self.mpolygon         = Polygon(points)
+        self.mpolyfaces       = []
+        self.mfaceextremities = []
 
     def polygon(self):
         return self.mpolygon
@@ -19,6 +30,21 @@ class Face:
     def length(self):
         return self.mpolygon.length()
 
+    def isBorder(self):
+        return len(self.mpolyfaces) == 1
+
+    def other_polyface(self,polyface):
+        if not polyface in self.mpolyfaces:
+            return None
+        if len(self.mpolyfaces) == 1:
+            return None
+        return iff(self.mpolyfaces[0] == polyface, self.mpolyfaces[1], self.mpolyfaces[0])
+
+    def add_polyface(self,polyface):
+        self.mpolyfaces.append(polyface)
+
+    def add_faceextremity(self,ext):
+        self.mfaceextremities.append(ext)
 
 #
 # Polyface is a circular list of Faces, computed by polygraph
@@ -27,20 +53,12 @@ class Polyface:
 
     def __init__(self,faces):
         self.mfaces    = faces
+        for face in faces:
+            face.add_polyface(self)
         self.mpolygon  = None
-        self.madj      = {face: None for face in faces}
 
     def faces(self):
         return self.mfaces
-
-    def add_adj(self,face,polyface):
-        # puts("add_adj",self,face,polyface)
-        self.madj[face] = polyface
-
-    @staticmethod
-    def add_adjacence(face,polyface1,polyface2):
-        polyface1.add_adj(face,polyface2)
-        polyface2.add_adj(face,polyface1)
 
     def polygon(self):
         if self.mpolygon == None:
@@ -82,12 +100,21 @@ class Polyface:
         return result
 
     def adjacents(self):
-        return lremove([self.adjacent(face) for face in self.faces()],None)
+        return lremove([face.other_polyface(self) for face in self.faces()],None)
 
     def adjacent(self,face):
         if not face in self.madj:
             return None
-        return self.madj[face]
+        return face.other_polyface(self)
+
+    def isBorder(self):
+        for face in self.madj:
+            if face.isBorder():
+                return True
+        return False
+
+    def borderFaces(self):
+        return [face for face in self.madj if face.isBorder()]
 
     #
     # if number of arcs > 3, get a 4 sides polyface by computing the two smallest faces, then aggregating in between
@@ -152,3 +179,4 @@ class Polyface:
         polypaths = [Polygon([polypath[0].point1()] + [p for poly in polypath for p in poly.points()[1:]]) for polypath in newfronts]
             
         return (polypaths,sides)
+    

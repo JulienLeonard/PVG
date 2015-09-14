@@ -368,8 +368,11 @@ class Polygon:
     def sublines(self,ts):
         return [self.subline(t1,t2) for (t1,t2) in pairs(ts)]
 
-    def split(self,ntimes):
-        return [self.subline(t1,t2) for (t1,t2) in pairs(usamples(ntimes+1))]
+    def split(self,ntimes=None,abscissa=None):
+        if not ntimes == None:
+            return [self.subline(t1,t2) for (t1,t2) in pairs(usamples(ntimes+1))]
+        if not abscissa == None:
+            return [self.subline(t1,t2) for (t1,t2) in pairs([0.0,abscissa,1.0])]
 
     def addline(self,size):
         result = self.mpoints[:]
