@@ -24,36 +24,34 @@ class Polygraph:
         return self.mfaceexts
 
     #
-    # return the border polyfaces, ie with one face no neighbours, according to their adjacency
     #
-    def borders(self):
-        # first find all faces with a border
-        borderlist = []
-        for polyface in self.polyfaces():
-            if polyface.isBorder():
-                borderlist.append(polyface)
-
-        if len(borderlist) == 0:
-            return []
+    #
+    def border_faces(self):
+        # find first face as border
+        for face in self.mfaces:
+            if face.isBorder():
+                face0 = face
+                break
         
-        puts("borderlist",len(borderlist))
-
-        # then order according to adjacency
-        # WARNING: only work for single contour
-        front = [borderlist[0]]
-        while len(front) < len(borderlist):
+        # then run laong border to get them all
+        front = [face0]
+        while True:
             cface = front[-1]
-            puts("cface",cface)
-            for adj in cface.adjacents():
-                if adj in borderlist and not adj in front:
-                    front.append(adj)
-                    break
+            added = False
+            for faceext in cface.faceextremities():
+                for adjface in faceext.face_adjacents(cface):
+                    if not adjface in front and adjface.isBorder:
+                        front.append(adjface)
+                        added = True
+                        break
+            if not added:
+                break
 
-        front = borderlist
-
-        puts("front",len(front))
-        
         return front
+
+
+    def border_polyfaces(self):
+        return [face.polyface() for face in self.border_faces()]
 
 
     @staticmethod

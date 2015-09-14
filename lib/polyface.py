@@ -11,6 +11,11 @@ class FaceExtremity:
     def add_face(self,face):
         self.mfaces.append(face)
 
+    def face_adjacents(self,face):
+        if not face in self.mfaces:
+            return None
+        return lremove(self.mfaces,face)
+
 #
 # a Face is a non-oriented arc
 #
@@ -23,6 +28,15 @@ class Face:
 
     def polygon(self):
         return self.mpolygon
+    
+    def polyfaces(self):
+        return self.mpolyfaces
+
+    def polyface(self):
+        return self.mpolyfaces[0]
+
+    def faceextremities(self):
+        return self.mfaceextremities
 
     def points(self):
         return self.mpolygon.points()
@@ -103,12 +117,12 @@ class Polyface:
         return lremove([face.other_polyface(self) for face in self.faces()],None)
 
     def adjacent(self,face):
-        if not face in self.madj:
+        if not face in self.mfaces:
             return None
         return face.other_polyface(self)
 
     def isBorder(self):
-        for face in self.madj:
+        for face in self.mfaces:
             if face.isBorder():
                 return True
         return False
