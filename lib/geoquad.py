@@ -46,7 +46,22 @@ class GeoQuad:
     # split the quad in 2 horizontally, returning 2 subquads
     #
     def ysplit(self,abscissa):
-        (newleft1,newleft2)   = self.mleft.split(abscissa)
-        (newright1,newright2) = self.mright.split(abscissa)
+        (newleft1,newleft2)   = self.mleft.split(abscissa=abscissa)
+        (newright1,newright2) = self.mright.split(abscissa=abscissa)
         newup1 = self.ycurve(abscissa)
         return (GeoQuad(newleft1,newup1,newright1,self.mdown),GeoQuad(newleft2,self.mup,newright2,newup1))
+
+    def xsplit(self,abscissa):
+        (newup1,newup2)     = self.mup.split(abscissa=abscissa)
+        (newdown1,newdown2) = self.mdown.split(abscissa=abscissa)
+        newleft1 = self.xcurve(abscissa)
+        return (GeoQuad(self.mleft,newup1,newleft1,newdown1),GeoQuad(newleft1,newup2,self.mright,newdown2))
+
+    def reduce(self,amount):
+        margin = (1.0 - amount) * 0.5
+        frame = [self.xcurve(margin), 
+                 self.ycurve(1.0-margin),
+                 self.xcurve(1.0-margin),
+                 self.ycurve(margin)]
+        frame = [curve.subline(margin,1.0-margin) for curve in frame]
+        return GeoQuad(frame[0],frame[1],frame[2],frame[3])

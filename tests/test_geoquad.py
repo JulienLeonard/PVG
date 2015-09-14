@@ -12,3 +12,7 @@ class GeoQuadTest(unittest.TestCase):
         geoquad = GeoQuad.square(Point(1.0,1.0),2.0)
         self.assertEqual(geoquad.xpoint(Point(0.5,0.5)).coords(),(1.0,1.0))
 
+    def test_split(self):
+        geoquad = GeoQuad.square(Point(1.0,1.0),2.0)
+        self.assertEqual(len(geoquad.xsplit(0.5)),2)
+

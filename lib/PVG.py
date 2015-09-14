@@ -10,3 +10,7 @@ from intersectionbuilder import *
 from edgegraph           import *
 from shapehierarchy      import *
 from maxcirclepacking    import *
+from polyface            import *
+from polygraph           import *
+from curvebuilder        import *
+from geoquad             import *
