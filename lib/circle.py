@@ -58,6 +58,9 @@ class Circle:
             return [self.sample(abscissa) for abscissa in abscissas]
         return None
 
+    def points(self,npoints=None,abscissas=None):
+        return self.samples(npoints,abscissas)
+
     def viewbox(self):
         x,y,r = self.coords()
         return BBox(x-r,y-r,x+r,y+r)
@@ -85,8 +88,9 @@ class Circle:
     def polygon(self,npoints=30):
         return Polygon(self.samples(npoints=npoints+1)[:-1])
 
+Circle.C0 = Circle()
 
-C0 = Circle()
+Circle.Unitary = Circle(Point(0.5,0.5),0.5)
 
 #
 #

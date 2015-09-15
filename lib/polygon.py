@@ -496,4 +496,10 @@ class Polygon:
                 return False
         return True
             
-        
+    #
+    # shift polygon description by abscissa (for closed polygons)
+    #
+    def shift(self,abscissa):
+        return self.subline(abscissa,1.0).concat(self.subline(0.0,abscissa))
+
+Polygon.Unitary = Polygon([Point(1.0,0.5),Point(1.0,0.0),Point(0.0,0.0),Point(0.0,1.0),Point(1.0,1.0)]).close()
