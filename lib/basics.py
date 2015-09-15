@@ -596,3 +596,18 @@ def inf(v1,v2):
 def infeq(v1,v2):
     return v1 <= v2
 
+def lcircularnext(list,item,offset=1):
+    if not item in list:
+        return None
+    i = list.index(item) + offset
+    return list[i % len(list)]
+    
+def lcircularitems(list,item1,item2):
+    if not item1 in list or not item2 in list:
+        return None
+    i1 = list.index(item1)
+    i2 = list.index(item2)
+    if  i1 <= i2:
+        return list[i1+1:i2]
+    else:
+        return list[i1+1:] + list[:i2]
