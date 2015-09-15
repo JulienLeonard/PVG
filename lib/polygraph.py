@@ -40,7 +40,7 @@ class Polygraph:
             added = False
             for faceext in cface.faceextremities():
                 for adjface in faceext.face_adjacents(cface):
-                    if not adjface in front and adjface.isBorder:
+                    if not adjface in front and adjface.isBorder():
                         front.append(adjface)
                         added = True
                         break
@@ -59,7 +59,7 @@ class Polygraph:
 
         # first compute faces
         faces = {}
-        newfaces = [list]
+        newfaces = []
         for arccycle in edgegraph.clockwise_arccycles():
             for arc in arccycle.arcs():
                 if not arc in faces:
@@ -70,7 +70,7 @@ class Polygraph:
 
         # then compute faceextremities
         faceexts = {}
-        for face in faces.values():
+        for face in newfaces:
             (p1,p2) = (face.points()[0],face.points()[-1])
             for p in (p1,p2):
                 if not p in faceexts:
@@ -81,4 +81,4 @@ class Polygraph:
         # then compute polyfaces
         polyfaces = [Polyface([faces[arc] for arc in arccycle.arcs()]) for arccycle in edgegraph.clockwise_arccycles()]
 
-        return (polyfaces,faces.values(),faceexts.values())
+        return (polyfaces,newfaces,faceexts.values())

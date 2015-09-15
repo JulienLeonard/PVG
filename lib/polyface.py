@@ -1,12 +1,16 @@
 from geoutils  import *
 from polygon   import *
 from edgegraph import *
+from geoquad   import *
 
 class FaceExtremity:
 
     def __init__(self,point):
         self.mpoint = point
         self.mfaces = []
+
+    def point(self):
+        return self.mpoint
 
     def add_face(self,face):
         self.mfaces.append(face)
@@ -58,7 +62,14 @@ class Face:
         self.mpolyfaces.append(polyface)
 
     def add_faceextremity(self,ext):
+        # puts("face",self,"add ext",ext)
         self.mfaceextremities.append(ext)
+
+    def polygonfrom(self,point):
+        if point == self.mfaceextremities[0].point():
+            return self.polygon()
+        else:
+            return self.polygon().reverse()
 
 #
 # Polyface is a circular list of Faces, computed by polygraph
@@ -193,4 +204,57 @@ class Polyface:
         polypaths = [Polygon([polypath[0].point1()] + [p for poly in polypath for p in poly.points()[1:]]) for polypath in newfronts]
             
         return (polypaths,sides)
-    
+
+    #
+    # compute a quad by having the specified face as left, the 2 adjacent faces as up and down, and the other(s) as right
+    #
+    # self.mfaces must be in clockwise 
+    def quadfromface(self,rootface):
+        # puts("quadfromface faces",[(face.points()[0],face.points()[-1]) for face in self.mfaces])
+        if not rootface in self.mfaces:
+            return None
+        face_up     = lcircularnext(self.mfaces,rootface)
+        face_down   = lcircularnext(self.mfaces,rootface,-1)
+        face_rights = lcircularitems(self.mfaces,face_up,face_down)
+        
+        polygon_left   = rootface.polygon()
+        polygon_up     = face_up.polygonfrom(polygon_left.points()[-1])
+        polygon_down   = face_down.polygonfrom(polygon_left.points()[0])
+
+        if len(face_rights) == 0:
+            polygon_right = Polygon([polygon_up.points()[-1]])
+        else:
+            polygon_right = Polyface.faces2polygon(face_rights).reverse()
+
+        if polygon_left.points()[-1] != polygon_up.points()[0] and  polygon_left.points()[-1] != polygon_up.points()[-1]:
+            polygon_left = polygon_left.reverse()
+        if polygon_up.points()[0] != polygon_left.points()[-1]:
+            polygon_up = polygon_up.reverse()
+        if polygon_down.points()[0] != polygon_left.points()[0]:
+            polygon_down = polygon_down.reverse()
+        if polygon_right.points()[-1] != polygon_up.points()[-1]:    
+            polygon_right = polygon_right.reverse()
+
+        # puts("quadfromface: faces",self.mfaces,"rootface",rootface,"result",face_up,face_rights,face_down)
+
+        return GeoQuad(polygon_left,polygon_up,polygon_right,polygon_down)
+
+    @staticmethod
+    def faces2polygon(faces):
+        if len(faces) == 0:
+            return None
+        if len(faces) == 1:
+            return faces[0].polygon()
+
+        result = faces[0].polygon().points()[:]
+        next1  = faces[1].polygon().points()
+        if result[-1] != next1[0] and result[-1] != next1[-1]:
+            result.reverse()
+        for face in faces[1:]:
+            newpoints = face.polygon().points()[:]
+            if newpoints[0] != result[-1]:
+                newpoints.reverse()
+            result.extend(newpoints[1:])
+        return Polygon(result)
+        
+        
