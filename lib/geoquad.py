@@ -65,3 +65,9 @@ class GeoQuad:
                  self.ycurve(margin)]
         frame = [curve.subline(margin,1.0-margin) for curve in frame]
         return GeoQuad(frame[0],frame[1],frame[2],frame[3])
+
+    #
+    # mapping
+    #
+    def mappolygon(self,polygon):
+        return Polygon([self.ypoint(p) for p in polygon.points()])

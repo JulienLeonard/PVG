@@ -14,6 +14,12 @@ class GeoIntercurve:
     def _ycurve(self,y):
         return self.minter.sample(y)
 
+    def sample(self,abscissa):
+        return self._ycurve(abscissa)
+
+    def curve(self,abscissa):
+        return self._ycurve(abscissa)
+
     #
     # WARNING: points must be normalized
     #
