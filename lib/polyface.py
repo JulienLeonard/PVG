@@ -71,6 +71,26 @@ class Face:
         else:
             return self.polygon().reverse()
 
+    @staticmethod
+    def joined_polygon(faces):
+        points = None
+        for face in faces:
+            if points == None:
+                points = face.points()[:]
+            else:
+                facepoints = face.points()[:]
+                if not points[-1] == facepoints[0] and not points[-1] == facepoints[-1]:
+                    points.reverse()
+                if points[-1] == facepoints[-1]:
+                    facepoints.reverse()
+                if not points[-1] == facepoints[0]:
+                    puts("Polyface joined_polygon def error")
+                    
+                points.extend(facepoints[1:])
+        result = Polygon(points)
+        return result
+
+
 #
 # Polyface is a circular list of Faces, computed by polygraph
 #
@@ -104,23 +124,44 @@ class Polyface:
             self.mpolygon = Polygon(points)
         return self.mpolygon
 
-    def vertexes(self):
-        result = None
-        for face in self.faces():
-            if result == None:
-                result = [face.points()[0]]
-            else:
-                newp = face.points()[0]
-                if result[-1] == newp:
-                    newp = face.points()[-1]
-                result.append(newp)
+    def faceexts(self):
+        result = []
+        faces = self.faces()
+        face0 = faces[0]
+        face1 = faces[1]
+        ext00,ext01  = face0.faceextremities()
+        ext10,ext11  = face1.faceextremities()
+        
+        result.append(iff(ext00 == ext10 or ext00 == ext11,ext01,ext00))
+        for face in faces[1:-1]:
+            ext1,ext2 = face.faceextremities()
+            result.append(iff(ext1 == result[-1],ext2,ext1))
         return result
+
+
+    def vertexes(self):
+        return [faceext.point() for faceext in self.faceexts()]
 
     def length(self):
         return self.polygon().length()
 
+    def miny(self):
+        return lmin([p.y() for p in self.vertexes()])
+
+    def minx(self):
+        return lmin([p.x() for p in self.vertexes()])
+
+    def maxy(self):
+        return lmax([p.y() for p in self.vertexes()])
+
+    def maxx(self):
+        return lmax([p.x() for p in self.vertexes()])
+
+    def sortedfaces(self,fkey):
+        return sorted(self.faces(),key=fkey)
+                    
     def face(self,fkey,reverse = False):
-        sortedfaces = sorted(self.faces(),key=fkey)
+        sortedfaces = self.sortedfaces(fkey)
         result = iff(reverse,sortedfaces[-1],sortedfaces[0])
         return result
 
@@ -139,7 +180,10 @@ class Polyface:
         return False
 
     def borderFaces(self):
-        return [face for face in self.madj if face.isBorder()]
+        return [face for face in self.faces() if face.isBorder()]
+
+    def border(self):
+        return self.borderFaces()[0]
 
     #
     # if number of arcs > 3, get a 4 sides polyface by computing the two smallest faces, then aggregating in between

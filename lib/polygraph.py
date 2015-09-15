@@ -33,7 +33,7 @@ class Polygraph:
                 face0 = face
                 break
         
-        # then run laong border to get them all
+        # then run along border to get them all
         front = [face0]
         while True:
             cface = front[-1]
@@ -52,6 +52,9 @@ class Polygraph:
 
     def border_polyfaces(self):
         return [face.polyface() for face in self.border_faces()]
+
+    def border_polygon(self):
+        return Face.joined_polygon(self.border_faces())
 
 
     @staticmethod
