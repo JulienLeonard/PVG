@@ -68,6 +68,24 @@ class Polygon:
     def point2(self):
         return self.mpoints[-1]
 
+    def ext1(self):
+        return self.point1()
+
+    def ext2(self):
+        return self.point2()
+
+    def miny(self):
+        return lmin([p.y() for p in self.pointextremities()])
+
+    def minx(self):
+        return lmin([p.x() for p in self.pointextremities()])
+
+    def maxy(self):
+        return lmax([p.y() for p in self.pointextremities()])
+
+    def maxx(self):
+        return lmax([p.x() for p in self.pointextremities()])
+
     def pointextremities(self):
         return (self.point1(),self.point2())
 
@@ -124,7 +142,7 @@ class Polygon:
         finallength = olength
         self.mlength = finallength
         if self.mlength == 0.0:
-            self.mparanges.append(PointAbscissaRange(0.0,1.0,self.segments()[0]))
+            self.mparanges.append(PointAbscissaRange(0.0,1.0,Segment(self.points()[0],self.points()[0])))
             for seg in self.segments()[1:]:
                 self.mparanges.append(PointAbscissaRange(1.0,1.0,seg))
         else:
@@ -244,9 +262,11 @@ class Polygon:
         return result
 
     def concat(self,polygon2):
-        newpoints = self.mpoints[:]
-        newpoints.extend(polygon2.points())
-        return Polygon(newpoints)
+        oldpoints = self.mpoints[:]
+        newpoints = polygon2.points()[:]
+        if pequal(oldpoints[-1],newpoints[0]):
+            newpoints = newpoints[1:]
+        return Polygon(oldpoints + newpoints)
 
     def rootframes(self):
         result = []
@@ -294,6 +314,8 @@ class Polygon:
         return newresult
 
     def offset(self,size):
+        if self.length() == 0:
+            return self
         result = []
         for seg in self.segments():
             v = seg.vector().ortho().normalize().scale(size)
@@ -501,5 +523,15 @@ class Polygon:
     #
     def shift(self,abscissa):
         return self.subline(abscissa,1.0).concat(self.subline(0.0,abscissa))
+
+
+    @staticmethod
+    def allconcat(polygons):
+        if len(polygons) < 1:
+            return None
+        result = polygons[0]
+        for polygon in polygons[1:]:
+            result = result.concat(polygon)
+        return result
 
 Polygon.Unitary = Polygon([Point(1.0,0.5),Point(1.0,0.0),Point(0.0,0.0),Point(0.0,1.0),Point(1.0,1.0)]).close()
