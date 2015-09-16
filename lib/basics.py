@@ -611,3 +611,15 @@ def lcircularitems(list,item1,item2):
         return list[i1+1:i2]
     else:
         return list[i1+1:] + list[:i2]
+
+def lcircularsort(list,fkey,reverse=False):
+    sortlist = sorted(list,key=fkey)
+    i = list.index(iff(reverse,sortlist[-1],sortlist[-0]))
+    puts("lcircularsort index",i)
+    return list[i:] + list[:i]
+
+def lcut(list,indices):
+    indices = [0] + indices + [-1]
+    result = [list[i1:i2] for (i1,i2) in pairs(indices[:-1])]
+    result.append(list[indices[-2]:])
+    return result
