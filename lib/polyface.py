@@ -42,6 +42,9 @@ class Face:
     def faceextremities(self):
         return self.mfaceextremities
 
+    def vertexes(self):
+        return [faceext.point() for faceext in self.faceextremities()]
+
     def points(self):
         return self.mpolygon.points()
 
@@ -90,6 +93,17 @@ class Face:
         result = Polygon(points)
         return result
 
+    def miny(self):
+        return lmin([p.y() for p in self.vertexes()])
+
+    def minx(self):
+        return lmin([p.x() for p in self.vertexes()])
+
+    def maxy(self):
+        return lmax([p.y() for p in self.vertexes()])
+
+    def maxx(self):
+        return lmax([p.x() for p in self.vertexes()])
 
 #
 # Polyface is a circular list of Faces, computed by polygraph
@@ -285,20 +299,33 @@ class Polyface:
 
     @staticmethod
     def faces2polygon(faces):
-        if len(faces) == 0:
-            return None
-        if len(faces) == 1:
-            return faces[0].polygon()
+        polygons = Polyface.faces2polygons(faces)
 
-        result = faces[0].polygon().points()[:]
-        next1  = faces[1].polygon().points()
-        if result[-1] != next1[0] and result[-1] != next1[-1]:
-            result.reverse()
+        if len(polygons) == 0:
+            return None
+
+        result = polygons[0]
+        for polygon in polygons[1:]:
+            result.concat(polygon)
+
+        return result
+
+    @staticmethod
+    def faces2polygons(faces):
+        if len(faces) == 0:
+            return []
+        if len(faces) == 1:
+            return [faces[0].polygon()]
+
+        result = [Polygon(faces[0].polygon().points()[:])]
+        next1  = Polygon(faces[1].polygon().points()[:])
+        if result[0].ext2() != next1.ext1() and result[0].ext2() != next1.ext2():
+            result = [result[0].reverse()]
         for face in faces[1:]:
-            newpoints = face.polygon().points()[:]
-            if newpoints[0] != result[-1]:
-                newpoints.reverse()
-            result.extend(newpoints[1:])
-        return Polygon(result)
+            newpolygon = Polygon(face.polygon().points()[:])
+            if newpolygon.ext1() != result[-1].ext2():
+                newpolygon = newpolygon.reverse()
+            result.append(newpolygon)
+        return result
         
         

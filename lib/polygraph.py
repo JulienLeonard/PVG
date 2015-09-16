@@ -44,6 +44,8 @@ class Polygraph:
                         front.append(adjface)
                         added = True
                         break
+                if added:
+                    break
             if not added:
                 break
 
