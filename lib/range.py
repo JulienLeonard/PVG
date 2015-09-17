@@ -73,6 +73,14 @@ class R:
         else:
             return [self.sample(rand()) for i in range(niter)]
 
+    def trim(self,v):
+        if v < self.minv():
+            return self.minv()
+        if v > self.maxv():
+            return self.maxv()
+        return v
+        
+
     #
     # define angle range
     #
