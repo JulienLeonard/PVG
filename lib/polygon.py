@@ -534,4 +534,5 @@ class Polygon:
             result = result.concat(polygon)
         return result
 
+
 Polygon.Unitary = Polygon([Point(1.0,0.5),Point(1.0,0.0),Point(0.0,0.0),Point(0.0,1.0),Point(1.0,1.0)]).close()
