@@ -392,8 +392,8 @@ class BBox:
         
         return [BBox(xmin,    ymin   , middlex, middley),
                 BBox(xmin,    middley, middlex, ymax   ),
-                BBox(middlex, middley, xmax,    ymax   ),
-                BBox(middlex, ymin   , xmax,    middley)]
+                BBox(middlex, ymin   , xmax,    middley),
+                BBox(middlex, middley, xmax,    ymax   )]
 
     def symx(self,symx):
         newxmin = 2.0 * symx - self.mxmin
