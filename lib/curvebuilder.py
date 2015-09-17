@@ -157,6 +157,21 @@ class CurveBuilder:
             result.append(Bezier(poly1.point(1.0-ratio),poly1.point(1.0),poly2.point(0.0),poly2.point(ratio)).polygon())
         return Polygon.allconcat(result)
 
+    #
+    # build a hump between 2 points
+    #
+    @staticmethod
+    def hump(p1,p2,heightratio = 0.1,abscissa = 0.5):
+        s = Segment(p1,p2)
+        
+        pnew = s.sample(abscissa).add(s.vector().ortho().scale(heightratio))
+
+        vbup   = s.vector().scale(1.0/6.0)
+        vbdown = vbup.scale(-1.0)
+
+        beziers = [Bezier(p1,p1.add(vbup),pnew.add(vbdown),pnew), Bezier(pnew,pnew.add(vbup),p2.add(vbdown),p2)]
+        return Polygon.allconcat(map(Bezier.polygon,beziers))
+
 
 #
 # curve range
