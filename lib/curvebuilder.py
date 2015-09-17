@@ -149,6 +149,15 @@ class CurveBuilder:
             pvs = lconcat(pvs,[o1,o2])
         return regularbezierpolygonfrompointsvectors(pvs)
 
+    @staticmethod
+    def rounded(facepolygons,ratio):
+        result      = []
+        for (poly1,poly2) in pairs(facepolygons[1:] + [facepolygons[0]]):
+            result.append(poly1.subline(ratio,1.0-ratio))
+            result.append(Bezier(poly1.point(1.0-ratio),poly1.point(1.0),poly2.point(0.0),poly2.point(ratio)).polygon())
+        return Polygon.allconcat(result)
+
+
 #
 # curve range
 #
