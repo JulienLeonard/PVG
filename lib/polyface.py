@@ -306,7 +306,7 @@ class Polyface:
 
         result = polygons[0]
         for polygon in polygons[1:]:
-            result.concat(polygon)
+            result = result.concat(polygon)
 
         return result
 
