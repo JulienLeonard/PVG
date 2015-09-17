@@ -66,16 +66,22 @@ class GeoQuad:
         return self.polygon().length()
 
     def xcurve(self,x):
+        x = R(0.0,1.0).trim(x)
         return self.interx.sample(x).maponpoints(self.mdown.sample(x),self.mup.sample(x))
 
     def ycurve(self,y):
+        y = R(0.0,1.0).trim(y)
         return self.intery.sample(y).maponpoints(self.mleft.sample(y),self.mright.sample(y))
 
     def xpoint(self,p):
-        return self.xcurve(p.x()).sample(p.y())
+        x = R(0.0,1.0).trim(p.x())
+        y = R(0.0,1.0).trim(p.y())
+        return self.xcurve(x).sample(y)
 
     def ypoint(self,p):
-        return self.ycurve(p.y()).sample(p.x())
+        x = R(0.0,1.0).trim(p.x())
+        y = R(0.0,1.0).trim(p.y())
+        return self.ycurve(y).sample(x)
 
     def containpoint(self,point):
         return self.polygon().containpoint(point)
@@ -149,4 +155,15 @@ class GeoQuad:
             return leaf.center()
         return None
 
+    #
+    #
+    #
+    def transverses2polygon(self,abs1,curve1,abs2,curve2):
+        up   = self.mup.subline(abs1,abs2)
+        down = self.mdown.subline(abs1,abs2)
 
+        curve1new = curve1.maponpoints(Point(abs1,0.0),Point(abs1,1.0))
+        curve2new = curve2.maponpoints(Point(abs2,0.0),Point(abs2,1.0))
+
+        return Polygon.allconcat([self.mappolygon(curve1new),up,self.mappolygon(curve2new).reverse(),down.reverse()])
+        
