@@ -173,6 +173,9 @@ class Polyface:
 
     def sortedfaces(self,fkey):
         return sorted(self.faces(),key=fkey)
+
+    def sortedface(self,fkey):
+        return sorted(self.faces(),key=fkey)[0]
                     
     def face(self,fkey,reverse = False):
         sortedfaces = self.sortedfaces(fkey)
