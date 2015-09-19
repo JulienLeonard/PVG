@@ -93,17 +93,36 @@ class Face:
         result = Polygon(points)
         return result
 
+    def xs(self):
+        return [p.x() for p in self.vertexes()]
+
+    def ys(self):
+        return [p.y() for p in self.vertexes()]
+
     def miny(self):
-        return lmin([p.y() for p in self.vertexes()])
+        return lmin(self.ys())
 
     def minx(self):
-        return lmin([p.x() for p in self.vertexes()])
+        return lmin(self.xs())
 
     def maxy(self):
-        return lmax([p.y() for p in self.vertexes()])
+        return lmax(self.ys())
 
     def maxx(self):
-        return lmax([p.x() for p in self.vertexes()])
+        return lmax(self.xs())
+
+    def middley(self):
+        return lmean(self.ys())
+
+    def middlex(self):
+        return lmean(self.xs())
+
+    def maxmiddlex(self):
+        return -self.middlex()
+
+    def minmiddlex(self):
+        return self.middlex()
+
 
 #
 # Polyface is a circular list of Faces, computed by polygraph
@@ -159,17 +178,29 @@ class Polyface:
     def length(self):
         return self.polygon().length()
 
+    def xs(self):
+        return map(Point.x,self.vertexes())
+
+    def ys(self):
+        return map(Point.y,self.vertexes())
+
     def miny(self):
-        return lmin([p.y() for p in self.vertexes()])
+        return lmin(self.ys())
 
     def minx(self):
-        return lmin([p.x() for p in self.vertexes()])
+        return lmin(self.xs())
 
     def maxy(self):
-        return lmax([p.y() for p in self.vertexes()])
+        return lmax(self.ys())
 
     def maxx(self):
-        return lmax([p.x() for p in self.vertexes()])
+        return lmax(self.xs())
+
+    def middley(self):
+        return lmean(self.ys())
+
+    def middlex(self):
+        return lmean(self.xs())
 
     def sortedfaces(self,fkey):
         return sorted(self.faces(),key=fkey)
@@ -299,6 +330,39 @@ class Polyface:
         # puts("quadfromface: faces",self.mfaces,"rootface",rootface,"result",face_up,face_rights,face_down)
 
         return GeoQuad(polygon_left,polygon_up,polygon_right,polygon_down)
+
+    #
+    # compute a quad by having the specified face as left, the 2 adjacent faces as up and down, and the other(s) as right
+    #
+    # self.mfaces must be in clockwise 
+    def quadfromleftrightfaces(self,face_left,face_right):
+        puts("quadfromleftrightfaces faces",face_left,face_right)
+        if not face_left in self.mfaces or not face_right in self.mfaces:
+            return None
+        face_ups     = lcircularitems(self.mfaces,face_left,face_right)
+        face_downs   = lcircularitems(self.mfaces,face_right,face_left)
+
+        puts("quadfromleftrightfaces face_ups",face_ups,"face_downs",face_downs)
+        
+        polygon_left    = face_left.polygon()
+        polygon_right   = face_right.polygon()
+        polygon_up      = Polyface.faces2polygon(face_ups)
+        polygon_down    = Polyface.faces2polygon(face_downs)
+
+        if polygon_left.points()[-1] != polygon_up.points()[0] and  polygon_left.points()[-1] != polygon_up.points()[-1]:
+            polygon_left = polygon_left.reverse()
+        if polygon_up.points()[0] != polygon_left.points()[-1]:
+            polygon_up = polygon_up.reverse()
+        if polygon_down.points()[0] != polygon_left.points()[0]:
+            polygon_down = polygon_down.reverse()
+        if polygon_right.points()[-1] != polygon_up.points()[-1]:    
+            polygon_right = polygon_right.reverse()
+
+        # puts("quadfromface: faces",self.mfaces,"rootface",rootface,"result",face_up,face_rights,face_down)
+
+        return GeoQuad(polygon_left,polygon_up,polygon_right,polygon_down)
+
+
 
     @staticmethod
     def faces2polygon(faces):
