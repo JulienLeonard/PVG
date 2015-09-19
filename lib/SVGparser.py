@@ -96,6 +96,9 @@ class SVGLayer:
     def polygons(self):
         return [poly for path in self.mpaths for poly in path.polygons()]
 
+    def ymin(self):
+        return self.bbox().ymin()
+
 
 class SVGParser:
     
