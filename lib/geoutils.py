@@ -121,6 +121,14 @@ class Vector(Coords):
     def scale(self,ratio):
         return Vector(self.x()*ratio,self.y()*ratio)
 
+
+    def scalex(self,rx):
+        return Vector(self.x()*rx,self.y())
+
+
+    def scaley(self,ry):
+        return Vector(self.x(),self.y() * ry)
+
     #
     # compute the ortho vector of a vector
     #
