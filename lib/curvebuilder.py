@@ -156,6 +156,18 @@ class CurveBuilder:
             result.append(poly1.subline(ratio,1.0-ratio))
             result.append(Bezier(poly1.point(1.0-ratio),poly1.point(1.0),poly2.point(0.0),poly2.point(ratio)).polygon())
         return Polygon.allconcat(result)
+    
+    @staticmethod
+    def symy(curve,extremityend=True,join=False):
+        if extremityend:
+            result =  curve.symy(curve.point2().y())
+        else:
+            result =  curve.symy(curve.point1().y())
+            
+        if join:
+            result = curve.concat(result)
+        return result
+
 
     #
     # build a hump between 2 points

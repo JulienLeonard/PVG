@@ -427,6 +427,9 @@ class Polygon:
     def symx(self,x):
         return Polygon([Point(2.0*x-p.x(),p.y())for p in self.points()])
 
+    def symy(self,y):
+        return Polygon([Point(p.x(),2.0*y-p.y())for p in self.points()])
+
     def viewbox(self):
         return points2bbox(self.points())
 
