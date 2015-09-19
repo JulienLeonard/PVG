@@ -414,14 +414,15 @@ class Polygon:
     def y(self,t):
         return self.point(t).y()
 
-
     def translate(self,v):
         return Polygon([p.add(v) for p in self.points()])
 
     def rotate(self,center,angle):
         return Polygon([p.rotate(center,angle) for p in self.points()])
     
-    def scale(self,center,factor):
+    def scale(self,factor,center = None):
+        if center == None:
+            center = self.middle()
         return Polygon([center.add(vector(center,p).scale(factor)) for p in self.points()])
 
     def symx(self,x):
@@ -429,6 +430,20 @@ class Polygon:
 
     def symy(self,y):
         return Polygon([Point(p.x(),2.0*y-p.y())for p in self.points()])
+
+    def scalex(self,rx):
+        middle = self.middle()
+        return Polygon([middle.add(vector(middle,p).scalex(rx)) for p in self.points()])
+
+    def scaley(self,ry):
+        middle = self.middle()
+        return Polygon([middle.add(vector(middle,p).scaley(ry)) for p in self.points()])
+
+    def movex(self,mx):
+        return self.translate(Vector(mx,0.0))
+
+    def movey(self,my):
+        return self.translate(Vector(0.0,my))
 
     def viewbox(self):
         return points2bbox(self.points())
