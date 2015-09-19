@@ -405,7 +405,17 @@ class BBox:
     def unionsymx(self,symx):
         return bbunion(self,self.symx(symx))
 
+    def xmin(self):
+        return self.coords()[0]
 
+    def ymin(self):
+        return self.coords()[1]
+
+    def xmax(self):
+        return self.coords()[2]
+
+    def ymax(self):
+        return self.coords()[3]
 
 def bbunion(bbox1,bbox2):
     # puts ("bbunion",bbox1,bbox2)
