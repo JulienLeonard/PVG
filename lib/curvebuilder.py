@@ -107,7 +107,7 @@ class CurveBuilder:
         else:
             factor = v2.length()/v1.length()
         #print "factor ",factor
-        result = result2.scale(ext1,factor)
+        result = result2.scale(factor,ext1)
         #print "scale points ",result.points()
         return result
 
@@ -165,7 +165,24 @@ class CurveBuilder:
             result =  curve.symy(curve.point1().y())
             
         if join:
-            result = curve.concat(result)
+            if extremityend:
+                result = curve.concat(result)
+            else:
+                result = result.concat(curve)
+        return result
+
+    @staticmethod
+    def symx(curve,extremitxend=True,join=False):
+        if extremitxend:
+            result =  curve.symx(curve.point2().x())
+        else:
+            result =  curve.symx(curve.point1().x())
+            
+        if join:
+            if extremitxend:
+                result = curve.concat(result)
+            else:
+                result = result.concat(curve)
         return result
 
 
