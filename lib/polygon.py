@@ -365,6 +365,7 @@ class Polygon:
         return self.segments()
 
     def subline(self,t1_,t2_):
+        # puts("subline",t1_,t2_)
         if t1_ < t2_:
             t1 = t1_
             t2 = t2_
@@ -407,8 +408,12 @@ class Polygon:
     def reduce(self,factor):
         return Polygon(preduce(self.mpoints,factor))
 
+    def x(self,t):
+        return self.point(t).x()
+
     def y(self,t):
         return self.point(t).y()
+
 
     def translate(self,v):
         return Polygon([p.add(v) for p in self.points()])
