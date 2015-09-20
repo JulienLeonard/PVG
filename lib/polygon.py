@@ -74,20 +74,20 @@ class Polygon:
     def ext2(self):
         return self.point2()
 
-    def miny(self):
-        return lmin([p.y() for p in self.pointextremities()])
-
-    def minx(self):
-        return lmin([p.x() for p in self.pointextremities()])
-
-    def maxy(self):
-        return lmax([p.y() for p in self.pointextremities()])
-
-    def maxx(self):
-        return lmax([p.x() for p in self.pointextremities()])
-
     def pointextremities(self):
         return (self.point1(),self.point2())
+
+    def miny(self):
+        return min(self.point1().y(),self.point2().y())
+
+    def minx(self):
+        return min(self.point1().y(),self.point2().y())
+
+    def maxy(self):
+        return max(self.point1().y(),self.point2().y())
+
+    def maxx(self):
+        return max(self.point1().x(),self.point2().x())
 
     def segments(self,nsegments=None,abscissas=None,bylength=None):
         if nsegments == None and abscissas == None and bylength == None:
