@@ -159,11 +159,11 @@ class Polygon:
                 return parange
         return None
 
-    def curvabscissa(self,pointindex):
-        if pointindex == 0:
-            return 0.0
-        else:
-            self.paranges()[pointindex].a2()
+    # def curveabscissa(self,pointindex):
+    #     if pointindex == 0:
+    #         return 0.0
+    #     else:
+    #         return self.paranges()[pointindex].a2()
 
     def point(self,t):
         if len(self.mpoints) == 1:
@@ -181,7 +181,7 @@ class Polygon:
         return self.tangent(t).ortho()
 
     def frame(self,t):
-        parange = self._abscissapointrange(t)
+        parange = self._pointabscissarange(t)
         return (parange.point(t),parange.vector())
 
 

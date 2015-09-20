@@ -61,9 +61,40 @@ class PolygonTest(unittest.TestCase):
     def test_length(self):
         self.assertEqual(Polygon.square(Point.P0(),1.0).length(),4.0)
 
-    def curveabscissa(self):
+    # def test_curveabscissa(self):
+    #     polygon = Polygon.square(Point.P0(),1.0)
+    #     self.assertEqual(polygon.curveabscissa(0),0.0)
+    #     self.assertEqual(polygon.curveabscissa(2),0.5)
+    #     self.assertEqual(polygon.curveabscissa(-1),1.0)
+
+
+    def test_point(self):
         polygon = Polygon.square(Point.P0(),1.0)
-        self.assertEqual(polygon.curveabscissa(Point(-0.5,-0.5)),0.0)
-        self.assertEqual(polygon.curveabscissa(Point(-0.5,0.0)),0.175)
-        self.assertEqual(polygon.curveabscissa(Point(-0.5,0.5)),0.25)
-        self.assertEqual(polygon.curveabscissa(Point(0.0,-0.5)),0.825)
+        self.assertEqual(polygon.point(0.0).coords(),(-0.5,-0.5))
+        self.assertEqual(polygon.point(1.0).coords(),(-0.5,-0.5))
+        self.assertEqual(polygon.point(0.5).coords(),(0.5,0.5))
+
+    def test_tangent(self):
+        polygon = Polygon.square(Point.P0(),1.0)
+        self.assertEqual(polygon.tangent(0.0).coords(),(0.0,1.0))
+        self.assertEqual(polygon.tangent(1.0).coords(),(-1.0,0.0))
+        self.assertEqual(polygon.tangent(0.5).coords(),(1.0,0.0))
+
+    def test_normal(self):
+        polygon = Polygon.square(Point.P0(),1.0)
+        self.assertEqual(polygon.normal(0.0).coords(),(-1.0,0.0))
+        self.assertEqual(polygon.normal(1.0).coords(),(0.0,-1.0))
+        self.assertEqual(polygon.normal(0.5).coords(),(0.0,1.0))
+
+    def test_frame(self):
+        polygon = Polygon.square(Point.P0(),1.0)
+        self.assertEqual([v.coords() for v in polygon.frame(0.0)],[(-0.5,-0.5),(0.0,1.0)])
+
+    def test_isclosed(self):
+        self.assertEqual(Polygon.square(Point.P0(),1.0).isclosed(),True)
+        self.assertEqual(Circle().polygon(100).isclosed(),False)
+
+    def test_close(self):
+        self.assertEqual(Polygon.square(Point.P0(),1.0).coords(),Polygon.square(Point.P0(),1.0).close().coords())
+        self.assertEqual(len(Circle().polygon(100).close().points()),len(Circle().polygon(100).points()) + 1)
+
