@@ -173,3 +173,48 @@ class PolygonTest(unittest.TestCase):
         newpoly = Circle().polygon(4)
         self.assertEqual(newpoly.rotate(Point(0.0,0.0),R.angle().sample(0.25)).coords(),[6.123233995736766e-17,1.0,-1.0,1.2246467991473532e-16,-1.8369701987210297e-16,-1.0,1.0,-2.4492935982947064e-16])
         
+    def test_scale(self):
+        newpoly = Circle().polygon(4)
+        self.assertEqual(newpoly.scale(0.5).coords(),[0.49999999999999994,2.7755575615628914e-17,7.654042494670959e-18,0.5,-0.5,8.898791557299657e-17,-1.1481063742006435e-16,-0.49999999999999994])
+
+    def test_symx(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.symx(0.0).coords(),[0.0,0.0,-1.0,0.0,-1.0,1.0])
+
+    def test_symy(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.symy(0.0).coords(),[0.0,0.0,1.0,0.0,1.0,-1.0])
+
+    def test_scalex(self):
+        newpoly = Circle().polygon(4)
+        self.assertEqual(newpoly.scalex(0.5).coords(),[0.49999999999999994,0.0,7.654042494670959e-18,1.0,-0.5,1.2246467991473532e-16,-1.1481063742006435e-16,-1.0])
+
+    def test_scaley(self):
+        newpoly = Circle().polygon(4)
+        self.assertEqual(newpoly.scaley(0.5).coords(),[1.0,2.7755575615628914e-17,6.123233995736766e-17,0.5,-1.0,8.898791557299657e-17,-1.8369701987210297e-16,-0.49999999999999994])
+
+    def test_movex(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.movex(0.5).coords(),[0.5,0.0,1.5,0.0,1.5,1.0])
+    
+    def test_movey(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.movey(0.5).coords(),[0.0,0.5,1.0,0.5,1.0,1.5])
+
+    def test_bbox(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.bbox().coords(),(0.0,0.0,1.0,1.0))
+
+    def test_coords(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.coords(),[0.0,0.0,1.0,0.0,1.0,1.0])
+
+
+        
+
+
+
+        
+
+
+        
