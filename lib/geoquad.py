@@ -111,11 +111,19 @@ class GeoQuad:
         newup1 = self.ycurve(abscissa)
         return (GeoQuad(newleft1,newup1,newright1,self.mdown),GeoQuad(newleft2,self.mup,newright2,newup1))
 
-    def xsplit(self,abscissa=0.5):
-        (newup1,newup2)     = self.mup.split(abscissa=abscissa)
-        (newdown1,newdown2) = self.mdown.split(abscissa=abscissa)
-        newleft1 = self.xcurve(abscissa)
-        return (GeoQuad(self.mleft,newup1,newleft1,newdown1),GeoQuad(newleft1,newup2,self.mright,newdown2))
+    def xsplit(self,abscissa=0.5,bylength=None):
+        if abscissa != None:
+            (newup1,newup2)     = self.mup.split(abscissa=abscissa)
+            (newdown1,newdown2) = self.mdown.split(abscissa=abscissa)
+            newleft1 = self.xcurve(abscissa)
+            return (GeoQuad(self.mleft,newup1,newleft1,newdown1),GeoQuad(newleft1,newup2,self.mright,newdown2))
+        if bylength != None:
+            abs1 = bylength/self.mup.length()
+            abs2 = bylength/self.mdown.length()
+            (newup1,newup2)     = self.mup.split(abscissa=abs1)
+            (newdown1,newdown2) = self.mdown.split(abscissa=abs2)
+            newleft1 = self.mappolygon(Polygon([Point(abs2,0.0),Point(abs1,1.0)]))
+            return (GeoQuad(self.mleft,newup1,newleft1,newdown1),GeoQuad(newleft1,newup2,self.mright,newdown2))
 
     def xysplit(self,x=0.5,y=0.5):
         newx1,newx2 = self.xsplit(x)
