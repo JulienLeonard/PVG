@@ -98,3 +98,29 @@ class PolygonTest(unittest.TestCase):
         self.assertEqual(Polygon.square(Point.P0(),1.0).coords(),Polygon.square(Point.P0(),1.0).close().coords())
         self.assertEqual(len(Circle().polygon(100).close().points()),len(Circle().polygon(100).points()) + 1)
 
+    def test_concat(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0)]).concat(Polygon([Point(1.0,0.0),Point(2.0,0.0)]))
+        self.assertEqual(newpoly.coords(),[0.0,0.0,1.0,0.0,2.0,0.0])
+
+    def test_rootframes(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual([(p.coords(),v.coords()) for (p,v) in newpoly.rootframes()],[((0.0,0.0),(1.0,0.0)),((1.0,0.0),(0.0,1.0)),((1.0,1.0),(0.0,1.0))])
+
+    def test_rootnormals(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual([(p.coords(),v.coords()) for (p,v) in newpoly.rootnormals()],[((0.5,0.0),(0.0,1.0)),((1.0,0.5),(-1.0,0.0))])
+
+    def test_pointoffset(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.pointoffset(0.0,2.0).coords(),(0.0,2.0))
+
+    def test_offset(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.offset(0.5).coords(),[0.0,0.5,1.0,0.5,0.5,0.0,0.5,1.0])
+    
+    # def test_offsetf(self):
+    #     newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+    #     # f = Segment(Point(0.0,0.0),Point(1.0,1.0)).sample
+    #     f = R(0.0,1.0).sample
+    #     self.assertEqual(newpoly.offsetf(f).coords(),[(0.0,0.0),(1.0,0.5),(1.5,0.0),(2.0,1.0)])
+

@@ -245,6 +245,9 @@ class Polygon:
             newpoints.append(self.mpoints[0])
         return Polygon(newpoints)
 
+    #
+    # TOCHECK
+    #
     def closures(self,polygon2):
         sub1s = self.subpolygonsfromintersection(polygon2)
         sub2s = polygon2.subpolygonsfromintersection(self)
@@ -282,7 +285,7 @@ class Polygon:
         return result
 
     def _pointoffset(self,rf,size):
-        return padd(rf[0],rf[1].ortho().normalize().scale(size))
+        return rf[0].add(rf[1].ortho().normalize().scale(size))
 
     def pointoffset(self,t,size):
         return self._pointoffset(self.frame(t),size)
@@ -338,25 +341,25 @@ class Polygon:
         # print "newresult",newresult
         return Polygon(newresult)
 
-    def offsetf(self,f):
-        result = []
-        index = 0;
-        # points = [self.point(t) for t in usamples(30)]
-        for seg in self.segments():
-            if not seg.length() < 0.01:
-                v  = seg.vector().ortho().normalize()
-                v1 = v.scale(f.y(self.curvabscissa(index)))
-                v2 = v.scale(f.y(self.curvabscissa(index+1)))
-                result.append(p1.add(v1))
-                result.append(p2.add(v2))
-            index += 1
-        newresult = [result[0]]
-        for p in result[1:]:
-            if not pequal(newresult[-1],p,0.001):
-                newresult.append(p)
+    # def offsetf(self,f):
+    #     result = []
+    #     index = 0;
+    #     # points = [self.point(t) for t in usamples(30)]
+    #     for seg in self.segments():
+    #         if not seg.length() < 0.01:
+    #             v  = seg.vector().ortho().normalize()
+    #             v1 = v.scale(f(self.curveabscissa(index)))
+    #             v2 = v.scale(f(self.curveabscissa(index+1)))
+    #             result.append(p1.add(v1))
+    #             result.append(p2.add(v2))
+    #         index += 1
+    #     newresult = [result[0]]
+    #     for p in result[1:]:
+    #         if not pequal(newresult[-1],p,0.001):
+    #             newresult.append(p)
         
-        # print "newresult",newresult
-        return Polygon(newresult)
+    #     # print "newresult",newresult
+    #     return Polygon(newresult)
 
     def reverse(self):
         return Polygon(lreverse(self.mpoints))
