@@ -1,4 +1,5 @@
 from utils    import *
+from range    import *
 from geoutils import *
 from polygon  import *
 from circle   import *
@@ -140,3 +141,35 @@ class PolygonTest(unittest.TestCase):
     def test_sublines(self):
         newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
         self.assertEqual([poly.coords() for poly in newpoly.sublines(usamples(5))],[[0.0,0.0,0.5,0.0],[0.5,0.0,1.0,0.0],[1.0,0.0,1.0,0.5],[1.0,0.5,1.0,1.0]])
+
+    def test_split(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.split(4)[0].coords(),[0.0,0.0,0.5,0.0])
+        self.assertEqual(newpoly.split(4)[1].coords(),[0.5,0.0,1.0,0.0])
+        self.assertEqual(newpoly.split(abscissa=0.25)[0].coords(),[0.0,0.0,0.5,0.0])
+        self.assertEqual(newpoly.split(abscissa=0.25)[1].coords(),[0.5,0.0,1.0,0.0,1.0,1.0])
+
+    def test_addline(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.addline(2.0).coords(),[0.0,0.0,1.0,0.0,1.0,1.0,1.0,3.0])
+
+    def test_reduce(self):
+        newpoly = Circle().polygon(4)
+        self.assertEqual(newpoly.reduce(0.5).coords(),[0.49999999999999994,2.7755575615628914e-17,7.654042494670959e-18,0.5,-0.5,8.898791557299657e-17,-1.1481063742006435e-16,-0.49999999999999994])
+
+    def test_x(self):
+        newpoly = Circle().polygon(4).close()
+        self.assertEqual(newpoly.x(0.25),1.1102230246251565e-16)
+                         
+    def test_y(self):
+        newpoly = Circle().polygon(4).close()
+        self.assertEqual(newpoly.y(0.25),1.0)
+
+    def test_translate(self):
+        newpoly = Circle().polygon(4)
+        self.assertEqual(newpoly.translate(Vector(1.0,1.0)).coords(),[2.0, 1.0, 1.0, 2.0, 0.0, 1.0000000000000002, 0.9999999999999998, 0.0])
+        
+    def test_rotate(self):
+        newpoly = Circle().polygon(4)
+        self.assertEqual(newpoly.rotate(Point(0.0,0.0),R.angle().sample(0.25)).coords(),[6.123233995736766e-17,1.0,-1.0,1.2246467991473532e-16,-1.8369701987210297e-16,-1.0,1.0,-2.4492935982947064e-16])
+        

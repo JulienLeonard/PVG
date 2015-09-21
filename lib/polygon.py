@@ -404,7 +404,7 @@ class Polygon:
         result = self.mpoints[:]
         p1 = result[-2]
         p2 = result[-1]
-        newp = p2.add(vector(p1,p2).norm().scale(size))
+        newp = p2.add(vector(p1,p2).normalize().scale(size))
         result.append(newp)
         return Polygon(result)
     
