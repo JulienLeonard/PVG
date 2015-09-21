@@ -124,3 +124,19 @@ class PolygonTest(unittest.TestCase):
     #     f = R(0.0,1.0).sample
     #     self.assertEqual(newpoly.offsetf(f).coords(),[(0.0,0.0),(1.0,0.5),(1.5,0.0),(2.0,1.0)])
 
+    def test_reverse(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.reverse().coords(),[1.0,1.0,1.0,0.0,0.0,0.0])
+
+    def test_edges(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual([s.coords() for s in newpoly.edges()],[(0.0,0.0,1.0,0.0),(1.0,0.0,1.0,1.0)])
+
+    def test_subline(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual(newpoly.subline(0.0,0.75).coords(),[0.0,0.0,1.0,0.0,1.0,0.5])
+        self.assertEqual(newpoly.subline(0.75,0.25).coords(),[1.0,0.5,1.0,0.0,0.5,0.0])
+
+    def test_sublines(self):
+        newpoly = Polygon([Point(0.0,0.0),Point(1.0,0.0),Point(1.0,1.0)])
+        self.assertEqual([poly.coords() for poly in newpoly.sublines(usamples(5))],[[0.0,0.0,0.5,0.0],[0.5,0.0,1.0,0.0],[1.0,0.0,1.0,0.5],[1.0,0.5,1.0,1.0]])

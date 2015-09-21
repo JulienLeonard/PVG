@@ -381,7 +381,7 @@ class Polygon:
         result = [point0]
         toadd = False
         for pa in self.mparanges:
-            if pa.a2() >= t1 and pa.a2() <= t2:
+            if pa.a2() >= t1 and pa.a2() <= t2 and not pequal(result[-1],pa.point2()):
                 result.append(pa.point2())
         pointend = self.point(t2)
         if not pequal(pointend,result[-1]):
