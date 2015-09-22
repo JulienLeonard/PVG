@@ -88,6 +88,12 @@ class Circle:
     def polygon(self,npoints=30):
         return Polygon(self.samples(npoints=npoints+1)[:-1])
 
+    @staticmethod
+    def fromSegment(segment,radius,abscissa=0.5):
+        center = segment.sample(abscissa).add(segment.normal().scale(size))
+        return Circle(center,radius)
+
+
 Circle.C0 = Circle()
 
 Circle.Unitary = Circle(Point(0.5,0.5),0.5)
