@@ -14,3 +14,5 @@ from polyface            import *
 from polygraph           import *
 from curvebuilder        import *
 from geoquad             import *
+from baopattern          import *
+from circlepackingbao    import *
