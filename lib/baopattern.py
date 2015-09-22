@@ -33,13 +33,15 @@ class BaoPattern:
             return self
 
     def draw(self,newnode,index):
-        self.fdraw()(newnode,index,self.color())
+        self.fdraw()(newnode,index,self.color(index))
 
     def radius(self):
         return lcircular(self.mradiuspattern,self.mindex)
 
-    def color(self):
-        return lcircular(self.mcolorpattern,self.mindex)
+    def color(self,index=None):
+        if index == None:
+            index = self.mindex
+        return lcircular(self.mcolorpattern,index)
     
 
 #

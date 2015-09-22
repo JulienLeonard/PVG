@@ -59,7 +59,7 @@ class BaoNode(Circle):
         radius  = segment.length()/2.0
         center1 = segment.sample(0.0).add(segment.normal().scale(-radius))
         center2 = segment.sample(1.0).add(segment.normal().scale(-radius))
-        return [BaoNode(Circle(center1,radius),0,0),BaoNode(Circle(center2,radius),0,0)]
+        return [BaoNode(Circle(center1,radius),0,0),BaoNode(Circle(center2,radius),0,1)]
 
 
 def baonodes0():
@@ -166,8 +166,8 @@ class CirclePackingBao:
             yield othernode
 
     @staticmethod
-    def iter(boundaries,inodes,baopattern,niter):
-        nodes       = BaoNode.nodes(inodes,0)
+    def iter(boundaries,nodes,baopattern,niter):
+        nodes       = BaoNode.nodes(nodes,0)
         boundaries  = BaoNode.nodes(boundaries)        
         stack       = BaoStack(nodes)
         lastindex   = stack.lastindex()
@@ -195,7 +195,7 @@ class CirclePackingBao:
             else:
                 othernode.retouch(True)
                 quadtree.add(newbaonode)
-                baopattern.draw(newbaonode,lastindex)
+                baopattern.draw(newbaonode,newbaonode.colorindex())
                 lastindex = stack.stack(newbaonode,othernode)
 
             if lastindex < 1:
