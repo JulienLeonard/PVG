@@ -99,6 +99,9 @@ class Polygon:
         if not bylength == None:
             return [Segment(p1,p2) for (p1,p2) in pairs(self.points(bylength=bylength))]
         return None
+
+    def segment(self,t):
+        return self._pointabscissarange(t).segment()
     
     def paranges(self):
         if self.mparanges == None:
