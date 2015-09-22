@@ -54,6 +54,13 @@ class BaoNode(Circle):
         x,y,r = circle.coords()
         return [BaoNode(Circle().coords((x-r/2.0,y,r/2.0)),0,0),BaoNode(Circle().coords((x+r/2.0,y,r/2.0)),1,1)]
 
+    @staticmethod
+    def fromsegment(segment):
+        radius  = segment.length()/2.0
+        center1 = segment.sample(0.0).add(segment.normal().scale(-radius))
+        center2 = segment.sample(1.0).add(segment.normal().scale(-radius))
+        return [BaoNode(Circle(center1,radius),0,0),BaoNode(Circle(center2,radius),0,0)]
+
 
 def baonodes0():
     return [BaoNode(Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(Circle().coords((2.0,0.0,1.0)),1,1)]
