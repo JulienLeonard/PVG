@@ -79,6 +79,19 @@ class R:
         if v > self.maxv():
             return self.maxv()
         return v
+
+    def symsample(self,t):
+        if t <= 0.5:
+            return self.sample(t * 2.0)
+        else:
+            return self.sample(2.0 * (1.0 - t))
+
+    def symsamples(self,nsamples=None,abscissas=None):
+        if not nsamples == None:
+            return [self.symsample(t) for t in usamples(nsamples)]
+        if not abscissas == None:
+            return [self.symsample(t) for t in abscissas]
+        return None
         
 
     #
