@@ -134,6 +134,7 @@ class Polyface:
         for face in faces:
             face.add_polyface(self)
         self.mpolygon  = None
+        self.mfacepolygon = {}
 
     def faces(self):
         return self.mfaces
@@ -141,18 +142,22 @@ class Polyface:
     def polygon(self):
         if self.mpolygon == None:
             points = None
+            face0 = None
             for face in self.faces():
                 if points == None:
                     points = face.points()[:]
+                    face0 = face
                 else:
                     facepoints = face.points()[:]
                     if not points[-1] == facepoints[0] and not points[-1] == facepoints[-1]:
                         points.reverse()
+                    self.mfacepolygon[face0] = Polygon(points)
                     if points[-1] == facepoints[-1]:
                         facepoints.reverse()
                     if not points[-1] == facepoints[0]:
                         puts("Polyface def error")
-                    
+
+                    self.mfacepolygon[face] = Polygon(facepoints)
                     points.extend(facepoints[1:])
             self.mpolygon = Polygon(points)
         return self.mpolygon
@@ -232,6 +237,13 @@ class Polyface:
 
     def border(self):
         return self.borderFaces()[0]
+
+    def facepolygon(self,face):
+        if self.mfacepolygon == {}:
+            self.polygon()
+        if not face in self.mfacepolygon:
+            return None
+        return self.mfacepolygon[face]
 
     #
     # if number of arcs > 3, get a 4 sides polyface by computing the two smallest faces, then aggregating in between
