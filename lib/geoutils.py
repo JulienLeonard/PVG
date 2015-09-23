@@ -236,7 +236,7 @@ class Segment:
         return vector(self.p1(),self.p2())
 
     def normal(self):
-        return self.vector().ortho()
+        return self.vector().ortho().normalize()
 
     def length(self):
         return self.vector().length()
@@ -252,6 +252,9 @@ class Segment:
             return [self]
         else:
             return self.split(int(math.ceil(self.length()/maxsize)))
+
+    def subsegment(self,t1,t2):
+        return Segment(self.sample(t1),self.sample(t2))
 
     def bbox(self):
         return points2bbox([self.p1(),self.p2()])
