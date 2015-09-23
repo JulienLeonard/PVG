@@ -147,6 +147,7 @@ class CirclePackingBao:
         bigcircle   = lastnode.scale( (lastnode.r() + newr * 2.1)/ lastnode.r() )
         collidings  = quadtree.colliding(bigcircle)
         ccollidings = lsubstract(collidings,excludenodes)
+        ccollidings = [c for c in ccollidings if isinstance(c,BaoNode)]
         ccollidings = lremove([node if (node.index() >= 0) else None for node in ccollidings],None)
         sortlist = [(n.index,n) for n in ccollidings]
         sortlist.sort()
@@ -160,15 +161,16 @@ class CirclePackingBao:
         if not othernode == None:
             yield othernode
         if not othernode == None:
-            yield stack.nextothernode(othernode)
+            nextothernode = stack.nextothernode(othernode)
+            if not nextothernode == None:
+                yield nextothernode
         ccollidings = CirclePackingBao.findnewother(quadtree,lastnode,stack.excludednodes(othernode),newr)
         for othernode in ccollidings:
-            yield othernode
+            if isinstance(othernode,BaoNode):
+                yield othernode
 
     @staticmethod
     def iter(boundaries,nodes,baopattern,niter):
-        nodes       = BaoNode.nodes(nodes,0)
-        boundaries  = BaoNode.nodes(boundaries)        
         stack       = BaoStack(nodes)
         lastindex   = stack.lastindex()
         quadtree    = QuadTree().adds( boundaries + nodes )
@@ -184,6 +186,7 @@ class CirclePackingBao:
             newbaonode = None
 
             for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
+                # puts("genothernodes",lastnode,othernode)
                 newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex())
                 if not newbaonode == None:
                     break
