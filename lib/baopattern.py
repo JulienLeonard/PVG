@@ -59,12 +59,11 @@ class BaoPatternSide(BaoPattern):
     #
     def next(self):
         self.mindex += 1
-        return (lcircular(self.msidepattern,self.mindex),lcircular(self.mradiuspattern,self.mindex),lcircular(self.mcolorpattern,self.mindex))
+        return self
+
+    def side(self):
+        return lcircular(self.msidepattern,self.mindex)    
 
     def sidepattern(self,sidepattern):
         self.msidepattern = sidepattern
         return self
-
-        
-
-    
