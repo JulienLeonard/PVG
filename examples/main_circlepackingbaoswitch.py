@@ -11,7 +11,7 @@ poly = Circle().scale(100.0).polygon(30).close()
 canvas.draw(poly,Color.black())
 boundaries = poly.segments()
 inodes     = baonodes0()
-baopattern = BaoPatternSide().fdraw(fdraw).radiuspattern(R(1.0,2.0).samples(20)).colorpattern([Color.hue2color(float(index)/100.0) for index in range(100)]).sidepattern([1.0,-1.0] * 10 + [-1.0]*20)
+baopattern = BaoPatternSwitch().fdraw(fdraw).radiuspattern(R(1.0,2.0).samples(20)).colorpattern([Color.hue2color(float(index)/20.0) for index in range(20)]).sidepattern([1.0] * 10 + [-1.0]*10)
 
 canvas.draw(inodes)
 

@@ -43,27 +43,3 @@ class BaoPattern:
             index = self.mindex
         return lcircular(self.mcolorpattern,index)
     
-
-#
-# TODO: do proper inheritance of constructor
-#
-class BaoPatternSide(BaoPattern):
-    def __init__(self):
-        self.msidepattern   = [1.0]
-        self.mradiuspattern = [1.0]
-        self.mcolorpattern  = [Color.black()]
-        self.mindex   = 0
-
-    #
-    # return (Side,RatioRadius,Color)
-    #
-    def next(self):
-        self.mindex += 1
-        return self
-
-    def side(self):
-        return lcircular(self.msidepattern,self.mindex)    
-
-    def sidepattern(self,sidepattern):
-        self.msidepattern = sidepattern
-        return self

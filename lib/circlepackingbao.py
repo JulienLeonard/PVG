@@ -68,15 +68,16 @@ def baonodes0():
 class BaoStack:
     
     def __init__(self,nodes):
-        self.mnodes        = nodes
-        self.mlastnode     = nodes[-1]
-        self.mlastlastnode = nodes[-2]
-        self.mothernode    = nodes[-2]
-        self.mlast3node    = None
+        self.mnodes         = nodes
+        self.mlastnode      = nodes[-1]
+        self.mlastlastnode  = nodes[-2]
+        self.mothernode     = nodes[-2]
+        self.mlast3node     = None
+        self.mprevdirection = 1.0
 
     def set(self,nodes,lastindex):
-        self.mlastnode     = nodes[lastindex]
-        self.mlastlastnode = nodes[lastindex-1]
+        self.mlastnode     = iff(self.mprevdirection > 0.0, nodes[lastindex], nodes[lastindex-1])
+        self.mlastlastnode = iff(self.mprevdirection > 0.0, nodes[lastindex-1], nodes[lastindex])
         self.mothernode    = None
         self.mlast3node    = None
 
@@ -128,17 +129,23 @@ class BaoStack:
     def nextothernode(self,othernode):
         return self.node(othernode.index() + 1)
 
+    def switch(self):
+        self.mlastnode      = self.mlastnode
+        self.mothernode     = self.mlastlastnode
+        self.mlastlastnode  = None
+        self.mlast3node     = None
+        self.mprevdirection = -self.mprevdirection
+
+
 class CirclePackingBao:
     
 
     @staticmethod
-    def computenextnode(quadtree,node2,node1,newr,index):
-        allsides = [1.0,-1.0]
-        for iside in allsides:
-            newcircle = circles2tangentout(node2,node1,newr,iside)
-            if not newcircle == None and not quadtree.iscolliding(newcircle):
-                newbaonode = BaoNode(newcircle,node2.colorindex() + 1,index + 1)
-                return newbaonode
+    def computenextnode(quadtree,node2,node1,newr,index,iside):
+        newcircle = circles2tangentout(node2,node1,newr,iside)
+        if not newcircle == None and not quadtree.iscolliding(newcircle):
+            newbaonode = BaoNode(newcircle,node2.colorindex() + 1,index + 1)
+            return newbaonode
         return None
 
 
@@ -159,18 +166,21 @@ class CirclePackingBao:
     @staticmethod
     def genothernodes(othernode,quadtree,lastnode,stack,newr):
         if not othernode == None:
+            #puts("yield other node")
             yield othernode
         if not othernode == None:
+            #puts("yield next other node")
             nextothernode = stack.nextothernode(othernode)
             if not nextothernode == None:
                 yield nextothernode
         ccollidings = CirclePackingBao.findnewother(quadtree,lastnode,stack.excludednodes(othernode),newr)
         for othernode in ccollidings:
             if isinstance(othernode,BaoNode):
+                #puts("yield colliding baonode")
                 yield othernode
 
     @staticmethod
-    def iter(boundaries,nodes,baopattern,niter):
+    def iter(boundaries,nodes,baopattern,niter,side=1.0):
         stack       = BaoStack(nodes)
         lastindex   = stack.lastindex()
         quadtree    = QuadTree().adds( boundaries + nodes )
@@ -187,7 +197,7 @@ class CirclePackingBao:
 
             for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
                 # puts("genothernodes",lastnode,othernode)
-                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex())
+                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex(),side)
                 if not newbaonode == None:
                     break
 

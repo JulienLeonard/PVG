@@ -151,7 +151,8 @@ class Polyface:
                     facepoints = face.points()[:]
                     if not points[-1] == facepoints[0] and not points[-1] == facepoints[-1]:
                         points.reverse()
-                    self.mfacepolygon[face0] = Polygon(points)
+                    if self.mfacepolygon == {}:
+                        self.mfacepolygon[face0] = Polygon(points[:])
                     if points[-1] == facepoints[-1]:
                         facepoints.reverse()
                     if not points[-1] == facepoints[0]:

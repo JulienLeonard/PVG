@@ -5,6 +5,30 @@ from baopattern       import *
 def index2color(period,index):
     return color.hue2color((index%period)/(float(period)))
 
+#
+# TODO: do proper inheritance of constructor
+#
+class BaoPatternSwitch(BaoPattern):
+    def __init__(self):
+        self.msidepattern   = [1.0]
+        self.mradiuspattern = [1.0]
+        self.mcolorpattern  = [Color.black()]
+        self.mindex   = 0
+
+    #
+    # return (Side,RatioRadius,Color)
+    #
+    def next(self):
+        self.mindex += 1
+        return self
+
+    def side(self):
+        return lcircular(self.msidepattern,self.mindex)    
+
+    def sidepattern(self,sidepattern):
+        self.msidepattern = sidepattern
+        return self
+
 
 class BS:
     def __init__(self):
@@ -24,22 +48,13 @@ class BS:
         for item in list:
             self.push(item)
         return self
-
-
-class BaoStackSwitch(BaoStack):
-
-    def switch(self):
-        self.mlastnode     = self.mlastnode
-        self.mothernode    = self.mlastlastnode
-        self.mlastlastnode = None
-        self.mlast3node    = None
         
 
 class CirclePackingBaoSwitch(CirclePackingBao):
     
     @staticmethod
     def iter(boundaries,nodes,baopattern,niter):
-        stack       = BaoStackSwitch(nodes)
+        stack       = BaoStack(nodes)
         lastindex   = stack.lastindex()
         quadtree    = QuadTree().adds( boundaries + nodes )
         lastside    = None
@@ -59,7 +74,7 @@ class CirclePackingBaoSwitch(CirclePackingBao):
 
             for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
                 # puts("genothernodes",lastnode,othernode)
-                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex())
+                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex(),newside)
                 if not newbaonode == None:
                     break
 
