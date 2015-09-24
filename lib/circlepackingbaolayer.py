@@ -1,6 +1,7 @@
-from utils            import *
-from circlepackingbao import *
-from baopattern       import *
+from utils                  import *
+from circlepackingbao       import *
+from circlepackingbaoswitch import *
+from baopattern             import *
 
 class BaoPatternLayer(BaoPattern):
     def __init__(self):
@@ -35,7 +36,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
         newcircle = circles2tangentout(node2,node1,newr,side)
         if not newcircle == None:
             collidings  = lsubstract(quadtree.colliding(newcircle),[node1,node2])
-            # puts("collidings",collidings)
+            # puts("newcircle",newcircle.coords(),"collidings",[(c,c.coords()) for c in collidings])
             if len(collidings) == 0:
                 newbaonode = BaoNode(newcircle,node2.colorindex() + 1,index + 1)
                 return (newbaonode,False)
@@ -62,6 +63,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
             # get current paramaters
             (lastnode,othernode) = stack.lastseed()
             newr                 = baopattern.next().radius()
+            # puts("current paramaters",lastnode,othernode)
 
             # compute new node if possible
             newbaonode = None
@@ -69,7 +71,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
             foreigncollision = False
             for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
                 (newbaonode,foreigncollision) = CirclePackingBaoLayer.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex(),side0)
-                # puts("genothernodes",lastnode,othernode,"newbaonode,foreigncollision",newbaonode,foreigncollision)
+                # puts("genothernodes",lastnode,othernode,"newbaonode,foreigncollision",newbaonode,foreigncollision,"side0",side0)
                 if not newbaonode == None:
                     break
                 else:
@@ -85,7 +87,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
                 side0 = -side0
                 # TODO: find a way to factorize the two genothernodes calls
                 for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
-                    # puts("genothernodes",lastnode,othernode)
+                    # puts("genothernodes after foreigncollision",lastnode,othernode,"side0",side0)
                     (newbaonode,foreigncollision) = CirclePackingBaoLayer.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex(),side0)
                     # puts("genothernodes after foreigncollision",lastnode,othernode,"newbaonode,foreigncollision",newbaonode,foreigncollision)
                     if not newbaonode == None:
@@ -95,7 +97,9 @@ class CirclePackingBaoLayer(CirclePackingBao):
             if newbaonode == None:
                 lastnode.notfound(True)
                 lastindex = stack.rewindtofreenode(lastindex)
+                # puts("no new node found, new lastindex",lastindex)
             else:
+                # puts("found newbao node",newbaonode)
                 othernode.retouch(True)
                 quadtree.add(newbaonode)
                 clayer.append(newbaonode)
