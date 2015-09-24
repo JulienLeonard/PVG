@@ -516,6 +516,12 @@ class Polygon:
         # TODO: to finish
 
     @staticmethod
+    def fromcoords(coords):
+        points = [Point(x,y) for (x,y) in foreach2(coords)]
+        return Polygon(points)
+
+
+    @staticmethod
     def fromRadiusAngle(origin,radiuss,angles):
         result = [origin]
         for r,a in zip(radiuss,angles):

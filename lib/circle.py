@@ -89,10 +89,18 @@ class Circle:
         return Polygon(self.samples(npoints=npoints+1)[:-1])
 
     @staticmethod
+    def fromcoords(coords):
+        if len(coords) < 3:
+            return None
+        return Circle(Point(coords[0],coords[1]),coords[2])
+
+
+    @staticmethod
     def fromSegment(segment,radius,abscissa=0.5):
         center = segment.sample(abscissa).add(segment.normal().scale(size))
         return Circle(center,radius)
 
+    
 
 Circle.C0 = Circle()
 
