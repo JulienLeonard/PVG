@@ -76,9 +76,9 @@ class BaoStack:
         self.mprevdirection = 1.0
 
     def set(self,nodes,lastindex):
-        self.mlastnode     = iff(self.mprevdirection > 0.0, nodes[lastindex], nodes[lastindex-1])
-        self.mlastlastnode = iff(self.mprevdirection > 0.0, nodes[lastindex-1], nodes[lastindex])
-        self.mothernode    = None
+        self.mlastnode     = iff(self.mprevdirection > 0.0, nodes[lastindex], nodes[lastindex])
+        self.mlastlastnode = iff(self.mprevdirection > 0.0, nodes[lastindex-1], nodes[lastindex+1])
+        self.mothernode    = self.mlastlastnode
         self.mlast3node    = None
 
     def lastindex(self):
