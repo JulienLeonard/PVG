@@ -11,18 +11,18 @@ def fdrawlayer(nodes):
         canvas.draw(node,Color.hue2color(hue))
 
 def fdraw(node,index,style):
-    canvas.draw(node,style)
+    canvas.draw(node.scale(0.5),style)
 
 poly = Circle().scale(100.0).polygon(30).close()
 canvas.draw(poly,Color.black())
 boundaries = poly.segments()
 inodes     = BaoNode.fromcircle(Circle(Point(0.0,95.0),10.0))
-baopattern = BaoPatternLayer().fdrawlayer(fdrawlayer).radiuspattern(R(5.0,5.0).samples(20))
+baopattern = BaoPatternLayer().fdraw(fdraw).fdrawlayer(fdrawlayer).radiuspattern(R(5.0,5.0).samples(20)).colorpattern([Color.hue2color(float(index)/20.0) for index in range(20)])
 # baopattern = BaoPattern().fdraw(fdraw).radiuspattern(R(5.0,5.0).samples(20)).colorpattern([Color.hue2color(float(index)/20.0) for index in range(20)])
 
 # canvas.draw(inodes)
 
 # packing = CirclePackingBao.iter(boundaries,inodes,baopattern,200,-1.0)
-packing = CirclePackingBaoLayer.iter(boundaries,inodes,baopattern,500,-1.0)
+packing = CirclePackingBaoLayer.iter(boundaries,inodes,baopattern,10000,-1.0)
 
 canvas.save("circlepackingbaolayer.png")
