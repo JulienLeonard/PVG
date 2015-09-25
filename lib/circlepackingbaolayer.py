@@ -55,7 +55,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
         stack       = BaoStack(nodes)
         lastindex   = stack.lastindex()
         quadtree    = QuadTree().adds( boundaries + nodes )
-        clayer      = [nodes]
+        clayer      = nodes[:]
 
         for iiter in range(niter):
             ifputs(iiter % 1000 == 0,"niter",iiter)
