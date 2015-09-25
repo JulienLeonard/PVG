@@ -8,7 +8,8 @@ from circlepacking import *
 
 class BaoNode(Circle):
 
-    def __init__(self,circle,colorindex,index):
+    def __init__(self,pattern,circle,colorindex,index):
+        self.mpattern     = pattern
         self.mcenter      = circle.center()
         self.mradius      = circle.radius()
         self.mretouch     = False
@@ -21,6 +22,13 @@ class BaoNode(Circle):
 
     def index(self):
         return self.mindex
+
+    def pattern(self,v = None):
+        if v == None:
+            return self.mpattern
+        else:
+            self.mpattern = v
+            return self
 
     def retouch(self,v = None):
         if v == None:
@@ -50,30 +58,34 @@ class BaoNode(Circle):
         return result
 
     @staticmethod
-    def fromcircle(circle):
+    def fromcircle(circle,baopattern=None):
         x,y,r = circle.coords()
-        return [BaoNode(Circle().coords((x-r/2.0,y,r/2.0)),0,0),BaoNode(Circle().coords((x+r/2.0,y,r/2.0)),1,1)]
+        return [BaoNode(baopattern,Circle().coords((x-r/2.0,y,r/2.0)),0,0),BaoNode(baopattern,Circle().coords((x+r/2.0,y,r/2.0)),1,1)]
 
     @staticmethod
-    def fromsegment(segment):
+    def fromsegment(segment,baopattern=None):
         radius  = segment.length()/2.0
         center1 = segment.sample(0.0).add(segment.normal().scale(-radius))
         center2 = segment.sample(1.0).add(segment.normal().scale(-radius))
-        return [BaoNode(Circle(center1,radius),0,0),BaoNode(Circle(center2,radius),0,1)]
+        return [BaoNode(baopattern,Circle(center1,radius),0,0),BaoNode(baopattern,Circle(center2,radius),0,1)]
 
 
-def baonodes0():
-    return [BaoNode(Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(Circle().coords((2.0,0.0,1.0)),1,1)]
+def baonodes0(pattern=None):
+    return [BaoNode(pattern,Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(pattern,Circle().coords((2.0,0.0,1.0)),1,1)]
 
 class BaoStack:
     
-    def __init__(self,nodes):
+    def __init__(self,pattern,nodes):
+        self.mpattern       = pattern
         self.mnodes         = nodes
         self.mlastnode      = nodes[-1]
         self.mlastlastnode  = nodes[-2]
         self.mothernode     = nodes[-2]
         self.mlast3node     = None
         self.mprevdirection = 1.0
+        
+        for node in nodes:
+            node.pattern(pattern)
 
     def set(self,nodes,lastindex):
         self.mlastnode     = iff(self.mprevdirection > 0.0, nodes[lastindex], nodes[lastindex])
@@ -138,13 +150,11 @@ class BaoStack:
 
 
 class CirclePackingBao:
-    
 
-    @staticmethod
-    def computenextnode(quadtree,node2,node1,newr,index,iside):
+    def computenextnode(self,quadtree,node2,node1,newr,index,iside):
         newcircle = circles2tangentout(node2,node1,newr,iside)
         if not newcircle == None and not quadtree.iscolliding(newcircle):
-            newbaonode = BaoNode(newcircle,node2.colorindex() + 1,index + 1)
+            newbaonode = BaoNode(self,newcircle,node2.colorindex() + 1,index + 1)
             return newbaonode
         return None
 
@@ -179,39 +189,41 @@ class CirclePackingBao:
                 #puts("yield colliding baonode")
                 yield othernode
 
-    @staticmethod
-    def iter(boundaries,nodes,baopattern,niter,side=1.0):
-        stack       = BaoStack(nodes)
-        lastindex   = stack.lastindex()
-        quadtree    = QuadTree().adds( boundaries + nodes )
+    def iter(self,niter=1,boundaries=None,nodes=None,baopattern_=None,side=1.0,quadtree=None):
+        if not nodes == None:
+            self.mstack       = BaoStack(self,nodes)
+            self.mlastindex   = self.mstack.lastindex()
+            self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
+            self.mquadtree.adds( boundaries + nodes )
+            self.mbaopattern = baopattern_
         
         for iiter in range(niter):
             ifputs(iiter % 1000 == 0,"niter",iiter)
 
             # get current paramaters
-            (lastnode,othernode) = stack.lastseed()
-            newr                 = baopattern.next().radius()
+            (lastnode,othernode) = self.mstack.lastseed()
+            newr                 = self.mbaopattern.next().radius()
 
             # compute new node if possible
             newbaonode = None
 
-            for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
+            for othernode in CirclePackingBao.genothernodes(othernode,self.mquadtree,lastnode,self.mstack,newr):
                 # puts("genothernodes",lastnode,othernode)
-                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex(),side)
+                newbaonode = self.computenextnode(self.mquadtree,lastnode,othernode,newr,self.mstack.newindex(),side)
                 if not newbaonode == None:
                     break
 
             # update according to result
             if newbaonode == None:
                 lastnode.notfound(True)
-                lastindex = stack.rewindtofreenode(lastindex)
+                self.mlastindex = self.mstack.rewindtofreenode(self.mlastindex)
             else:
                 othernode.retouch(True)
-                quadtree.add(newbaonode)
-                baopattern.draw(newbaonode,newbaonode.colorindex())
-                lastindex = stack.stack(newbaonode,othernode)
+                self.mquadtree.add(newbaonode)
+                self.mbaopattern.draw(newbaonode,newbaonode.colorindex())
+                self.mlastindex = self.mstack.stack(newbaonode,othernode)
 
-            if lastindex < 1:
+            if self.mlastindex < 1:
                 break
             
-        return stack.nodes()
+        return self

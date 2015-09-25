@@ -29,7 +29,9 @@ class BaoPatternSwitch(BaoPattern):
         self.msidepattern = sidepattern
         return self
 
-
+#
+# To build Sides patterns
+#
 class BS:
     def __init__(self):
         self.mlist = []
@@ -49,48 +51,52 @@ class BS:
             self.push(item)
         return self
         
-
+#
+# PackingBao with switch bao direction specification
+#
 class CirclePackingBaoSwitch(CirclePackingBao):
     
-    @staticmethod
-    def iter(boundaries,nodes,baopattern,niter):
-        stack       = BaoStack(nodes)
-        lastindex   = stack.lastindex()
-        quadtree    = QuadTree().adds( boundaries + nodes )
-        lastside    = None
+    def iter(self,niter=1,boundaries=None,nodes=None,baopattern_=None,quadtree=None):
+        if not nodes == None:
+            self.mstack       = BaoStack(self,nodes)
+            self.mlastindex   = self.mstack.lastindex()
+            self.mlastside    = None
+            self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
+            self.mquadtree.adds( boundaries + nodes )
+            self.mbaopattern = baopattern_
 
         for iiter in range(niter):
             ifputs(iiter % 1000 == 0,"niter",iiter)
 
             # get current paramaters
-            newside              = baopattern.next().side()
-            if not (newside == lastside or lastside == None):
-                stack.switch()
-            (lastnode,othernode) = stack.lastseed()
-            newr                 = baopattern.radius()
+            newside              = self.mbaopattern.next().side()
+            if not (newside == self.mlastside or self.mlastside == None):
+                self.mstack.switch()
+            (lastnode,othernode) = self.mstack.lastseed()
+            newr                 = self.mbaopattern.radius()
 
             # compute new node if possible
             newbaonode = None
 
-            for othernode in CirclePackingBao.genothernodes(othernode,quadtree,lastnode,stack,newr):
+            for othernode in CirclePackingBao.genothernodes(othernode,self.mquadtree,lastnode,self.mstack,newr):
                 # puts("genothernodes",lastnode,othernode)
-                newbaonode = CirclePackingBao.computenextnode(quadtree,lastnode,othernode,newr,stack.newindex(),newside)
+                newbaonode = self.computenextnode(self.mquadtree,lastnode,othernode,newr,self.mstack.newindex(),newside)
                 if not newbaonode == None:
                     break
 
             # update according to result
             if newbaonode == None:
                 lastnode.notfound(True)
-                lastindex = stack.rewindtofreenode(lastindex)
+                self.mlastindex = self.mstack.rewindtofreenode(self.mlastindex)
             else:
                 othernode.retouch(True)
-                quadtree.add(newbaonode)
-                baopattern.draw(newbaonode,newbaonode.colorindex())
-                lastindex = stack.stack(newbaonode,othernode)
+                self.mquadtree.add(newbaonode)
+                self.mbaopattern.draw(newbaonode,newbaonode.colorindex())
+                self.mlastindex = self.mstack.stack(newbaonode,othernode)
 
-            if lastindex < 1:
+            if self.mlastindex < 1:
                 break
 
-            lastside = newside
+            self.mlastside = newside
             
-        return stack.nodes()
+        return self
