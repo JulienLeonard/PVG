@@ -34,6 +34,15 @@ class BaoPatternLayer(BaoPattern):
 #
 class CirclePackingBaoLayer(CirclePackingBao):
 
+    def __init__(self,boundaries=None,nodes=None,baopattern_=None,side0=None,quadtree=None):
+        self.mstack       = BaoStack(self,nodes)
+        self.mlastindex   = self.mstack.lastindex()
+        self.mclayer      = nodes[:]
+        self.mcside       = side0
+        self.mbaopattern  = baopattern_
+        self.mquadtree    = iff(quadtree == None, QuadTree(), quadtree)
+        self.mquadtree.adds( boundaries + nodes )
+
     def computenextnode(self,quadtree,node2,node1,newr,index,side):
         result = (None,False)
         newcircle = circles2tangentout(node2,node1,newr,side)
@@ -53,15 +62,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
         return result
 
     
-    def iter(self,niter=1,boundaries=None,nodes=None,baopattern_=None,side0=None,quadtree=None):
-        if not nodes == None:
-            self.mstack       = BaoStack(self,nodes)
-            self.mlastindex   = self.mstack.lastindex()
-            self.mclayer      = nodes[:]
-            self.mcside       = side0
-            self.mbaopattern  = baopattern_
-            self.mquadtree    = iff(quadtree == None, QuadTree(), quadtree)
-            self.mquadtree.adds( boundaries + nodes )
+    def iter(self,niter=1):
 
         for iiter in range(niter):
             ifputs(iiter != 0 and iiter % 1000 == 0,"niter",iiter)

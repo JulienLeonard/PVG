@@ -12,9 +12,11 @@ from circlepacking import *
 #
 class CirclePackingSequencer:
 
-    def __init__(self,packings = []):
-        self.mpackings = []
-        self.mquadtree = None
+    def __init__(self,packings = [],quadtree = None, boundaries=None):
+        self.mpackings = packings
+        self.mquadtree = iff(quadtree == None, QuadTree(), quadtree)
+        if not boundaries == None:
+            self.mquadtree.adds(boundaries)
 
     def add(self,packing):
         self.mpackings.append(packing)
@@ -25,15 +27,7 @@ class CirclePackingSequencer:
     def packings(self):
         return self.mpackings
 
-    def iter(self,niter=1,boundaries=None,quadtree=None):
-        if not quadtree == None:
-            self.mquadtree = None
-        else:
-            if self.mquadtree == None:
-                self.mquadtree = Quadtree()
-        if not boundaries == None:
-            self.mquadtree.adds(boundaries)
-            
+    def iter(self,niter=1):
         r = Roller(self.mpackings)
         for i in range(niter):
-            r.next().iter(niter=1,quadtree=self.mquadtree)
+            r.next().iter()

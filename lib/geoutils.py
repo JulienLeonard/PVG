@@ -215,6 +215,7 @@ class Segment:
         return self.sample(0.5)
 
     def sample(self,t):
+        t = R(0.0,1.0).trim(t)
         return Point(self.mrx.sample(t),self.mry.sample(t))
 
     def samples(self,npoints=None,abscissas=None):

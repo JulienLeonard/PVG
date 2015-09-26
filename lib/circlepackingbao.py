@@ -58,20 +58,21 @@ class BaoNode(Circle):
         return result
 
     @staticmethod
-    def fromcircle(circle,baopattern=None):
+    def fromcircle(circle,packing=None):
         x,y,r = circle.coords()
-        return [BaoNode(baopattern,Circle().coords((x-r/2.0,y,r/2.0)),0,0),BaoNode(baopattern,Circle().coords((x+r/2.0,y,r/2.0)),1,1)]
+        return [BaoNode(packing,Circle().coords((x-r/2.0,y,r/2.0)),0,0),BaoNode(packing,Circle().coords((x+r/2.0,y,r/2.0)),1,1)]
 
     @staticmethod
-    def fromsegment(segment,baopattern=None):
-        radius  = segment.length()/2.0
-        center1 = segment.sample(0.0).add(segment.normal().scale(-radius))
-        center2 = segment.sample(1.0).add(segment.normal().scale(-radius))
-        return [BaoNode(baopattern,Circle(center1,radius),0,0),BaoNode(baopattern,Circle(center2,radius),0,1)]
+    def fromsegment(segment,packing=None,radius=None):
+        radius  = iff(radius == None, segment.length()/2.0, radius)
+        offset = radius / (segment.length())
+        center1 = segment.sample(0.5 - offset).add(segment.normal().scale(-radius))
+        center2 = segment.sample(0.5 + offset).add(segment.normal().scale(-radius))
+        return [BaoNode(packing,Circle(center1,radius),0,0),BaoNode(packing,Circle(center2,radius),0,1)]
 
 
-def baonodes0(pattern=None):
-    return [BaoNode(pattern,Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(pattern,Circle().coords((2.0,0.0,1.0)),1,1)]
+def baonodes0(packing=None):
+    return [BaoNode(packing,Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(packing,Circle().coords((2.0,0.0,1.0)),1,1)]
 
 class BaoStack:
     
@@ -151,6 +152,15 @@ class BaoStack:
 
 class CirclePackingBao:
 
+    def __init__(self,boundaries=None,nodes=None,baopattern_=None,side=1.0,quadtree=None):
+        self.mstack       = BaoStack(self,nodes)
+        self.mlastindex   = self.mstack.lastindex()
+        self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
+        self.mbaopattern  = baopattern_
+        self.mside        = side
+        self.mquadtree.adds( boundaries + nodes )
+        
+
     def computenextnode(self,quadtree,node2,node1,newr,index,iside):
         newcircle = circles2tangentout(node2,node1,newr,iside)
         if not newcircle == None and not quadtree.iscolliding(newcircle):
@@ -189,13 +199,7 @@ class CirclePackingBao:
                 #puts("yield colliding baonode")
                 yield othernode
 
-    def iter(self,niter=1,boundaries=None,nodes=None,baopattern_=None,side=1.0,quadtree=None):
-        if not nodes == None:
-            self.mstack       = BaoStack(self,nodes)
-            self.mlastindex   = self.mstack.lastindex()
-            self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
-            self.mquadtree.adds( boundaries + nodes )
-            self.mbaopattern = baopattern_
+    def iter(self,niter=1):
         
         for iiter in range(niter):
             ifputs(iiter % 1000 == 0,"niter",iiter)
@@ -209,7 +213,7 @@ class CirclePackingBao:
 
             for othernode in CirclePackingBao.genothernodes(othernode,self.mquadtree,lastnode,self.mstack,newr):
                 # puts("genothernodes",lastnode,othernode)
-                newbaonode = self.computenextnode(self.mquadtree,lastnode,othernode,newr,self.mstack.newindex(),side)
+                newbaonode = self.computenextnode(self.mquadtree,lastnode,othernode,newr,self.mstack.newindex(),self.mside)
                 if not newbaonode == None:
                     break
 

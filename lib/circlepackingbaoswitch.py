@@ -55,15 +55,16 @@ class BS:
 # PackingBao with switch bao direction specification
 #
 class CirclePackingBaoSwitch(CirclePackingBao):
+
+    def __init__(self,boundaries=None,nodes=None,baopattern_=None,quadtree=None):
+        self.mstack       = BaoStack(self,nodes)
+        self.mlastindex   = self.mstack.lastindex()
+        self.mlastside    = None
+        self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
+        self.mquadtree.adds( boundaries + nodes )
+        self.mbaopattern = baopattern_
     
-    def iter(self,niter=1,boundaries=None,nodes=None,baopattern_=None,quadtree=None):
-        if not nodes == None:
-            self.mstack       = BaoStack(self,nodes)
-            self.mlastindex   = self.mstack.lastindex()
-            self.mlastside    = None
-            self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
-            self.mquadtree.adds( boundaries + nodes )
-            self.mbaopattern = baopattern_
+    def iter(self,niter=1):
 
         for iiter in range(niter):
             ifputs(iiter % 1000 == 0,"niter",iiter)
