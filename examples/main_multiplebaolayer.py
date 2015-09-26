@@ -16,7 +16,7 @@ def fdraw(node,index,style):
 
 poly = Circle().scale(100.0).polygon(30).close()
 canvas.draw(poly,Color.black())
-boundaries = poly.segments()
+boundaries  = poly.segments()
 baopattern0 = BaoPatternLayer().fdraw(fdraw).fdrawlayer(fdrawlayer).radiuspattern(R(1.0,2.0).samples(20)).colorpattern([Color.hue2color(float(index)/20.0) for index in range(20)])
 inodes      = BaoNode.fromcircle(Circle(Point(0.0,95.0),1.0))
 # baopattern = BaoPattern().fdraw(fdraw).radiuspattern(R(5.0,5.0).samples(20)).colorpattern([Color.hue2color(float(index)/20.0) for index in range(20)])
@@ -25,10 +25,10 @@ inodes      = BaoNode.fromcircle(Circle(Point(0.0,95.0),1.0))
 
 # packing = CirclePackingBao.iter(boundaries,inodes,baopattern,200,-1.0)
 quadtree = QuadTree()
-pack = CirclePackingBaoLayer().iter(1020,boundaries,inodes,copy.deepcopy(baopattern0),-1.0,quadtree)
+pack = CirclePackingBaoLayer(boundaries,inodes,copy.deepcopy(baopattern0),-1.0,quadtree).iter(1020)
 
 
-subpackings = [CirclePackingBaoLayer().iter(1,boundaries,pack.mstack.nodes()[i:i+2],copy.deepcopy(baopattern0),-1.0,quadtree) for i in [-9,-34]]
+subpackings = [CirclePackingBaoLayer(boundaries,pack.mstack.nodes()[i:i+2],copy.deepcopy(baopattern0),-1.0,quadtree) for i in [-9,-34]]
 
 for i in range(1000):
     for subpacking in subpackings:

@@ -13,6 +13,6 @@ inodes     = baonodes0()
 
 canvas.draw(inodes)
 
-packing = CirclePackingBao().iter(1000,boundaries,inodes,baopattern)
+packing = CirclePackingBao(boundaries,inodes,baopattern).iter(1000)
 
 canvas.save("circlepackingbao.png")

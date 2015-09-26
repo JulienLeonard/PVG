@@ -23,6 +23,6 @@ inodes     = BaoNode.fromcircle(Circle(Point(0.0,95.0),10.0))
 # canvas.draw(inodes)
 
 # packing = CirclePackingBao.iter(boundaries,inodes,baopattern,200,-1.0)
-packing = CirclePackingBaoLayer().iter(10000,boundaries,inodes,baopattern,-1.0)
+packing = CirclePackingBaoLayer(boundaries,inodes,baopattern,-1.0).iter(10000)
 
 canvas.save("circlepackingbaolayer.png")

@@ -14,6 +14,6 @@ inodes     = baonodes0()
 
 canvas.draw(inodes)
 
-packing = CirclePackingBaoSwitch().iter(5000,boundaries,inodes,baopattern)
+packing = CirclePackingBaoSwitch(boundaries,inodes,baopattern).iter(5000)
 
 canvas.save("circlepackingbaoswitch.png")
