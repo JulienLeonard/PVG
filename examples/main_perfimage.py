@@ -1,11 +1,4 @@
-import sys
-sys.path.insert(0, './../lib')
-
-from utils      import *
-from canvas     import *
-from SVGparser  import *
-from silhouette import *
-from color      import *
+from PVG import *
 
 render = Canvas("main_perfimage.png").size(18000).render()
 

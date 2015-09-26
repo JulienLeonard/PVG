@@ -1,8 +1,4 @@
-import sys
-sys.path.insert(0, './../lib')
-
-from renderCairo import *
-from color       import *
+from PVG import *
 
 outputfilepath = defaultoutputdir() + "/" + "main_rendCairo.png"
 render = RenderCairo(Viewport(Point(0.0,0.0),5.0),ImageDim(1000,1000),outputfilepath, Color.red())

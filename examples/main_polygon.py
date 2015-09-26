@@ -1,10 +1,4 @@
-# some_file.py
-import sys
-sys.path.insert(0, './../lib')
-
-from canvas    import *
-from polygon   import *
-from color     import *
+from PVG import *
 
 render = Canvas("main_polygon.png").render()
 

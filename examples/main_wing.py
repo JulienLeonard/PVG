@@ -1,10 +1,4 @@
-import sys
-sys.path.insert(0, './../lib')
-
-from utils      import *
-from canvas     import *
-from SVGparser  import *
-from color      import *
+from PVG import *
 
 render = Canvas("main_wing.png").render()
 
