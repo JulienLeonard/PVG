@@ -25,9 +25,13 @@ class BaoPatternLayer(BaoPattern):
         if not self.fdraw() == None:
             self.fdraw()(newnode,index,self.color(index))
 
-    def drawlayer(self,nodes):
+    def drawlayer(self,nodes,ilayer):
         if not self.fdrawlayer() == None:
-            self.fdrawlayer()(nodes)
+            self.fdrawlayer()(nodes,ilayer)
+
+#
+# TODO: create layerstack to take care of layers
+#
 
 #
 # PackingBao with direction changed when colliding, defining layers of nodes
@@ -38,6 +42,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
         self.mstack       = BaoStack(self,nodes)
         self.mlastindex   = self.mstack.lastindex()
         self.mclayer      = nodes[:]
+        self.mnlayer      = 0
         self.mcside       = side0
         self.mbaopattern  = baopattern_
         self.mquadtree    = iff(quadtree == None, QuadTree(), quadtree)
@@ -87,8 +92,9 @@ class CirclePackingBaoLayer(CirclePackingBao):
 
             if foreigncollision and len(self.mclayer) > 0:
                 # puts("foreigncollision")
-                self.mbaopattern.drawlayer(self.mclayer)
-                self.mclayer = []
+                self.mbaopattern.drawlayer(self.mclayer,self.mnlayer)
+                self.mclayer  = []
+                self.mnlayer += 1
                 self.mstack.switch()
                 (lastnode,othernode) = self.mstack.lastseed()
                 self.mcside = -self.mcside
