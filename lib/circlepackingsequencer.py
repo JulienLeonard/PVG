@@ -28,9 +28,9 @@ class CirclePackingSequencer:
         return self.mpackings
 
     def iter(self,niter=1):
-        r = Roller(self.mpackings)
         for i in range(niter):
-            r.next().iter()
+            for packing in self.mpackings:
+                packing.iter()
 
     def iterlayer(self,nlayer=1,maxiterperlayer=1000):
         r = Roller(self.mpackings)
