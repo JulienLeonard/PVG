@@ -32,6 +32,32 @@ class BaoPatternLayer(BaoPattern):
 #
 # TODO: create layerstack to take care of layers
 #
+class BaoStackLayer(BaoStack):
+
+    def __init__(self,nodes):
+        super(BaoStackLayer,self).__init__(nodes)
+        self.mlayers = []
+        self.mclayer = nodes[:]
+
+    def stacklayer(self):
+        self.mlayers.append(self.mclayer)
+        self.mclayer = []
+
+    def lastlayer(self):
+        return self.mlayers[-1]
+
+    def layers(self):
+        return self.mlayers
+
+    def nlayers(self):
+        return len(self.mlayers)
+
+    def stack(self,newnode,othernode):
+        self.mclayer.append(newnode)
+        return super(BaoStackLayer,self).stack(newnode,othernode)
+
+    def currentLayerEmpty(self):
+        return (len(self.mclayer) == 0)
 
 #
 # PackingBao with direction changed when colliding, defining layers of nodes
@@ -39,14 +65,18 @@ class BaoPatternLayer(BaoPattern):
 class CirclePackingBaoLayer(CirclePackingBao):
 
     def __init__(self,boundaries=None,nodes=None,baopattern_=None,side0=None,quadtree=None):
-        self.mstack       = BaoStack(self,nodes)
+        self.mstack       = BaoStackLayer(nodes)
         self.mlastindex   = self.mstack.lastindex()
-        self.mclayer      = nodes[:]
-        self.mnlayer      = 0
         self.mcside       = side0
         self.mbaopattern  = baopattern_
         self.mquadtree    = iff(quadtree == None, QuadTree(), quadtree)
         self.mquadtree.adds( boundaries + nodes )
+        for node in nodes:
+            node.packing(self)
+        self.miterperlayer = 0
+
+    def niterperlayer(self):
+        return self.miterperlayer
 
     def computenextnode(self,quadtree,node2,node1,newr,index,side):
         result = (None,False)
@@ -60,16 +90,17 @@ class CirclePackingBaoLayer(CirclePackingBao):
             else:
                 endlayer = False
                 for colliding in collidings:
-                    if not isinstance(colliding,BaoNode) or not colliding.pattern() == self:
+                    if not isinstance(colliding,BaoNode) or not colliding.packing() == self:
                         endlayer = True
                         break
                 result = (None,endlayer)
         return result
 
-    
     def iter(self,niter=1):
 
         for iiter in range(niter):
+            self.miterperlayer += 1
+
             ifputs(iiter != 0 and iiter % 1000 == 0,"niter",iiter)
 
             # get current paramaters
@@ -90,11 +121,11 @@ class CirclePackingBaoLayer(CirclePackingBao):
                     if foreigncollision:
                         break
 
-            if foreigncollision and len(self.mclayer) > 0:
+            if foreigncollision and not self.mstack.currentLayerEmpty():
                 # puts("foreigncollision")
-                self.mbaopattern.drawlayer(self.mclayer,self.mnlayer)
-                self.mclayer  = []
-                self.mnlayer += 1
+                self.mstack.stacklayer()
+                self.mbaopattern.drawlayer(self.mstack.lastlayer(),self.mstack.nlayers())
+                self.miterperlayer = 0
                 self.mstack.switch()
                 (lastnode,othernode) = self.mstack.lastseed()
                 self.mcside = -self.mcside
@@ -115,7 +146,6 @@ class CirclePackingBaoLayer(CirclePackingBao):
                 # puts("found newbao node",newbaonode)
                 othernode.retouch(True)
                 self.mquadtree.add(newbaonode)
-                self.mclayer.append(newbaonode)
                 self.mbaopattern.draw(newbaonode,newbaonode.colorindex())
                 self.mlastindex = self.mstack.stack(newbaonode,othernode)
 
