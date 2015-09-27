@@ -31,3 +31,14 @@ class CirclePackingSequencer:
         r = Roller(self.mpackings)
         for i in range(niter):
             r.next().iter()
+
+    def iterlayer(self,nlayer=1,maxiterperlayer=1000):
+        r = Roller(self.mpackings)
+        packstops = []
+        while len(packstops) < len(self.mpackings):
+            packing = r.next()
+            if packing.mstack.nlayers() <= nlayer and packing.niterperlayer() < maxiterperlayer:
+                packing.iter()
+            else:
+                if not packing in packstops:
+                    packstops.append(packing)
