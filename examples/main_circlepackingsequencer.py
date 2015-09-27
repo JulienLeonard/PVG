@@ -2,7 +2,7 @@ from PVG     import *
 from PVGPACK import *
 import copy
 
-canvas = Canvas().background(Color.black())
+canvas = Canvas().margin(1.0).background(Color.black())
 
 quadtree   = QuadTree()
 poly       = Circle().scale(20).polygon(5).close()
