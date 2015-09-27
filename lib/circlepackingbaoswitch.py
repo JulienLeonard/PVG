@@ -57,12 +57,15 @@ class BS:
 class CirclePackingBaoSwitch(CirclePackingBao):
 
     def __init__(self,boundaries=None,nodes=None,baopattern_=None,quadtree=None):
-        self.mstack       = BaoStack(self,nodes)
+        self.mstack       = BaoStack(nodes)
         self.mlastindex   = self.mstack.lastindex()
         self.mlastside    = None
         self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
         self.mquadtree.adds( boundaries + nodes )
         self.mbaopattern = baopattern_
+        for node in nodes:
+            node.packing(self)
+        
     
     def iter(self,niter=1):
 

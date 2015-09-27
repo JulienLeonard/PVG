@@ -8,8 +8,8 @@ from circlepacking import *
 
 class BaoNode(Circle):
 
-    def __init__(self,pattern,circle,colorindex,index):
-        self.mpattern     = pattern
+    def __init__(self,packing,circle,colorindex,index):
+        self.mpacking     = packing
         self.mcenter      = circle.center()
         self.mradius      = circle.radius()
         self.mretouch     = False
@@ -23,11 +23,11 @@ class BaoNode(Circle):
     def index(self):
         return self.mindex
 
-    def pattern(self,v = None):
+    def packing(self,v = None):
         if v == None:
-            return self.mpattern
+            return self.mpacking
         else:
-            self.mpattern = v
+            self.mpacking = v
             return self
 
     def retouch(self,v = None):
@@ -74,10 +74,9 @@ class BaoNode(Circle):
 def baonodes0(packing=None):
     return [BaoNode(packing,Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(packing,Circle().coords((2.0,0.0,1.0)),1,1)]
 
-class BaoStack:
+class BaoStack(object):
     
-    def __init__(self,pattern,nodes):
-        self.mpattern       = pattern
+    def __init__(self,nodes):
         self.mnodes         = nodes
         self.mlastnode      = nodes[-1]
         self.mlastlastnode  = nodes[-2]
@@ -85,9 +84,6 @@ class BaoStack:
         self.mlast3node     = None
         self.mprevdirection = 1.0
         
-        for node in nodes:
-            node.pattern(pattern)
-
     def set(self,nodes,lastindex):
         self.mlastnode     = iff(self.mprevdirection > 0.0, nodes[lastindex], nodes[lastindex])
         self.mlastlastnode = iff(self.mprevdirection > 0.0, nodes[lastindex-1], nodes[lastindex+1])
@@ -153,13 +149,16 @@ class BaoStack:
 class CirclePackingBao:
 
     def __init__(self,boundaries=None,nodes=None,baopattern_=None,side=1.0,quadtree=None):
-        self.mstack       = BaoStack(self,nodes)
+        self.mstack       = BaoStack(nodes)
         self.mlastindex   = self.mstack.lastindex()
         self.mquadtree    = iff(quadtree==None,QuadTree(),quadtree)
         self.mbaopattern  = baopattern_
         self.mside        = side
         self.mquadtree.adds( boundaries + nodes )
-        
+        for node in nodes:
+            node.packing(self)
+
+
 
     def computenextnode(self,quadtree,node2,node1,newr,index,iside):
         newcircle = circles2tangentout(node2,node1,newr,iside)
