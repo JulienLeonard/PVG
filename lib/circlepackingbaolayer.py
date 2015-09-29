@@ -8,11 +8,38 @@ from baopattern             import *
 #
 class BaoPatternLayer(BaoPattern):
     def __init__(self):
-        self.mradiuspattern = [1.0]
-        self.mcolorpattern  = [Color.black()]
-        self.mindex         = 0
-        self.mfdraw         = None
-        self.mfdrawlayer    = None
+        self.mradiuspattern      = [1.0]
+        self.mcolorpattern       = [Color.black()]
+        self.mindex              = 0
+        self.mindexlayer         = 0
+        self.mfdraw              = None
+        self.mfdrawlayer         = None
+        self.mradiuspatternlayer = None
+        self.mcolorpatternlayer  = None
+
+    def nextlayer(self):
+        self.mindexlayer += 1
+        return self
+
+    def radiuspatternlayer(self,radiuspattern):
+        self.mradiuspatternlayer = radiuspattern
+        return self
+
+    def colorpatternlayer(self,colorpattern):
+        self.mcolorpatternlayer = colorpattern
+        return self
+
+    def radius(self):
+        if self.mradiuspatternlayer == None:
+            return  super(BaoPatternLayer,self).radius()
+        else:
+            return lcircular(self.mradiuspatternlayer,self.mindexlayer)
+
+    def colorlayer(self,index=None):
+        if index == None:
+            index = self.mindexlayer
+        return lcircular(self.mcolorpatternlayer,index)
+
 
     def fdrawlayer(self, v = None):
         if v == None:
@@ -27,7 +54,7 @@ class BaoPatternLayer(BaoPattern):
 
     def drawlayer(self,nodes,ilayer):
         if not self.fdrawlayer() == None:
-            self.fdrawlayer()(nodes,ilayer)
+            self.fdrawlayer()(nodes,ilayer,self.colorlayer(ilayer))
 
 #
 # TODO: create layerstack to take care of layers
@@ -125,6 +152,7 @@ class CirclePackingBaoLayer(CirclePackingBao):
                 # puts("foreigncollision")
                 self.mstack.stacklayer()
                 self.mbaopattern.drawlayer(self.mstack.lastlayer(),self.mstack.nlayers())
+                self.mbaopattern.nextlayer()
                 self.miterperlayer = 0
                 self.mstack.switch()
                 (lastnode,othernode) = self.mstack.lastseed()
