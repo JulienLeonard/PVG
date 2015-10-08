@@ -70,9 +70,9 @@ class BaoNode(Circle):
         center2 = segment.sample(0.5 + offset).add(segment.normal().scale(-radius))
         return [BaoNode(packing,Circle(center1,radius),0,0),BaoNode(packing,Circle(center2,radius),0,1)]
 
-
-def baonodes0(packing=None):
-    return [BaoNode(packing,Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(packing,Circle().coords((2.0,0.0,1.0)),1,1)]
+    @staticmethod
+    def baonodes0(packing=None):
+        return [BaoNode(packing,Circle().coords((0.0,0.0,1.0)),0,0),BaoNode(packing,Circle().coords((2.0,0.0,1.0)),1,1)]
 
 class BaoStack(object):
     
@@ -136,7 +136,7 @@ class BaoStack(object):
         return None
 
     def nextothernode(self,othernode):
-        return self.node(othernode.index() + 1)
+        return self.node(iff(self.mprevdirection > 0.0, othernode.index() + 1, othernode.index() - 1))
 
     def switch(self):
         self.mlastnode      = self.mlastnode
@@ -157,8 +157,6 @@ class CirclePackingBao:
         self.mquadtree.adds( boundaries + nodes )
         for node in nodes:
             node.packing(self)
-
-
 
     def computenextnode(self,quadtree,node2,node1,newr,index,iside):
         newcircle = circles2tangentout(node2,node1,newr,iside)

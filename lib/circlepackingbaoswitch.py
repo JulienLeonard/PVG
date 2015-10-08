@@ -18,9 +18,9 @@ class BaoPatternSwitch(BaoPattern):
     #
     # return (Side,RatioRadius,Color)
     #
-    def next(self):
-        self.mindex += 1
-        return self
+    #def next(self):
+    #    self.mindex += 1
+    #    return self
 
     def side(self):
         return lcircular(self.msidepattern,self.mindex)    
