@@ -547,7 +547,7 @@ class Polygon:
     # WARNING: only works for convex polygons
     #
     @staticmethod
-    def contain(poly1,poly2,strict):
+    def contain(poly1,poly2):
         for p in poly2.points():
             if not poly1.containpoint(p):
                 return False

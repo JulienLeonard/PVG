@@ -354,7 +354,7 @@ class BBox:
         return Viewport(self.center(), self.radius() * ratio)
 
     def resize(self,factor):
-        xmin,ymin,xmax,ymax = self.coords()
+        # xmin,ymin,xmax,ymax = self.coords()
         newwidth  = self.xsize() * factor
         newheight = self.ysize() * factor
         xcenter,ycenter = self.center().coords()
