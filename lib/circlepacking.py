@@ -4,6 +4,7 @@ from geoutils  import *
 from tangentutils import *
 from quadtree import *
 from circleadj import *
+from seed      import *
 
 class CircleNode(Circle):
     def __init__(self,center = None, radius = 1.0):
@@ -263,26 +264,26 @@ class CirclePacking:
     def compute(self,seeds,quadtree,nitermax,minsize=0.0001):
         self.madj = CircleAdj()
         for seed in seeds:
-            c1,c2,side = seed
+            # c1,c2,side = seed
             # puts("c1",c1,"c2",c2)
-            self.madj.addcircleadj(c1,c2)
+            self.madj.addcircleadj(seed.c1(),seed.c2())
         front = seeds[:]
         niter = 0
         front = self.mfrontorderf(front)
         while len(front):
             nfront, front = self.mnextadjf(front)
-            c1,c2,side = nfront
-            radius = self.mradiusf(c1[-1],c2[-1])
+            c1,c2,side = nfront.mdef
+            radius = self.mradiusf(c1.radius(),c2.radius())
             newcircle = circles2tangent(c1,"OUT",c2,"OUT",radius, side)
             #print "newcircle",newcircle
-            if not quadtree.iscolliding(newcircle) and newcircle[-1] > minsize:
+            if not quadtree.iscolliding(newcircle) and newcircle.radius() > minsize:
                 #print "add circle"
                 self.madj.addcircleadj(c1,newcircle)
                 self.madj.addcircleadj(c2,newcircle)
                 quadtree.add(newcircle)
                 for side in self.mnextsidesf():
-                    front = self.minsertnewf(front,[c1,newcircle,side])
-                    front = self.minsertnewf(front,[c2,newcircle,side])
+                    front = self.minsertnewf(front,Seed2().seeddef([c1,newcircle,side]))
+                    front = self.minsertnewf(front,Seed2().seeddef([c2,newcircle,side]))
             niter += 1
             if niter%1000 == 0:
                 puts("niter",niter)

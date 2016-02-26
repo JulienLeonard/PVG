@@ -77,8 +77,13 @@ class CircleAdj:
             return []
         return self.mcircles[circle]
 
-    def circles(self):
-        return self.mcircles["list"][:]
+    def circles(self,value = None):
+        if value == None:
+            return self.mcircles["list"][:]
+        else:
+            for (c1,c2) in pairs(value):
+                self.addcircleadj(c1,c2)
+            return self
 
     def completeadjacency(self,added,candidates):
         for adj in candidates:
