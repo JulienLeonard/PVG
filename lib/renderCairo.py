@@ -26,6 +26,15 @@ class RenderCairo(Render):
     def endpicture(self):
         self.msurface.write_to_png (self.outputfilepath())
 
+    def drawcirclepicture(self,circle,colorc):
+        ctx = self.mctx
+        
+        ctx.arc(circle.x(),circle.y(),circle.r(),0.0, 2.0 * 3.14159)
+
+        # then fill with color
+        ctx.set_source_rgba(colorc.r(), colorc.g(),colorc.b(),colorc.a())
+        ctx.fill()
+
     def drawpolygonpicture(self,polygon,colorc):
         ctx = self.mctx
 
@@ -47,15 +56,27 @@ class RenderCenter(RenderCairo):
         self.mimagedim  = imagedim
         self.mbackcolor = backcolor
 
+    def drawcircle( self, circle, colorc = Color.black()):
+        if not circle == None:
+            self.mdrawings.append(Drawing(circle,colorc))
+
+
     def drawpolygon( self, polygon, colorc = Color.black()):
         if not polygon == None:
             self.mdrawings.append(Drawing(polygon,colorc))
 
     def end(self):
+        puts("RenderCenter(RenderCairo end start")
         self.initpicture(self.mimagedim,self.mbackcolor)
         self.setviewport(self.viewport())
+        puts("RenderCenter(RenderCairo start drawing")
         for drawing in self.mdrawings:
-            self.drawpolygonpicture(drawing.shape(),drawing.style())
+            shape = drawing.shape()
+            if isinstance(shape,Polygon):
+                self.drawpolygonpicture(shape,drawing.style())
+            if isinstance(shape,Circle):
+                self.drawcirclepicture(shape,drawing.style())
+                
         self.endpicture()
 
     def viewport(self):
