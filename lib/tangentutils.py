@@ -3,7 +3,7 @@ from geoutils import *
 from quadtree import *
 
 def nextadjcircle(circle, angle, radius):
-    newcenter = circle.center().add(V0.rotate(angle).scale(r+radius))
+    newcenter = circle.center().add(Vector.VX0().rotate(angle).scale(circle.radius() + radius))
     return Circle(newcenter,radius)
 
 def seqcircle(seed,radiuss,angles):

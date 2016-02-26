@@ -34,10 +34,10 @@ class R:
     def sample(self,t):
         if t < 0.0 or t > 1.0:
             return None
-        if t < 0.0:
-            t = 0.0
-        if t > 1.0:
-            t = 1.0
+        # if t < 0.0:
+        #     t = 0.0
+        # if t > 1.0:
+        #     t = 1.0
         return sample((self.mv1,self.mv2),t)
 
     def samples(self,nsamples=None,abscissas=None):
