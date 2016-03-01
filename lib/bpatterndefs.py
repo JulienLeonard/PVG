@@ -230,8 +230,13 @@ class PlugSet:
         return self.mplugs
 
     @staticmethod
-    def plug2s(pattern,sides=[-1,1]):
-        return PlugSet(pattern,[BPlug2(pattern,None,c1,c2,side) for side in sides for circlestring in pattern.circlestrings() for (c1,c2) in pairs(circlestring)])
+    def plug2s(sides=[-1,1]):
+        def result(pattern):
+            return PlugSet(pattern,[BPlug2(pattern,None,c1,c2,side) for side in sides for circlestring in pattern.circlestrings() for (c1,c2) in pairs(circlestring)])
+        return result
+
+    #def plug2s(pattern,sides=[-1,1]):
+    #    return PlugSet(pattern,[BPlug2(pattern,None,c1,c2,side) for side in sides for circlestring in pattern.circlestrings() for (c1,c2) in pairs(circlestring)])
 
     @staticmethod
     def singleext(pattern):
@@ -477,14 +482,13 @@ class BPattern:
 
 class RootPattern(BPattern):
 
-    def __init__(self,circlepairs=[(Circle(Point(-1.0,0.0),1.0),Circle(Point(1.0,0.0),1.0))], sides = [-1.0,1.0]):
+    def __init__(self,circlepairs=[(Circle(Point(-1.0,0.0),1.0),Circle(Point(1.0,0.0),1.0))]):
         self.mpatterndef      = None
         self.mparentjunction  = None
         self.mjunctiongen     = None
         self.madj             = CircleAdj()
         for (c1,c2) in circlepairs:
             self.madj.addcircleadj(c1,c2)
-        self.msides = sides
         self.mlastangle = None
 
     def junctiongen(self,value = None):
@@ -627,6 +631,9 @@ class BPatternDef:
         newradius = junctiondef.radius(plug)
         # TODO: if radius absolute, need to overwrite newradius
         newcircle = plug.newcircle(newradius)
+        if newcircle == None:
+            return None
+
         dangle    = plug.anglenewcircle(newcircle)
 
         result =  None
