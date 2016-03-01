@@ -88,6 +88,13 @@ class Circle:
     def polygon(self,npoints=30):
         return Polygon(self.samples(npoints=npoints+1)[:-1])
 
+    def circlestring(self,ncircles = 10):
+        # ncircles = int(self.polygon(100).length()/circlesize)
+        points   = self.polygon(100).close().samples(ncircles)
+        points = points + [points[0]]
+        result = [Circle.fromDiameter(p1,p2) for (p1,p2) in pairs(points)]
+        return result
+
     @staticmethod
     def fromcoords(coords):
         if len(coords) < 3:
@@ -100,7 +107,12 @@ class Circle:
         center = segment.sample(abscissa).add(segment.normal().scale(size))
         return Circle(center,radius)
 
-    
+    @staticmethod
+    def fromDiameter(p1,p2):
+        ccenter = pmiddle([p1,p2])
+        r = dist(p1,p2)/2.0
+        return Circle(ccenter,r)
+
 
 Circle.C0 = Circle()
 
