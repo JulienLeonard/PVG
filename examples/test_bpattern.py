@@ -21,9 +21,12 @@ patterndef.junctiongen(juncgen)
 roots = [RootPattern().junctiongen(juncgen)]
 
 puts("starting bworld")
+
 bworld  = BWorld(canvas,quadtree).initwithpatterns(roots)
 
-bworld.compute(50000,0.01).draw(canvas)
+import cProfile
+cProfile.run('bworld.compute(10000,0.01).draw(canvas)')
+
 
 # render.end()
 canvas.save("test_bpattern.png")

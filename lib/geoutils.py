@@ -319,13 +319,14 @@ class BBox:
         self.mxmax = xmax
         self.mymin = ymin
         self.mymax = ymax
+        self.mcoords = (self.mxmin,self.mymin,self.mxmax,self.mymax)
         
     @staticmethod
     def fromCenterSize(ccenter,csize):
         return BBox(ccenter.x() - csize/2.0,ccenter.y() - csize/2.0, ccenter.x() + csize/2.0, ccenter.y() + csize/2.0)
 
     def coords(self):
-        return (self.mxmin,self.mymin,self.mxmax,self.mymax)
+        return self.mcoords
 
     def center(self):
         return Point((self.mxmin + self.mxmax)/2.0, (self.mymin + self.mymax)/2.0)
@@ -392,9 +393,19 @@ class BBox:
                 Point(center.x()+size/2.0,center.y()-size/2.0)]
 
     def intersect(self,obbox):
-        (xmin0,ymin0,xmax0,ymax0) = self.coords()
-        (xmin,ymin,xmax,ymax)     = obbox.coords()
+        xmin0,ymin0,xmax0,ymax0 = self.mcoords
+        xmin,ymin,xmax,ymax     = obbox.mcoords
         return (xmin <= xmax0 and xmax >= xmin0 and ymin <= ymax0 and ymax >= ymin0)
+        # if obbox.mcoords[0] > self.mcoords[2]:
+        #     return False
+        # if obbox.mcoords[2] < self.mcoords[0]:
+        #     return False
+        # if obbox.mcoords[1] > self.mcoords[3]:
+        #     return False
+        # if obbox.mcoords[3] < self.mcoords[1]:
+        #     return False
+        # return True
+        
 
     def split4(self):
         (xmin,ymin,xmax,ymax) = self.coords()

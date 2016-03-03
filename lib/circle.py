@@ -9,6 +9,9 @@ class Circle:
     def __init__(self,center=Point(0.0,0.0),radius=1.0):
         self.mcenter = center
         self.mradius = radius
+        self.mcoords = (self.mcenter.x(),self.mcenter.y(),radius)
+        x,y,r = self.mcoords
+        self.mbbox   = BBox(x-r,y-r,x+r,y+r)
 
     def coords(self,v=None):
         if not v == None:
@@ -16,11 +19,16 @@ class Circle:
             self.mradius = v[2]
             return self
         else:
-            return (self.x(),self.y(),self.radius())
+            # return (self.x(),self.y(),self.radius())
+            return self.mcoords
 
     def center(self,v=None):
         if not v == None:
             self.mcenter = v
+            self.mcoords[0] = mcenter.x()
+            self.mcoords[1] = mcenter.y()
+            x,y,r = self.mcoords
+            self.mbbox      = BBox(x-r,y-r,x+r,y+r)
             return self
         else:
             return self.mcenter
@@ -28,6 +36,9 @@ class Circle:
     def radius(self,v=None):
         if not v == None:
             self.mradius = v
+            self.mcoords[2] = v
+            x,y,r = self.mcoords
+            self.mbbox      = BBox(x-r,y-r,x+r,y+r)
             return self
         else:
             return self.mradius
@@ -62,17 +73,16 @@ class Circle:
         return self.samples(npoints,abscissas)
 
     def viewbox(self):
-        x,y,r = self.coords()
-        return BBox(x-r,y-r,x+r,y+r)
+        return self.mbbox
 
     def bbox(self):
-        return self.viewbox()
+        return self.mbbox
 
     def x(self):
-        return self.center().x()
+        return self.mcoords[0]
 
     def y(self):
-        return self.center().y()
+        return self.mcoords[1]
 
     def point(self,abscissa):
         return self.sample(abscissa)
@@ -128,16 +138,23 @@ def cscale(circle,ratio):
 # check if 2 circles intersect, given an error 
 #
 def circleintersect(c1,c2,errorsize = 0.0000001):
-    cc1 = c1.center()
-    cc2 = c2.center()
-    r1  = c1.radius()
-    r2  = c2.radius()
+    #cc1 = c1.center()
+    #cc2 = c2.center()
+    x1,y1,r1 = c1.mcoords
+    x2,y2,r2 = c2.mcoords
+    
+    #r1  = c1.radius()
+    #r2  = c2.radius()
 
-    v2 = dist2(cc1,cc2)
-    r2 = (r1+r2)*(r1+r2)
+    #v2 = dist2(cc1,cc2)
+    x12 = (x1 - x2)
+    y12 = (y1 - y2)
+    v2 = x12*x12 + y12*y12
+    r12 = r1+r2
+    r22 = r12*r12
     # print "differror",-0.00001
     result = False
-    if ( (v2-r2)/r2 < -errorsize):
+    if ( (v2-r22)/r22 < -errorsize):
         result = True
     # print "circleintersect",c1,c2,"result",result,"v2",v2,"r2",r2,"criteria",(v2-r2)/r2
     return result

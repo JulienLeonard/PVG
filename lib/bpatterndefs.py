@@ -297,6 +297,7 @@ class BWorld:
         return result
 
     def updatefrombresult(self,cpattern,bresult,niter):
+        # puts("updatefrombresult ncircles",len(bresult.circles()))
         for newcircle in bresult.circles():
             self.mquadtree.add(newcircle)
             
@@ -327,10 +328,11 @@ class BWorld:
                 if bresult:
                     
                 # bresult = cplug.compute(self.mrender,self.mquadtree,self.mocontext,self.mpatternmap,minsize)
+                    niterold = niter
                     niter = self.updatefrombresult(cpattern,bresult,niter)
 
-                    if niter%1000 == 0:
-                        puts("niter",niter)
+                    if not ((niter-niter%1000)/1000 == (niterold-niterold%1000)/1000):
+                        puts("niter",niter,"niterold",niterold)
                     if niter > nitermax:
                         break
 
@@ -670,7 +672,7 @@ class BPatternDef:
                         ncircles = []
                     break
 
-            if len(ncircles) == ncirclenumber or (len(ncircles) > 0 and partial):
+            if len(ncircles) == ncirclenumber or (len(ncircles) > 1 and partial):
                 newpattern = BPattern(self,junctiondef,plug,CircleAdj().circles(ncircles),cangle)
 
                 for c in ncircles:

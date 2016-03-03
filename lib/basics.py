@@ -92,7 +92,17 @@ def samples(rrange,niter):
         return []
     if niter == 1:
         return [rrange[0]]
-    return [sample(rrange,float(i)/float(niter-1)) for i in range(niter)]
+    # return [sample(rrange,float(i)/float(niter-1)) for i in range(niter)]
+    incr   = (rrange[1] - rrange[0])
+    result = [rrange[0] + incr * float(i)/float(niter-1) for i in range(niter)]
+
+    # result = [rrange[0]]
+    # incr   = (rrange[1] - rrange[0])/float(niter-1)
+    # rcsum = rrange[0]
+    # for i in range(niter-1):
+    #     rcsum = rcsum + incr
+    #     result.append(rcsum)
+    return result
 
 #
 # shortcut for sampling the unitary range

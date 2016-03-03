@@ -20,12 +20,13 @@ class Quad:
         result = lconcat(result,self.ownshapes())
         return result
 
-    def intersect(self,shape):
-        return self.mbbox.intersect(shape.bbox())
+    def intersect(self,bbox):
+        return self.mbbox.intersect(bbox)
 
     def add(self,shape,push):
-        if not self.intersect(shape):
-            self.mbbox = bbunion(self.mbbox,shape.bbox())
+        bbox = shape.bbox()
+        if not self.intersect(bbox):
+            self.mbbox = bbunion(self.mbbox,bbox)
             self.insert(shape,push)
         else:
             self.addwithoutcheck(shape,push)
@@ -44,9 +45,10 @@ class Quad:
             self.insert(shape,push)
         
     def dispatch(self,shape,push):
+        bbox = shape.bbox()
         for subquad in self.msubquads:
             # puts("dispatch subquad",subquad.descr(),"shape",shape)
-            if subquad.intersect(shape):
+            if subquad.intersect(bbox):
                 subquad.addwithoutcheck(shape,push)
 
     def nshapes(self):
@@ -78,14 +80,31 @@ class Quad:
 
         self.mshapemap.clear()
         
-    def mayintersect(self,newshape):
+    def hascollision(self, newbbox, newshape ):
+        if not self.intersect(newbbox):
+            return False
+        else:
+            # if len(self.msubquads) > 0:
+            for subquad in self.msubquads:
+                if subquad.hascollision(newbbox,newshape):
+                    return True
+            # return False
+            # else:
+            for push in self.mshapemap:
+                for oshape in self.mshapemap[push]:
+                    if Shape.intersect(newshape,oshape):
+                        return True
+                return False
+
+        
+    def mayintersect(self,newbbox):
         #print "mayintersect",self.bbox(),"nshape",len(self.shapemap),"shape",newshape
         result = []
-        if self.intersect(newshape):
+        if self.intersect(newbbox):
             if len(self.msubquads):
                 for subquad in self.msubquads:
-                    if subquad.intersect(newshape):
-                        subresult = subquad.mayintersect(newshape)
+                    if subquad.intersect(newbbox):
+                        subresult = subquad.mayintersect(newbbox)
                         result.extend(subresult)
             else:
                 for push in self.mshapemap:
@@ -121,14 +140,12 @@ class QuadTree:
         return self
 
     def iscolliding(self,newshape):
-        shapes = self.mrootquad.mayintersect( newshape )
-        for shape in shapes:
-            if Shape.intersect(shape,newshape):
-                return True
-        return False
+        newbbox = newshape.bbox()
+        return self.mrootquad.hascollision( newbbox, newshape )
 
     def colliding(self,newshape):
-        shapes = lunique(self.mrootquad.mayintersect( newshape ))
+        newbbox = newshape.bbox()
+        shapes = lunique(self.mrootquad.mayintersect( newbbox ))
         return [shape for shape in shapes if Shape.intersect(shape,newshape)]
 
     def shapes(self):
