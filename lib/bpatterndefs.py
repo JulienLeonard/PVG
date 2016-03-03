@@ -241,8 +241,10 @@ class PlugSet:
     @staticmethod
     def singleext(pattern):
         lastangle = pattern.lastangle()
-        if lastangle == None:
+        ccstrings = pattern.circlestrings()
+        if lastangle == None or len(ccstrings) == 0 or len(ccstrings[0]) == 0:
             return PlugSet(pattern,[])
+    
         return PlugSet(pattern,[BPlugSingle(pattern,None,pattern.circlestrings()[0][-1],pattern.lastangle())])
         
 
@@ -553,6 +555,7 @@ class BPatternDef:
         self.mlratios = []
         self.mvangleincr = 0.0
         self.msangleincr = 1.0
+        self.mpartial = False
         self.mstyle = {"color":Color.black(),"sizeratio":1.0}
 
         self.mlastangle = None
@@ -617,6 +620,13 @@ class BPatternDef:
             self.mstyle = value
             return self
 
+    def partial(self, value = None):
+        if value == None:
+            return self.mpartial
+        else:
+            self.mpartial = value
+            return self
+
 
     # base method to compute the pattern, defined by the parameters
     # TODO: optimize to compute once the pattern then copy/paste with homotecy
@@ -627,6 +637,7 @@ class BPatternDef:
         lratios       = self.lratios()
         vangleincr    = self.vangleincr()
         sangleincr    = self.sangleincr()
+        partial       = self.partial()
 
         newradius = junctiondef.radius(plug)
         # TODO: if radius absolute, need to overwrite newradius
@@ -655,10 +666,11 @@ class BPatternDef:
                 if not quadtree.iscolliding(n2circle):
                     ncircles.append(n2circle)
                 else:
-                    ncircles = []
+                    if partial == False:
+                        ncircles = []
                     break
 
-            if len(ncircles) == ncirclenumber:
+            if len(ncircles) == ncirclenumber or (len(ncircles) > 0 and partial):
                 newpattern = BPattern(self,junctiondef,plug,CircleAdj().circles(ncircles),cangle)
 
                 for c in ncircles:
