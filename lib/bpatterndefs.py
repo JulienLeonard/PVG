@@ -481,19 +481,20 @@ class BPattern:
             return self
 
     def drawall(self,canvas):
-        canvas.draw(self.madj.circles())
+        canvas.draw(self.madj.circles(),self.mpatterndef.mstyle)
     
 
 class RootPattern(BPattern):
 
     def __init__(self,circlepairs=[(Circle(Point(-1.0,0.0),1.0),Circle(Point(1.0,0.0),1.0))]):
-        self.mpatterndef      = None
+        self.mpatterndef      = self
         self.mparentjunction  = None
         self.mjunctiongen     = None
         self.madj             = CircleAdj()
         for (c1,c2) in circlepairs:
             self.madj.addcircleadj(c1,c2)
         self.mlastangle = None
+        self.mstyle = None
 
     def junctiongen(self,value = None):
         if value == None:
@@ -501,7 +502,13 @@ class RootPattern(BPattern):
         else:
             self.mjunctiongen = value
             return self
-    
+
+    def style(self, value = None):
+        if value == None:
+            return self.mstyle
+        else:
+            self.mstyle = value
+            return self
 
 ############################################################################################################
 #

@@ -3,7 +3,7 @@ from geoutils    import *
 from color       import *
 from renderCairo import *
 
-class Canvas():
+class Canvas:
     def __init__(self,filename = "temp.png"):
         self.mrender           = None
         self.moutputfilename   = filename

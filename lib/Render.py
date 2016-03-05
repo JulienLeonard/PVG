@@ -1,4 +1,5 @@
 from color    import *
+from style    import *
 from geoutils import *
 from circle   import *
 from polygon  import *
@@ -80,29 +81,27 @@ class Render:
             self.mmargin = v
             return self
 
-    def draw(self, shape, colorc = None ):
+    def draw(self, shape, style = None ):
         if type(shape) == list:
             shapes = shape
             for shape in shapes:
-                self.draw(shape,colorc)
+                self.draw(shape,style)
         else:
             if isinstance(shape,Frame):
                 for drawing in shape.drawings():
                     # puts("shape",shape,"drawing",drawing)
                     self.draw(drawing.shape(),drawing.style())
             else:
-                if colorc == None:
-                    colorc = Color.black()
                 if isinstance(shape,Circle):
-                    self.drawcircle(shape,colorc)
+                    self.drawcircle(shape,style)
                 elif isinstance(shape,Polygon):
-                    self.drawpolygon(shape,colorc)
+                    self.drawpolygon(shape,style)
         return self
 
-    def drawpolygon( self, polygon, colorc = Color.black() ):
-        self.drawpolygonpicture(polygon,colorc)
+    def drawpolygon( self, polygon, style = None ):
+        self.drawpolygonpicture(polygon,style)
 
-    def drawpolygonpicture( self, polygon, colorc ):
+    def drawpolygonpicture( self, polygon, style ):
         puts("Render drawpolygonpicture not defined")
 
     def initpicture(self):
@@ -125,16 +124,17 @@ class Render:
         for poly in polygons:
             self.drawpolygon(poly,color)
 
-    def drawcircle(self,circle,color=Color.black(),ratio=1.0):
-        self.drawpolygon(circle.scale(ratio).polygon(30),color)
+    def drawcircle(self,circle,style):
+        ratio = iff(style == None, 1.0, style.sizeratio())
+        self.drawpolygon(circle.scale(ratio).polygon(30),style)
 
-    def drawcircles(self,circles,color=Color.black(),ratio = 1.0):
+    def drawcircles(self,circles,style):
         for circle in circles:
-            self.drawcircle(circle,color,ratio)
+            self.drawcircle(circle,style)
 
-    def drawcirclescolors(self,circles,colors):
+    def drawcirclescolors(self,circles,styles):
         for i in range(len(circles)):
-            self.drawcircle(circles[i],circular(colors,i))
+            self.drawcircle(circles[i],circular(styles,i))
 
 
 

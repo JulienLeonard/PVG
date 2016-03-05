@@ -1,6 +1,7 @@
 from utils               import *
 from geoutils            import *
 from color               import *
+from style               import *
 from canvas              import *
 from circle              import *
 from polygon             import *
