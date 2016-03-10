@@ -2,6 +2,7 @@ from utils       import *
 from geoutils    import *
 from color       import *
 from renderCairo import *
+from renderSVG   import *
 
 class Canvas:
     def __init__(self,filename = "temp.png"):
@@ -44,3 +45,16 @@ class Canvas:
     def draw(self,shape,style = None):
         self.render().draw(shape,style)
         return self
+
+class CanvasSVG(Canvas):
+
+    def render(self):
+        if self.mrender == None:
+            self.mrender = RenderCenterSVG(self.msizes,self.mbackground)
+        return self.mrender
+
+    def save(self,outputfilepath):
+        self.render()
+        self.mrender.mfilename = outputfilepath
+        self.render().end()
+    
