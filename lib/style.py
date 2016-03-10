@@ -8,7 +8,7 @@ class Style:
 
     def color(self,value = None):
         if value == None:
-            return self.mcolor
+            return self.getcolor()
         else:
             self.mcolor = value
             return self
@@ -21,3 +21,9 @@ class Style:
             return self
 
         
+    def getcolor(self):
+        if isinstance(self.mcolor,Color):
+            return self.mcolor
+        if isinstance(self.mcolor,Roller):
+            return self.mcolor.next()
+        return None
