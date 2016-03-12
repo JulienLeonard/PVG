@@ -4,7 +4,6 @@ class RenderSVG(Render):
     def initpicture(self,imagedim,filename,backcolor):
         self.mimagedim = imagedim
         self.mfilename = filename
-        puts("filename",filename)
         self.mfile     = open(self.mfilename,'w+')
         self.mfile.write("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + str(imagedim.width()) + "\" height=\"" + str(imagedim.height()) + "\" ")
 

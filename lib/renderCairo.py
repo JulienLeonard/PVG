@@ -85,4 +85,31 @@ class RenderCenter(RenderCairo):
     def viewport(self):
         return bbunions([drawing.shape().bbox() for drawing in self.mdrawings]).resize(self.margin()).viewport()
         
-            
+class RenderPDF(RenderCenter):
+    def __init__(self,imagedim,backcolor=Color.white()):
+        self.mdrawings  = []
+        self.mimagedim  = imagedim
+        self.mbackcolor = backcolor
+        self.mmargin    = 1.0
+
+    def margin(self, v = None):
+        if v == None:
+            return self.mmargin
+        else:
+            self.mmargin = v
+            return self
+
+    def initpicture(self,imagedim,backcolor):
+        self.mimagedim = imagedim
+        self.msurface  = cairo.PDFSurface(self.mfilename, imagedim.width(), imagedim.height())
+        self.mctx      = cairo.Context(self.msurface)
+
+        # set background
+        self.mctx.rectangle(0.0, 0.0, imagedim.width(), imagedim.height())
+	self.mctx.set_source_rgb(backcolor.r(), backcolor.g(), backcolor.b())
+	self.mctx.fill()
+    
+    def endpicture(self):
+        # nothing to do
+        v = 1
+        

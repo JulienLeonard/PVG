@@ -561,6 +561,7 @@ class BPatternDef:
         self.mncircles = 1
         self.mangles   = [0.0]
         self.mrratios = (1.0,1.0)
+        self.mrrelative = True
         self.mlratios = []
         self.mvangleincr = 0.0
         self.msangleincr = 1.0
@@ -636,6 +637,13 @@ class BPatternDef:
             self.mpartial = value
             return self
 
+    def rrelative(self, value = None):
+        if value == None:
+            return self.mrrelative
+        else:
+            self.mrrelative = value
+            return self
+
 
     # base method to compute the pattern, defined by the parameters
     # TODO: optimize to compute once the pattern then copy/paste with homotecy
@@ -663,6 +671,8 @@ class BPatternDef:
             ncircles = [newcircle]
             cangle = angle + dangle
             newradius = newcircle.radius()
+            if not self.rrelative():
+                newradius = 1.0
             if len(rratios):
                 newradiuses = [newradius * ir for ir in samples(rratios,ncirclenumber-1)]
             else:

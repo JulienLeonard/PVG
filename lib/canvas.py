@@ -38,8 +38,9 @@ class Canvas:
             self.mrender = RenderCenter(self.msizes,self.mbackground).outputfilepath(self.moutputfilename).margin(self.mmargin)
         return self.mrender
 
-    def save(self,outputfilepath):
-        self.render().outputfilepath(outputfilepath)
+    def save(self,outputfilepath=None):
+        if not outputfilepath == None:
+            self.render().outputfilepath(outputfilepath)
         self.render().end()
 
     def draw(self,shape,style = None):
@@ -47,7 +48,7 @@ class Canvas:
         return self
 
 class CanvasSVG(Canvas):
-
+    
     def render(self):
         if self.mrender == None:
             self.mrender = RenderCenterSVG(self.msizes,self.mbackground)
@@ -58,3 +59,9 @@ class CanvasSVG(Canvas):
         self.mrender.mfilename = outputfilepath
         self.render().end()
     
+class CanvasPDF(Canvas):
+    
+    def render(self):
+        if self.mrender == None:
+            self.mrender = RenderPDF(self.msizes,self.mbackground).outputfilepath(self.moutputfilename).margin(self.mmargin)
+        return self.mrender
