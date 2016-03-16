@@ -1,10 +1,9 @@
 from utils       import *
 from geoutils    import *
 from color       import *
-from renderCairo import *
-from renderSVG   import *
+from Render      import *
 
-class Canvas:
+class CanvasInterface:
     def __init__(self,filename = "temp.png"):
         self.mrender           = None
         self.moutputfilename   = filename
@@ -33,10 +32,9 @@ class Canvas:
         self.mmargin = margin
         return self
 
+    # to be overloaded by backend
     def render(self):
-        if self.mrender == None:
-            self.mrender = RenderCenter(self.msizes,self.mbackground).outputfilepath(self.moutputfilename).margin(self.mmargin)
-        return self.mrender
+        return None
 
     def save(self,outputfilepath=None):
         if not outputfilepath == None:
@@ -47,21 +45,4 @@ class Canvas:
         self.render().draw(shape,style)
         return self
 
-class CanvasSVG(Canvas):
     
-    def render(self):
-        if self.mrender == None:
-            self.mrender = RenderCenterSVG(self.msizes,self.mbackground)
-        return self.mrender
-
-    def save(self,outputfilepath):
-        self.render()
-        self.mrender.mfilename = outputfilepath
-        self.render().end()
-    
-class CanvasPDF(Canvas):
-    
-    def render(self):
-        if self.mrender == None:
-            self.mrender = RenderPDF(self.msizes,self.mbackground).outputfilepath(self.moutputfilename).margin(self.mmargin)
-        return self.mrender

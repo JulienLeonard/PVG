@@ -1,5 +1,4 @@
 from utils     import *
-from drawutils import *
 from geoutils  import *
 from tangentutils import *
 from quadtree import *
