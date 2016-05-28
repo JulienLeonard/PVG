@@ -230,7 +230,7 @@ class PlugSet:
         return self.mplugs
 
     @staticmethod
-    def plug2s(sides=[-1,1]):
+    def plug2s(sides=[1,-1]):
         def result(pattern):
             return PlugSet(pattern,[BPlug2(pattern,None,c1,c2,side) for side in sides  for circlestring in pattern.circlestrings() for (c1,c2) in pairs(circlestring)])
         return result
@@ -299,49 +299,59 @@ class BWorld:
     def popnextpattern(self):
         result         = self.mpatterns[0]
         self.mpatterns = self.mpatterns[1:]
-        self.moldpatterns.append(result)
+        # self.moldpatterns.append(result)
         return result
 
     def updatefrombresult(self,cpattern,bresult,niter):
-        # puts("updatefrombresult ncircles",len(bresult.circles()))
-        for newcircle in bresult.circles():
-            self.mquadtree.add(newcircle)
+        if bresult:
+            # puts("updatefrombresult ncircles",len(bresult.circles()))
+            for newcircle in bresult.circles():
+                self.mquadtree.add(newcircle)
             
-        for adj1,adj2 in bresult.adjs():
-            self.madj.addcircleadj(adj1,adj2)
+            for adj1,adj2 in bresult.adjs():
+                self.madj.addcircleadj(adj1,adj2)
+            
+            # puts("updatefrombresult bresult pattern",bresult.mpattern)
+            if not bresult.mpattern is None:
+                if not bresult.mpattern in self.mpatterns:
+                    self.mpatterns.append(bresult.mpattern)
 
-        # puts("updatefrombresult bresult pattern",bresult.mpattern)
-        if not bresult.mpattern is None:
-            if not bresult.mpattern in self.mpatterns:
-                self.mpatterns.append(bresult.mpattern)
+            # puts("bworld pattern stack",len(self.mpatterns),"niter +",bresult.mniter)
+            niter += bresult.mniter
 
-        if cpattern.hasplug():
+        if cpattern.hasplugjunction():
             self.mpatterns.append(cpattern)
         else:
             self.moldpatterns.append(cpattern)
         
-
-        # puts("bworld pattern stack",len(self.mpatterns),"niter +",bresult.mniter)
-        niter += bresult.mniter
+        #puts("patterns",self.mpatterns)
+        #puts("oldpatterns",self.moldpatterns)
+            
         return niter
 
     def compute(self,nitermax,minsize=0.0001):
         niter = 0
         while len(self.mpatterns):
             cpattern = self.popnextpattern()
-            for (plug,junctiondef) in cpattern.junctiongen().gen(cpattern):
+            #puts("current pattern",cpattern)
+            if cpattern.hasplugjunction():
+                (plug,junctiondef) = cpattern.nextplugjunction()
+                # for (plug,junctiondef) in cpattern.junctiongen().gen(cpattern):
                 bresult = junctiondef.compute(self.mquadtree,self.mocontext,plug)
+                niterold = niter
+                niter    = self.updatefrombresult(cpattern,bresult,niter)
+
                 if bresult:
                     
-                # bresult = cplug.compute(self.mrender,self.mquadtree,self.mocontext,self.mpatternmap,minsize)
-                    niterold = niter
-                    niter = self.updatefrombresult(cpattern,bresult,niter)
-
+                    # bresult = cplug.compute(self.mrender,self.mquadtree,self.mocontext,self.mpatternmap,minsize)
+                
                     if not ((niter-niter%1000)/1000 == (niterold-niterold%1000)/1000):
                         puts("niter",niter,"niterold",niterold)
                     if niter > nitermax:
                         break
-
+            else:
+                self.moldpatterns.append(cpattern)
+                
             if niter > nitermax:
                 break
         return self
@@ -451,14 +461,7 @@ class BPattern:
         self.madj             = adj
         self.mlastangle       = lastangle
         self.mlastcomputation = None
-
-        self.mplug.msubpattern = self
-        self.mplug.mparentpattern.addsubpattern(plug,self)
-
-        self.msubpatterns = {}
-
-    def addsubpattern(self,plug,subpattern):
-        self.msubpatterns[plug] = subpattern
+        self.mplugjunctions   = None
         
     def patterndef(self):
         return self.mpatterndef
@@ -531,8 +534,6 @@ class RootPattern(BPattern):
         self.mstyle = None
         self.mplug  = None
         self.mplugjunctions   = None
-
-        self.msubpatterns = {}
         
     def junctiongen(self,value = None):
         if value == None:
@@ -602,7 +603,6 @@ class BPatternDef:
         self.mrrelative = True
         self.mlratios = []
         self.mvangleincr = 0.0
-        self.mvangleacc  = 0.0
         self.msangleincr = 1.0
         self.mpartial = False
         self.mstyle = {"color":Color.black(),"sizeratio":1.0}
@@ -655,13 +655,6 @@ class BPatternDef:
             self.mvangleincr = value
             return self
 
-    def vangleacc(self,value = None):
-        if value == None:
-            return self.mvangleacc
-        else:
-            self.mvangleacc = value
-            return self
-
     def sangleincr(self,value = None):
         if value == None:
             return self.msangleincr
@@ -699,19 +692,10 @@ class BPatternDef:
         rratios       = self.rratios()
         lratios       = self.lratios()
         vangleincr    = self.vangleincr()
-        vangleacc     = self.vangleacc()
         sangleincr    = self.sangleincr()
         partial       = self.partial()
 
         newradius = junctiondef.radius(plug)
-        if not self.rrelative():
-            newradius = 1.0
-        if len(rratios):
-            newradiuses = [newradius * ir for ir in samples(rratios,ncirclenumber)]
-        else:
-            newradiuses = [newradius * ir for ir in lratios[:]]
-
-        newradius = newradiuses[0]
         # TODO: if radius absolute, need to overwrite newradius
         newcircle = plug.newcircle(newradius)
         if newcircle == None:
@@ -721,16 +705,22 @@ class BPatternDef:
 
         result =  None
         for angle in angles:
+            angleincr  = sangleincr * vangleincr
 
             ncircles = [newcircle]
             cangle = angle + dangle
+            newradius = newcircle.radius()
+            if not self.rrelative():
+                newradius = 1.0
+            if len(rratios):
+                newradiuses = [newradius * ir for ir in samples(rratios,ncirclenumber-1)]
+            else:
+                newradiuses = [newradius * ir for ir in lratios[1:]]
 
-            angleacc = 0.0
-            for newradius in newradiuses[1:]:
+
+            for newradius in newradiuses:
                 n2circle = nextadjcircle(ncircles[-1],cangle,newradius)
-                angleincr  = sangleincr * (vangleincr + angleacc)
                 cangle += angleincr
-                angleacc += vangleacc
                 if not quadtree.iscolliding(n2circle):
                     ncircles.append(n2circle)
                 else:

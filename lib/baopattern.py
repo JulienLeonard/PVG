@@ -1,6 +1,7 @@
 from utils         import *
 from geoutils      import *
 from color         import *
+from style         import *
 
 class BaoPattern:
     def __init__(self):
@@ -33,7 +34,7 @@ class BaoPattern:
             return self
 
     def draw(self,newnode,index):
-        self.fdraw()(newnode,index,self.color(index))
+        self.fdraw()(newnode,index,Style(self.color(index)))
 
     def radius(self):
         return lcircular(self.mradiuspattern,self.mindex)

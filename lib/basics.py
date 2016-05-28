@@ -93,15 +93,8 @@ def samples(rrange,niter):
     if niter == 1:
         return [rrange[0]]
     # return [sample(rrange,float(i)/float(niter-1)) for i in range(niter)]
-    incr   = (rrange[1] - rrange[0])
+    incr = (rrange[1] - rrange[0])
     result = [rrange[0] + incr * float(i)/float(niter-1) for i in range(niter)]
-
-    # result = [rrange[0]]
-    # incr   = (rrange[1] - rrange[0])/float(niter-1)
-    # rcsum = rrange[0]
-    # for i in range(niter-1):
-    #     rcsum = rcsum + incr
-    #     result.append(rcsum)
     return result
 
 #
@@ -633,3 +626,8 @@ def lcut(list,indices):
     result = [list[i1:i2] for (i1,i2) in pairs(indices[:-1])]
     result.append(list[indices[-2]:])
     return result
+
+def fput(filepath,content):
+    f = open(filepath,"w")
+    f.write(content)
+    f.close()

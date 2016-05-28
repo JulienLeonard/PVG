@@ -11,11 +11,13 @@ class BaoNode(Circle):
         self.mpacking     = packing
         self.mcenter      = circle.center()
         self.mradius      = circle.radius()
+        self.mbbox        = circle.bbox()
         self.mretouch     = False
         self.mnotfound    = False
         self.mcolorindex  = colorindex
         self.mindex       = index
-
+        self.mcoords      = circle.coords()
+        
     def colorindex(self):
         return self.mcolorindex
 

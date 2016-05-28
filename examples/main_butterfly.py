@@ -1,5 +1,8 @@
+import sys
+sys.path.append("../lib/")
 from PVG     import *
 from PVGPACK import *
+from canvascairo import *
 
 #
 # TODO: DEBUG as computing too long

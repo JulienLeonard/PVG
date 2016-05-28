@@ -375,7 +375,7 @@ class BBox:
     def containbbox(self,obbox):
         xmin1,ymin1,xmax1,ymax1 = self.coords()
         xmin2,ymin2,xmax2,ymax2 = obbox.coords()
-        if xmin1 < xmin2 and xmax2 < xmax1 and ymin1 < ymin2 and ymax2 < ymax2:
+        if xmin1 < xmin2 and xmax2 < xmax1 and ymin1 < ymin2 and ymax2 < ymax1:
             return True
         return False
 

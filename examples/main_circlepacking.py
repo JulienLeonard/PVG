@@ -1,4 +1,7 @@
+import sys
+sys.path.append("../lib/")
 from PVGPACK import *
+from canvascairo import *
 
 random.seed(45674567235.0)
 
